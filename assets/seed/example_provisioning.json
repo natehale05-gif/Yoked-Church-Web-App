@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "config": {
+    "churchName": "Grace Harbor Church",
+    "tagline": "Anchored in hope.",
+    "logoInitials": "GH",
+    "primaryColorHex": "#FF0984E3",
+    "secondaryColorHex": "#FF00CEC9",
+    "accentColorHex": "#FFFDCB6E",
+    "fontFamily": "Inter",
+    "cornerRadius": 20,
+    "darkMode": false,
+    "heroTitle": "You belong at Grace Harbor",
+    "heroSubtitle": "A safe harbor for every stage of the journey.",
+    "heroCtaLabel": "Plan Your Visit",
+    "heroCtaUrl": "https://example.com/visit",
+    "welcomeTitle": "Welcome home",
+    "welcomeBody": "However you found us, we're glad you're here. Come explore faith with us this weekend.",
+    "aboutTitle": "Our Story",
+    "aboutBody": "Grace Harbor exists to help people find hope in Jesus.",
+    "missionStatement": "Know God. Find freedom. Make a difference.",
+    "beliefs": [
+      "The Bible is God's word.",
+      "Jesus is the way to God.",
+      "The church is a family."
+    ],
+    "address": "88 Harbor Way, Portside, USA",
+    "phone": "(555) 234-1000",
+    "email": "hello@graceharbor.example",
+    "mapUrl": "https://maps.google.com/?q=88+Harbor+Way",
+    "liveStreamUrl": "https://youtube.com/@example/live",
+    "givingTitle": "Give with joy",
+    "givingBody": "Your generosity makes ministry possible.",
+    "primaryGiveUrl": "https://example.com/give",
+    "givingFunds": [
+      {
+        "id": "fund-general",
+        "name": "General Fund",
+        "description": "Supports day-to-day ministry.",
+        "url": "https://example.com/give/general"
+      }
+    ],
+    "serviceTimes": [
+      {
+        "id": "svc-1",
+        "name": "Sunday Service",
+        "day": "Sunday",
+        "time": "10:00 AM",
+        "location": "Main Hall"
+      }
+    ],
+    "socialLinks": [
+      {
+        "id": "s1",
+        "platform": "instagram",
+        "url": "https://instagram.com/example"
+      }
+    ],
+    "showAbout": true,
+    "showSermons": true,
+    "showEvents": true,
+    "showMinistries": true,
+    "showGiving": true,
+    "showContact": true,
+    "showLiveStream": true,
+    "footerNote": "Grace Harbor Church is a registered non-profit."
+  },
+  "sermons": [],
+  "events": [],
+  "ministries": [],
+  "staff": []
+}
