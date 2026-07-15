@@ -5,7 +5,9 @@ name: Deploy to GitHub Pages
 # triggered manually from the Actions tab (Run workflow).
 on:
   push:
-    branches: [main]
+    # `main` is the normal production deploy. The feature branch is included
+    # temporarily so this PR can be previewed on GitHub Pages before merging.
+    branches: [main, cursor/premium-church-website-6fa0]
   workflow_dispatch:
 
 # Permissions required by the official GitHub Pages deploy actions.
