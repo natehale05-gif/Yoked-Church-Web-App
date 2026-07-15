@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../config/site_config.dart';
+import '../state/site_content_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/responsive.dart';
 import '../utils/launch.dart';
@@ -37,6 +38,7 @@ class _GiveWays extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Section(
       child: Column(
         children: [
@@ -71,7 +73,7 @@ class _GiveWays extends StatelessWidget {
                     PrimaryButton(
                       label: 'Give Now',
                       icon: Icons.arrow_forward,
-                      onPressed: () => openUrl(SiteConfig.giveUrl),
+                      onPressed: () => openUrl(content.giveUrl),
                     ),
                   ],
                 ),
@@ -82,15 +84,15 @@ class _GiveWays extends StatelessWidget {
           ResponsiveGrid(
             desktopColumns: 2,
             tabletColumns: 2,
-            children: const [
+            children: [
               _GiveMethod(
                 icon: Icons.mail_outline,
                 title: 'By Mail',
                 body:
                     'Send a check to our office at '
-                    '${SiteConfig.addressLine1}, ${SiteConfig.addressLine2}.',
+                    '${content.addressLine1}, ${content.addressLine2}.',
               ),
-              _GiveMethod(
+              const _GiveMethod(
                 icon: Icons.volunteer_activism_outlined,
                 title: 'In Person',
                 body:

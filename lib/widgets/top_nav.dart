@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
-import '../config/site_config.dart';
+import '../state/site_content_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/responsive.dart';
@@ -48,10 +49,16 @@ class TopNav extends StatelessWidget {
                     active: _isActive(currentPath, item.path),
                     onDark: !solid,
                   ),
-                const SizedBox(width: 16),
+                _NavLink(
+                  item: const NavItem('Sign in', '/login'),
+                  active: currentPath == '/login',
+                  onDark: !solid,
+                ),
+                const SizedBox(width: 12),
                 PrimaryButton(
                   label: 'Give',
-                  onPressed: () => openUrl(SiteConfig.giveUrl),
+                  onPressed: () =>
+                      openUrl(context.read<SiteContentController>().content.giveUrl),
                 ),
               ] else
                 IconButton(
@@ -83,6 +90,10 @@ class _Wordmark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = onDark ? AppColors.onDark : AppColors.navy;
+    final content = context.watch<SiteContentController>().content;
+    final initial = content.shortName.isNotEmpty
+        ? content.shortName.substring(0, 1)
+        : (content.churchName.isNotEmpty ? content.churchName.substring(0, 1) : '?');
     return InkWell(
       onTap: () => context.go('/'),
       borderRadius: BorderRadius.circular(8),
@@ -95,12 +106,12 @@ class _Wordmark extends StatelessWidget {
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                color: AppColors.gold,
+                color: content.accent,
                 borderRadius: BorderRadius.circular(9),
               ),
               alignment: Alignment.center,
               child: Text(
-                SiteConfig.shortName.substring(0, 1),
+                initial,
                 style: const TextStyle(
                   color: AppColors.navyDeep,
                   fontWeight: FontWeight.w800,
@@ -110,7 +121,7 @@ class _Wordmark extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              SiteConfig.churchName,
+              content.churchName,
               style: GoogleFonts.cormorantGaramond(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
@@ -189,6 +200,7 @@ class NavDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentPath = GoRouterState.of(context).uri.path;
+    final content = context.watch<SiteContentController>().content;
     return Drawer(
       backgroundColor: AppColors.navyDeep,
       width: 300,
@@ -207,7 +219,7 @@ class NavDrawer extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                SiteConfig.churchName,
+                content.churchName,
                 style: GoogleFonts.cormorantGaramond(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
@@ -220,18 +232,22 @@ class NavDrawer extends StatelessWidget {
                   item: item,
                   active: TopNav._isActive(currentPath, item.path),
                 ),
+              _DrawerLink(
+                item: const NavItem('Sign in', '/login'),
+                active: currentPath == '/login',
+              ),
               const SizedBox(height: 24),
               PrimaryButton(
                 label: 'Give',
                 icon: Icons.favorite,
                 onPressed: () {
                   Navigator.of(context).pop();
-                  openUrl(SiteConfig.giveUrl);
+                  openUrl(content.giveUrl);
                 },
               ),
               const Spacer(),
               Text(
-                SiteConfig.addressLine1,
+                content.addressLine1,
                 style: AppTheme.eyebrow(color: AppColors.onDarkSoft),
               ),
             ],

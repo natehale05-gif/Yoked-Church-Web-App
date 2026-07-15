@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
-import '../config/site_config.dart';
+import '../state/site_content_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/responsive.dart';
@@ -15,6 +16,7 @@ class SiteFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Container(
       width: double.infinity,
       color: AppColors.navyDeep,
@@ -51,7 +53,7 @@ class SiteFooter extends StatelessWidget {
               runSpacing: 12,
               children: [
                 Text(
-                  '© ${DateTime.now().year} ${SiteConfig.churchName}. All rights reserved.',
+                  '© ${DateTime.now().year} ${content.churchName}. All rights reserved.',
                   style: GoogleFonts.inter(
                     color: AppColors.onDarkSoft,
                     fontSize: 13,
@@ -62,17 +64,17 @@ class SiteFooter extends StatelessWidget {
                   children: [
                     _SocialIcon(
                       icon: Icons.camera_alt_outlined,
-                      url: SiteConfig.instagramUrl,
+                      url: content.instagramUrl,
                       tooltip: 'Instagram',
                     ),
                     _SocialIcon(
                       icon: Icons.facebook_outlined,
-                      url: SiteConfig.facebookUrl,
+                      url: content.facebookUrl,
                       tooltip: 'Facebook',
                     ),
                     _SocialIcon(
                       icon: Icons.play_circle_outline,
-                      url: SiteConfig.youtubeUrl,
+                      url: content.youtubeUrl,
                       tooltip: 'YouTube',
                     ),
                   ],
@@ -91,11 +93,12 @@ class _Brand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          SiteConfig.churchName,
+          content.churchName,
           style: GoogleFonts.cormorantGaramond(
             fontSize: 30,
             fontWeight: FontWeight.w700,
@@ -106,7 +109,7 @@ class _Brand extends StatelessWidget {
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 360),
           child: Text(
-            SiteConfig.tagline,
+            content.tagline,
             style: GoogleFonts.inter(
               color: AppColors.onDarkSoft,
               fontSize: 16,
@@ -142,6 +145,7 @@ class _VisitColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -149,18 +153,18 @@ class _VisitColumn extends StatelessWidget {
         const SizedBox(height: 20),
         _ContactRow(
           icon: Icons.place_outlined,
-          text: '${SiteConfig.addressLine1}\n${SiteConfig.addressLine2}',
-          onTap: () => openUrl(SiteConfig.mapUrl),
+          text: '${content.addressLine1}\n${content.addressLine2}',
+          onTap: () => openUrl(content.mapUrl),
         ),
         _ContactRow(
           icon: Icons.mail_outline,
-          text: SiteConfig.email,
-          onTap: () => openEmail(SiteConfig.email),
+          text: content.email,
+          onTap: () => openEmail(content.email),
         ),
         _ContactRow(
           icon: Icons.call_outlined,
-          text: SiteConfig.phone,
-          onTap: () => openPhone(SiteConfig.phone),
+          text: content.phone,
+          onTap: () => openPhone(content.phone),
         ),
       ],
     );

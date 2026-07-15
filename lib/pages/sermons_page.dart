@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../config/site_config.dart';
+import '../state/site_content_controller.dart';
 import '../widgets/cards.dart';
 import '../widgets/content_width.dart';
 import '../widgets/page_hero.dart';
@@ -11,6 +12,7 @@ class SermonsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Column(
       children: [
         const PageHero(
@@ -25,7 +27,7 @@ class SermonsPage extends StatelessWidget {
             desktopColumns: 2,
             tabletColumns: 2,
             runSpacing: 48,
-            children: [for (final s in SiteConfig.sermons) SermonCard(s)],
+            children: [for (final s in content.sermons) SermonCard(s)],
           ),
         ),
       ],

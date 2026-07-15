@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../config/site_config.dart';
+import '../state/site_content_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/responsive.dart';
 import '../widgets/buttons.dart';
@@ -93,6 +94,7 @@ class _ValuesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Section(
       background: AppColors.cream,
       child: Column(
@@ -105,7 +107,7 @@ class _ValuesSection extends StatelessWidget {
           ResponsiveGrid(
             desktopColumns: 4,
             tabletColumns: 2,
-            children: [for (final v in SiteConfig.values) ValueCard(v)],
+            children: [for (final v in content.values) ValueCard(v)],
           ),
         ],
       ),
@@ -118,6 +120,7 @@ class _LeadershipSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Section(
       child: Column(
         children: [
@@ -132,7 +135,7 @@ class _LeadershipSection extends StatelessWidget {
           ResponsiveGrid(
             desktopColumns: 4,
             tabletColumns: 2,
-            children: [for (final p in SiteConfig.leaders) PersonCard(p)],
+            children: [for (final p in content.leaders) PersonCard(p)],
           ),
         ],
       ),

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../config/site_config.dart';
+import '../models/app_icons.dart';
+import '../models/site_content.dart';
+import '../state/site_content_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/responsive.dart';
@@ -83,6 +86,7 @@ class _HeroText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -95,13 +99,13 @@ class _HeroText extends StatelessWidget {
             border: Border.all(color: AppColors.onDark.withValues(alpha: 0.18)),
           ),
           child: Text(
-            'WELCOME TO ${SiteConfig.shortName.toUpperCase()}',
+            'WELCOME TO ${content.shortName.toUpperCase()}',
             style: AppTheme.eyebrow(color: AppColors.goldSoft),
           ),
         ),
         const SizedBox(height: 26),
         Text(
-          SiteConfig.heroHeadline,
+          content.heroHeadline,
           style: context
               .responsive(
                 mobile: Theme.of(context).textTheme.displayMedium,
@@ -113,7 +117,7 @@ class _HeroText extends StatelessWidget {
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
           child: Text(
-            SiteConfig.heroSubhead,
+            content.heroSubhead,
             style: Theme.of(context)
                 .textTheme
                 .bodyLarge
@@ -150,11 +154,12 @@ class _ServiceTimeStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Wrap(
       spacing: 28,
       runSpacing: 16,
       children: [
-        for (final s in SiteConfig.serviceTimes)
+        for (final s in content.serviceTimes)
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -196,6 +201,7 @@ class _WhatToExpect extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Section(
       child: Column(
         children: [
@@ -209,7 +215,7 @@ class _WhatToExpect extends StatelessWidget {
           const SizedBox(height: 56),
           ResponsiveGrid(
             children: [
-              for (final p in SiteConfig.whatToExpect) ValueCard(p),
+              for (final p in content.whatToExpect) ValueCard(p),
             ],
           ),
         ],
@@ -279,6 +285,7 @@ class _ValuesBand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Container(
       width: double.infinity,
       color: AppColors.navy,
@@ -298,7 +305,7 @@ class _ValuesBand extends StatelessWidget {
               desktopColumns: 4,
               tabletColumns: 2,
               children: [
-                for (final v in SiteConfig.values) _DarkValueCard(v),
+                for (final v in content.values) _DarkValueCard(v),
               ],
             ),
           ],
@@ -317,7 +324,7 @@ class _DarkValueCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(point.icon, color: AppColors.goldSoft, size: 34),
+        Icon(iconForKey(point.iconKey), color: AppColors.goldSoft, size: 34),
         const SizedBox(height: 20),
         Text(
           point.title,
@@ -347,7 +354,8 @@ class _MinistriesPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final preview = SiteConfig.ministries.take(3).toList();
+    final preview =
+        context.watch<SiteContentController>().content.ministries.take(3).toList();
     return Section(
       child: Column(
         children: [
@@ -382,7 +390,9 @@ class _LatestMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final latest = SiteConfig.sermons.first;
+    final sermons = context.watch<SiteContentController>().content.sermons;
+    if (sermons.isEmpty) return const SizedBox.shrink();
+    final latest = sermons.first;
     final isDesktop = context.isDesktop;
     return Section(
       background: AppColors.cream,
@@ -441,7 +451,8 @@ class _EventsPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final preview = SiteConfig.events.take(3).toList();
+    final preview =
+        context.watch<SiteContentController>().content.events.take(3).toList();
     return Section(
       child: Column(
         children: [
@@ -476,6 +487,7 @@ class _VisitCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
@@ -505,7 +517,7 @@ class _VisitCta extends StatelessWidget {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 560),
               child: Text(
-                'Join us this Sunday at ${SiteConfig.addressLine1}. '
+                'Join us this Sunday at ${content.addressLine1}. '
                 'Come a few minutes early and let us welcome you in person.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context)
@@ -529,7 +541,7 @@ class _VisitCta extends StatelessWidget {
                   label: 'Get Directions',
                   icon: Icons.place_outlined,
                   onDark: true,
-                  onPressed: () => openUrl(SiteConfig.mapUrl),
+                  onPressed: () => openUrl(content.mapUrl),
                 ),
               ],
             ),

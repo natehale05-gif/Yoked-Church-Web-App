@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../config/site_config.dart';
+import '../state/site_content_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/responsive.dart';
 import '../utils/launch.dart';
@@ -40,7 +41,8 @@ class _ContactPageState extends State<ContactPage> {
       final body = Uri.encodeComponent(
         '${_message.text}\n\nFrom: ${_name.text} (${_email.text})',
       );
-      openUrl('mailto:${SiteConfig.email}?subject=$subject&body=$body');
+      final email = context.read<SiteContentController>().content.email;
+      openUrl('mailto:$email?subject=$subject&body=$body');
       setState(() => _sent = true);
     }
   }
@@ -150,26 +152,27 @@ class _ContactDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _DetailRow(
           icon: Icons.place_outlined,
           title: 'Visit',
-          value: '${SiteConfig.addressLine1}\n${SiteConfig.addressLine2}',
-          onTap: () => openUrl(SiteConfig.mapUrl),
+          value: '${content.addressLine1}\n${content.addressLine2}',
+          onTap: () => openUrl(content.mapUrl),
         ),
         _DetailRow(
           icon: Icons.mail_outline,
           title: 'Email',
-          value: SiteConfig.email,
-          onTap: () => openEmail(SiteConfig.email),
+          value: content.email,
+          onTap: () => openEmail(content.email),
         ),
         _DetailRow(
           icon: Icons.call_outlined,
           title: 'Call',
-          value: SiteConfig.phone,
-          onTap: () => openPhone(SiteConfig.phone),
+          value: content.phone,
+          onTap: () => openPhone(content.phone),
         ),
       ],
     );

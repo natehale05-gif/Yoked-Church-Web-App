@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../config/site_config.dart';
+import '../state/site_content_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/responsive.dart';
@@ -41,6 +42,7 @@ class _WhenWhere extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = context.isDesktop;
+    final content = context.watch<SiteContentController>().content;
     return Section(
       child: Flex(
         direction: isDesktop ? Axis.horizontal : Axis.vertical,
@@ -53,7 +55,7 @@ class _WhenWhere extends StatelessWidget {
               children: [
                 Text('WHEN WE GATHER', style: AppTheme.eyebrow()),
                 const SizedBox(height: 20),
-                for (final s in SiteConfig.serviceTimes)
+                for (final s in content.serviceTimes)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Row(
@@ -90,14 +92,14 @@ class _WhenWhere extends StatelessWidget {
                 Text('WHERE TO FIND US', style: AppTheme.eyebrow()),
                 const SizedBox(height: 16),
                 Text(
-                  '${SiteConfig.addressLine1}\n${SiteConfig.addressLine2}',
+                  '${content.addressLine1}\n${content.addressLine2}',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 24),
                 PrimaryButton(
                   label: 'Get Directions',
                   icon: Icons.place_outlined,
-                  onPressed: () => openUrl(SiteConfig.mapUrl),
+                  onPressed: () => openUrl(content.mapUrl),
                 ),
               ],
             ),
@@ -122,6 +124,7 @@ class _ExpectSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Section(
       background: AppColors.cream,
       child: Column(
@@ -132,7 +135,7 @@ class _ExpectSection extends StatelessWidget {
           ),
           const SizedBox(height: 56),
           ResponsiveGrid(
-            children: [for (final p in SiteConfig.whatToExpect) ValueCard(p)],
+            children: [for (final p in content.whatToExpect) ValueCard(p)],
           ),
         ],
       ),

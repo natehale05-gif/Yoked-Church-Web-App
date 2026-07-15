@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../config/site_config.dart';
+import '../models/app_icons.dart';
+import '../models/site_content.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'photo_frame.dart';
@@ -57,7 +58,7 @@ class ValueCard extends StatelessWidget {
               color: AppColors.cream,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(point.icon, color: AppColors.navy, size: 28),
+            child: Icon(iconForKey(point.iconKey), color: AppColors.navy, size: 28),
           ),
           const SizedBox(height: 22),
           Text(point.title, style: Theme.of(context).textTheme.titleLarge),
@@ -82,7 +83,7 @@ class MinistryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(ministry.icon, color: AppColors.gold, size: 30),
+              Icon(iconForKey(ministry.iconKey), color: AppColors.gold, size: 30),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

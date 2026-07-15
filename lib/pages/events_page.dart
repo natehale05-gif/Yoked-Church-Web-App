@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../config/site_config.dart';
+import '../state/site_content_controller.dart';
 import '../widgets/cards.dart';
 import '../widgets/content_width.dart';
 import '../widgets/page_hero.dart';
@@ -11,6 +12,7 @@ class EventsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Column(
       children: [
         const PageHero(
@@ -25,7 +27,7 @@ class EventsPage extends StatelessWidget {
             desktopColumns: 2,
             tabletColumns: 2,
             runSpacing: 28,
-            children: [for (final e in SiteConfig.events) EventCard(e)],
+            children: [for (final e in content.events) EventCard(e)],
           ),
         ),
       ],

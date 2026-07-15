@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../config/site_config.dart';
+import '../state/site_content_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/responsive.dart';
 import '../widgets/buttons.dart';
@@ -15,6 +16,7 @@ class MinistriesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = context.watch<SiteContentController>().content;
     return Column(
       children: [
         const PageHero(
@@ -26,7 +28,7 @@ class MinistriesPage extends StatelessWidget {
         ),
         Section(
           child: ResponsiveGrid(
-            children: [for (final m in SiteConfig.ministries) MinistryCard(m)],
+            children: [for (final m in content.ministries) MinistryCard(m)],
           ),
         ),
         const _GetConnectedCta(),
