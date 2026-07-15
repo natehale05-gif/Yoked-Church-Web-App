@@ -65,6 +65,29 @@ Anywhere you see a `PhotoFrame`, provide an image and it renders automatically:
 When no image is provided, a tasteful placeholder is shown so the layout always
 looks intentional.
 
+## Deploying to GitHub Pages
+
+This repo includes a workflow at `.github/workflows/deploy-pages.yml` that builds
+the web app and publishes it to GitHub Pages automatically.
+
+One-time setup:
+
+1. In the repository, go to **Settings → Pages**.
+2. Under **Build and deployment → Source**, choose **GitHub Actions**.
+
+After that, every push to the `main` branch builds and deploys the site. You can
+also trigger it manually from the **Actions** tab → *Deploy to GitHub Pages* →
+**Run workflow**.
+
+The site will be available at:
+
+```
+https://<your-username>.github.io/<repository-name>/
+```
+
+The workflow sets the correct `--base-href` automatically from the repository
+name, so assets load correctly from the project subpath.
+
 ## Project structure
 
 ```
