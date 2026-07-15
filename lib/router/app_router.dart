@@ -30,6 +30,11 @@ const _staffOnly = [
 ];
 const _memberOnly = ['/app/me', '/app/serve'];
 
+/// Boundary-aware prefix match so that, e.g., `/app/members` does not match
+/// `/app/me` (which would wrongly redirect staff away from the Members page).
+bool _matchesAny(String loc, List<String> paths) =>
+    paths.any((p) => loc == p || loc.startsWith('$p/'));
+
 GoRouter buildRouter(AuthController auth) {
   return GoRouter(
     initialLocation: '/',
@@ -46,8 +51,8 @@ GoRouter buildRouter(AuthController auth) {
       }
       if (inApp && signedIn) {
         if (loc == '/app') return staff ? '/app/dashboard' : '/app/me';
-        if (!staff && _staffOnly.any(loc.startsWith)) return '/app/me';
-        if (staff && _memberOnly.any(loc.startsWith)) return '/app/dashboard';
+        if (!staff && _matchesAny(loc, _staffOnly)) return '/app/me';
+        if (staff && _matchesAny(loc, _memberOnly)) return '/app/dashboard';
       }
       return null;
     },
