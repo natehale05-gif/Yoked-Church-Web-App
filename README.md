@@ -2,6 +2,9 @@
 
 A cross-platform Flutter church app/website, built to be resold as a customizable template: sermons & livestream, events, online giving, and prayer requests / connect cards - deployed as a static site on GitHub Pages.
 
+See [`ROADMAP.md`](ROADMAP.md) for the planned member portal, staff/admin
+dashboard, and YouTube live-sync features not yet built.
+
 ## Quick start
 
 ```bash
