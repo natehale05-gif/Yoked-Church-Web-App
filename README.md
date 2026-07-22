@@ -43,11 +43,11 @@ Apple; edit your profile and household; browse and request to join
 small groups; RSVP to events (also shown right on the public Events
 page); opt into the member directory; and view giving history.
 
-New accounts default to the `member` role. To make someone `staff` or
-`admin` (which unlocks the `/admin` dashboard below), edit their `role`
-field directly on their `users/{uid}` document in the Firebase console
-for now - there's no in-app role management yet (that's Phase 4 of the
-roadmap).
+New accounts default to the `member` role. **Bootstrapping the first
+admin** still requires the Firebase console (there's no one to promote
+you yet): sign up normally, then edit that account's `role` field to
+`admin` directly on its `users/{uid}` document. After that, admins can
+promote/demote anyone else from `/admin/members` in the app itself.
 
 ## Staff dashboard
 
@@ -57,6 +57,11 @@ review and mark Connect-page submissions as followed up, and manage
 small groups (including approving pending join requests from each
 group's roster). Everything here is backed by the same Firestore
 collections and rules as the member portal above.
+
+Admins additionally get a "Members" tab (`/admin/members`) to change
+anyone's role via a dropdown - staff cannot see or reach this screen,
+and the Firestore rules reject a role change from anyone but an admin
+even if someone bypasses the UI.
 
 **Deploy the security rules** (required before going live with
 accounts - Firestore defaults to fully locked-down otherwise):

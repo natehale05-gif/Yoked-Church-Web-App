@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../config/church_config.dart';
+import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 
 class _AdminNavItem {
@@ -11,13 +13,17 @@ class _AdminNavItem {
   const _AdminNavItem(this.label, this.path);
 }
 
-const List<_AdminNavItem> _items = [
+const List<_AdminNavItem> _staffItems = [
   _AdminNavItem('Overview', '/admin'),
   _AdminNavItem('Sermons', '/admin/sermons'),
   _AdminNavItem('Events', '/admin/events'),
   _AdminNavItem('Connect Inbox', '/admin/connect'),
   _AdminNavItem('Groups', '/admin/groups'),
 ];
+
+// Only shown to admins - role management is more sensitive than the
+// day-to-day content tools above.
+const _AdminNavItem _membersItem = _AdminNavItem('Members', '/admin/members');
 
 /// Page header + secondary nav shared by every `/admin/*` screen -
 /// mirrors [AccountHeader], with a darker accent so staff always know
@@ -32,6 +38,8 @@ class AdminHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = Breakpoints.isMobile(context);
     final currentPath = GoRouterState.of(context).uri.toString();
+    final isAdmin = context.watch<AuthProvider>().currentUser?.isAdmin == true;
+    final items = [..._staffItems, if (isAdmin) _membersItem];
 
     return Container(
       width: double.infinity,
@@ -55,7 +63,7 @@ class AdminHeader extends StatelessWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: _items.map((item) {
+              children: items.map((item) {
                 final selected = currentPath == item.path;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),

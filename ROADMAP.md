@@ -80,8 +80,8 @@ All in an in-app `/admin` dashboard, gated to `staff`/`admin` roles:
 
 Staff access, plus:
 
-- **Roles & invites**: promote/demote member ↔ staff ↔ admin, invite new staff by email.
-- **Church settings UI**: edit everything currently hardcoded in `lib/config/church_config.dart` — name, tagline, colors, logo, service times, social/giving links, feature toggles — from a settings screen backed by Firestore instead of a code file. This is the single highest-leverage item for the "resell to other churches" business model: today, customizing for a new church means editing Dart and redeploying; this makes it a no-code settings page.
+- ✅ **Roles**: promote/demote member ↔ staff ↔ admin from `/admin/members` (admin-only). *Invite-by-email isn't built - new staff/admin still have to sign up as a regular member first, then get promoted.*
+- **Church settings UI**: edit everything currently hardcoded in `lib/config/church_config.dart` — name, tagline, colors, logo, service times, social/giving links, feature toggles — from a settings screen backed by Firestore instead of a code file. This is the single highest-leverage item for the "resell to other churches" business model: today, customizing for a new church means editing Dart and redeploying; this makes it a no-code settings page. *Deliberately deferred - a bigger architectural change than the rest of Phase 4, since it touches how nearly every screen reads branding/config, not just one admin screen. Worth its own dedicated pass.*
 - **Reports & analytics**: giving totals/trends, form submission volume, popular sermons, basic site engagement.
 - **Audit log**: who changed what (settings, roles, content) and when.
 - **Data export / account deletion tools** (privacy compliance).
@@ -122,7 +122,7 @@ Each phase is independently shippable and builds on the last:
 1. ✅ **Auth foundation** — sign up/login/reset, `users/{uid}` + role field, route guards, baseline Firestore rules. *Done: email/password + Google/Apple sign-in, role-checked security rules (tested against the Firebase emulator), auth-aware route guards.*
 2. ✅ **Member portal MVP** — profile/household, event RSVP, groups browse/join, directory opt-in. *Done: `/account` area with profile+household editing, group browse/join-request, event RSVP (also on the public Events page), opt-in directory, and a display-only giving history page. See the README's "Accounts & member portal" section.*
 3. 🟡 **Staff CMS MVP** — sermon & events CMS, Connect/prayer inbox, groups & volunteer management. *Mostly done: `/admin` dashboard (gated to staff/admin) with sermon, event, and group CRUD plus a Connect inbox - 31 passing security-rule scenarios verified against the emulator. Volunteer scheduling, a member list, and announcements are the remaining pieces (see the Staff section above for specifics).*
-4. **Admin controls** — role management, **church settings UI** (replacing hardcoded config — high priority for resale), reports/audit log.
+4. 🟡 **Admin controls** — role management, **church settings UI** (replacing hardcoded config — high priority for resale), reports/audit log. *Role management done (`/admin/members`, admin-only, 6 more passing rule scenarios). Settings UI, reports, and audit log remain - settings UI in particular deserves its own pass given its size.*
 5. **YouTube live/VOD sync** — channel connection UI, scheduled Cloud Function, homepage live banner, auto-import into the sermon review queue. Depends on Phase 3 (sermon CMS) existing so imported sermons have somewhere to land, and Phase 4 (settings UI) as the natural home for the "connect channel" control.
 6. **Polish & advanced** — push notifications, giving history sync, prayer wall, kids check-in, multi-campus support — pull items forward from here as needs surface.
 

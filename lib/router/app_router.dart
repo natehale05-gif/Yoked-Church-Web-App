@@ -15,6 +15,7 @@ import '../screens/admin/admin_home_screen.dart';
 import '../screens/admin/connect_admin_screen.dart';
 import '../screens/admin/events_admin_screen.dart';
 import '../screens/admin/groups_admin_screen.dart';
+import '../screens/admin/members_admin_screen.dart';
 import '../screens/admin/sermons_admin_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/sign_in_screen.dart';
@@ -48,6 +49,9 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
       final signedIn = authProvider.isSignedIn;
       if ((isAccountPath || isAdminPath) && !signedIn && !authProvider.isLoading) return '/sign-in';
       if (isAdminPath && signedIn && authProvider.currentUser?.isStaff != true) return '/account';
+      // Role management is admin-only - a plain staff account bounces to
+      // the staff dashboard overview rather than seeing a blank/broken page.
+      if (path == '/admin/members' && signedIn && authProvider.currentUser?.isAdmin != true) return '/admin';
       if (_authPaths.contains(path) && signedIn) return '/account';
       return null;
     },
@@ -86,6 +90,7 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
             GoRoute(path: '/admin/events', builder: (context, state) => const EventsAdminScreen()),
             GoRoute(path: '/admin/connect', builder: (context, state) => const ConnectAdminScreen()),
             GoRoute(path: '/admin/groups', builder: (context, state) => const GroupsAdminScreen()),
+            GoRoute(path: '/admin/members', builder: (context, state) => const MembersAdminScreen()),
           ],
         ],
       ),

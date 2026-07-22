@@ -48,4 +48,18 @@ class UserService {
     if (!doc.exists) return null;
     return AppUser.fromMap(uid, doc.data()!);
   }
+
+  /// Admin-only: list every member for the role management screen.
+  /// Allowed by `firestore.rules` because `isStaff()`/`isAdmin()` callers
+  /// can read any `users/{uid}` doc, not just their own.
+  Future<List<AppUser>> fetchAllUsers() async {
+    final snapshot = await _users.orderBy('displayName').get();
+    return snapshot.docs.map((doc) => AppUser.fromMap(doc.id, doc.data())).toList();
+  }
+
+  /// Admin-only: change another member's role. `firestore.rules` rejects
+  /// this unless the caller is themselves an admin.
+  Future<void> updateRole(String uid, UserRole role) {
+    return _users.doc(uid).update({'role': role.name});
+  }
 }
