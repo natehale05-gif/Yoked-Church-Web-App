@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../config/church_config.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
+import 'notification_bell.dart';
 
 class NavItem {
   final String label;
@@ -58,6 +59,7 @@ class AppNavBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             const Spacer(),
             if (!isMobile) ..._buildDesktopLinks(context, currentPath),
+            if (auth != null && auth.isSignedIn) NotificationBell(uid: auth.currentUser!.uid),
             if (!isMobile && auth != null) ...[
               const SizedBox(width: 8),
               _AccountControl(auth: auth),

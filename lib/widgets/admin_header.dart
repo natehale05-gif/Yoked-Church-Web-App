@@ -19,6 +19,7 @@ const List<_AdminNavItem> _staffItems = [
   _AdminNavItem('Events', '/admin/events'),
   _AdminNavItem('Connect Inbox', '/admin/connect'),
   _AdminNavItem('Groups', '/admin/groups'),
+  _AdminNavItem('Volunteering', '/admin/volunteering'),
 ];
 
 // Only shown to admins - role management is more sensitive than the

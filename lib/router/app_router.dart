@@ -11,12 +11,14 @@ import '../screens/account/group_detail_screen.dart';
 import '../screens/account/groups_screen.dart';
 import '../screens/account/my_events_screen.dart';
 import '../screens/account/profile_screen.dart';
+import '../screens/account/volunteering_screen.dart';
 import '../screens/admin/admin_home_screen.dart';
 import '../screens/admin/connect_admin_screen.dart';
 import '../screens/admin/events_admin_screen.dart';
 import '../screens/admin/groups_admin_screen.dart';
 import '../screens/admin/members_admin_screen.dart';
 import '../screens/admin/sermons_admin_screen.dart';
+import '../screens/admin/volunteering_admin_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/sign_in_screen.dart';
 import '../screens/auth/sign_up_screen.dart';
@@ -83,6 +85,7 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
               ),
             ),
             GoRoute(path: '/account/events', builder: (context, state) => const MyEventsScreen()),
+            GoRoute(path: '/account/volunteering', builder: (context, state) => const VolunteeringScreen()),
             GoRoute(path: '/account/directory', builder: (context, state) => const DirectoryScreen()),
             GoRoute(path: '/account/giving', builder: (context, state) => const GivingHistoryScreen()),
             GoRoute(path: '/admin', builder: (context, state) => const AdminHomeScreen()),
@@ -91,6 +94,7 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
             GoRoute(path: '/admin/connect', builder: (context, state) => const ConnectAdminScreen()),
             GoRoute(path: '/admin/groups', builder: (context, state) => const GroupsAdminScreen()),
             GoRoute(path: '/admin/members', builder: (context, state) => const MembersAdminScreen()),
+            GoRoute(path: '/admin/volunteering', builder: (context, state) => const VolunteeringAdminScreen()),
           ],
         ],
       ),

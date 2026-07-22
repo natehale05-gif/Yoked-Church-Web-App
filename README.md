@@ -63,6 +63,23 @@ anyone's role via a dropdown - staff cannot see or reach this screen,
 and the Firestore rules reject a role change from anyone but an admin
 even if someone bypasses the UI.
 
+## Volunteering & notifications
+
+Staff create volunteer positions from `/admin/volunteering` and can
+either assign a specific member directly (instantly confirmed) or
+approve a member's own self-signup from `/account/volunteering`
+(self-signups start `pending` and don't count against the position's
+open slots until a staff member approves them - Firestore rules block
+a member from approving their own). Either way, the member gets an
+in-app notification - the bell icon in the nav (visible once signed
+in) shows an unread badge and a dropdown of recent notifications.
+
+`NotificationService` (`lib/services/notification_service.dart`) is
+written generically, not just for volunteering - only staff/admin
+actions can create a notification (enforced by `firestore.rules`, not
+just the UI), so it's ready to reuse for other future staff-initiated
+alerts without new infrastructure.
+
 **Deploy the security rules** (required before going live with
 accounts - Firestore defaults to fully locked-down otherwise):
 

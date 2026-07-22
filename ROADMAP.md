@@ -57,11 +57,11 @@ Gaps worth adding:
 - **Profile & household**: name, photo, contact info, household/family members.
 - **Small groups**: browse/search groups by category or day, request to join, see "my groups."
 - **Event RSVP**: mark attending, see upcoming RSVP'd events.
-- **Volunteering**: browse open serving slots, sign up, see my upcoming commitments.
+- ✅ **Volunteering**: browse open serving positions and self-signup (pending admin approval), or get assigned directly by an admin (instantly confirmed); see my assignments, decline one if needed.
 - **Giving history**: view past gifts, download annual tax statement (numbers synced in from the giving provider — see Open Questions).
 - **Member directory**: opt-in searchable directory of other members/households.
 - **Prayer wall** (stretch): opt in to share a request publicly to the church, others can mark "praying," see responses.
-- **Notification preferences**: which push/email notifications to receive.
+- ✅🟡 **Notifications**: a bell icon + unread badge in the nav shows in-app notifications (currently only fired when a volunteer assignment is made/approved - see Staff/Admin's `NotificationService`). *Real push/email notifications and per-category preferences are still future work (Phase 6) - what exists today is in-app only, and is intentionally written generically so other actions (new sermon posted, event reminders, etc.) can start firing into the same inbox later without new infrastructure.*
 
 ### Staff (logged in, elevated)
 
@@ -71,9 +71,9 @@ All in an in-app `/admin` dashboard, gated to `staff`/`admin` roles:
 - ✅ **Events CMS**: create/edit/delete events. *(Day-of check-in / RSVP export not built yet - the RSVP data exists in `eventRsvps` but there's no attendee-list view yet.)*
 - ✅ **Connect/Prayer inbox**: view submissions from the Connect page, mark followed-up. *(No per-submission assignment to a specific team member or internal notes field yet - `staffNote` exists on the model but isn't editable in the UI yet.)*
 - ✅ **Groups management**: create/edit/delete groups, approve join requests, view/remove roster members.
-- **Volunteer scheduling**: create serving opportunities & slots, view/manage sign-ups, send reminders. *(Not built - needs new `volunteerSlots`/`volunteerSignups` collections.)*
+- ✅ **Volunteer scheduling**: create positions, assign a specific member directly (instantly confirmed) or approve a member's self-signup (starts pending until approved), remove an assignment. *(No reminder-sending yet - see Announcements below.)*
 - **Member list**: view/search members, edit basic info, deactivate an account. *(Not built - deferred alongside Phase 4's deeper role/account management.)*
-- **Announcements**: compose and send a push/email notification to all members or a segment. *(Not built - depends on push notification infra from Phase 6.)*
+- **Announcements**: compose and send a push/email notification to all members or a segment. *(Not built - depends on push notification infra from Phase 6. Note: a lighter-weight **in-app** notification inbox now exists - see "Notifications" below - and could plausibly grow into this instead of waiting on push.)*
 - **Auto-imported sermon review queue**: sermons pulled in automatically from the connected YouTube channel (see Admin below) land with a "needs review" flag until a staff member assigns series/speaker/description and publishes — keeps auto-import from bypassing quality control. *(Not built yet - part of Phase 5.)*
 
 ### Admin (logged in, full control)
@@ -102,13 +102,13 @@ firms up.
 3. **Firestore data model additions** (building on the existing `sermons`, `events`, `submissions` collections):
    - `users/{uid}` — role, profile, household
    - `groups/{id}`, `groupMemberships/{id}`
-   - `volunteerSlots/{id}`, `volunteerSignups/{id}`
+   - ✅ `volunteerPositions/{id}`, `volunteerAssignments/{id}`
    - `eventRsvps/{id}`
    - `churchSettings/{singleton}` — replaces hardcoded `ChurchConfig` values
    - `givingRecords/{id}` (synced or manually entered — see Open Questions)
    - `auditLog/{id}`
 4. **Firestore security rules** — role-based read/write per collection (visitor-readable content vs. member-only vs. staff/admin-write).
-5. **Push notifications** — Firebase Cloud Messaging + web push permission UX.
+5. 🟡 **Notifications** — ✅ in-app inbox exists (`notifications/{id}`, `lib/services/notification_service.dart`, bell icon in `lib/widgets/nav_bar.dart`), staff-write-only so it can't be spoofed by a member. Real push (Firebase Cloud Messaging + web push permission UX) is still future work, but the in-app inbox is written generically enough that FCM could later just be a second delivery channel triggered from the same `NotificationService.create(...)` call sites rather than a rebuild.
 6. **Admin dashboard shell** — new layout (sidebar nav) distinct from the public `AppShell` in `lib/widgets/app_shell.dart`, reusing the same `SectionContainer`/theme patterns already established.
 7. **YouTube live/VOD sync** — a scheduled backend job (Cloud Function, e.g. every 5 minutes) checks the admin-connected channel via the YouTube Data API v3:
    - Polls for an active live broadcast on that channel; writes live status + embed/video ID to a `liveStream/{singleton}` Firestore doc, which the Home page (`lib/screens/home_screen.dart`) reads instead of the static `liveStreamUrl` today.
@@ -121,7 +121,7 @@ Each phase is independently shippable and builds on the last:
 
 1. ✅ **Auth foundation** — sign up/login/reset, `users/{uid}` + role field, route guards, baseline Firestore rules. *Done: email/password + Google/Apple sign-in, role-checked security rules (tested against the Firebase emulator), auth-aware route guards.*
 2. ✅ **Member portal MVP** — profile/household, event RSVP, groups browse/join, directory opt-in. *Done: `/account` area with profile+household editing, group browse/join-request, event RSVP (also on the public Events page), opt-in directory, and a display-only giving history page. See the README's "Accounts & member portal" section.*
-3. 🟡 **Staff CMS MVP** — sermon & events CMS, Connect/prayer inbox, groups & volunteer management. *Mostly done: `/admin` dashboard (gated to staff/admin) with sermon, event, and group CRUD plus a Connect inbox - 31 passing security-rule scenarios verified against the emulator. Volunteer scheduling, a member list, and announcements are the remaining pieces (see the Staff section above for specifics).*
+3. 🟡 **Staff CMS MVP** — sermon & events CMS, Connect/prayer inbox, groups & volunteer management. *Mostly done: `/admin` dashboard (gated to staff/admin) with sermon, event, group, and volunteer-position CRUD plus a Connect inbox - 53 passing security-rule scenarios verified against the emulator across the session. A member list and announcements are the remaining pieces (see the Staff section above for specifics).*
 4. 🟡 **Admin controls** — role management, **church settings UI** (replacing hardcoded config — high priority for resale), reports/audit log. *Role management done (`/admin/members`, admin-only, 6 more passing rule scenarios). Settings UI, reports, and audit log remain - settings UI in particular deserves its own pass given its size.*
 5. **YouTube live/VOD sync** — channel connection UI, scheduled Cloud Function, homepage live banner, auto-import into the sermon review queue. Depends on Phase 3 (sermon CMS) existing so imported sermons have somewhere to land, and Phase 4 (settings UI) as the natural home for the "connect channel" control.
 6. **Polish & advanced** — push notifications, giving history sync, prayer wall, kids check-in, multi-campus support — pull items forward from here as needs surface.

@@ -16,6 +16,7 @@ const List<_AccountNavItem> _items = [
   _AccountNavItem('Profile', '/account/profile'),
   _AccountNavItem('Groups', '/account/groups'),
   _AccountNavItem('My Events', '/account/events'),
+  _AccountNavItem('Volunteering', '/account/volunteering'),
   _AccountNavItem('Directory', '/account/directory'),
   _AccountNavItem('Giving', '/account/giving'),
 ];

@@ -79,5 +79,31 @@ service cloud.firestore {
       allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isStaff());
       allow write: if isStaff();
     }
+
+    match /volunteerPositions/{id} {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+
+    // A member can self-signup (create their own assignment, but only as
+    // `pending` - self-approval on create is impossible) and later
+    // decline it; only staff can create an already-`approved` assignment
+    // (direct admin-assign) or flip a pending one to `approved`.
+    match /volunteerAssignments/{id} {
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isStaff());
+      allow create: if isStaff() ||
+        (isSignedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.status == 'pending');
+      allow update: if isStaff() ||
+        (isSignedIn() && resource.data.uid == request.auth.uid && request.resource.data.status == 'declined');
+      allow delete: if isStaff() || (isSignedIn() && resource.data.uid == request.auth.uid);
+    }
+
+    // In-app notifications: only staff-initiated actions (assigning or
+    // approving a volunteer) create these; a member only ever sees,
+    // marks read, or deletes their own.
+    match /notifications/{id} {
+      allow create: if isStaff();
+      allow read, update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
   }
 }
