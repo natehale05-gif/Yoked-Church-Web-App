@@ -67,14 +67,14 @@ Gaps worth adding:
 
 All in an in-app `/admin` dashboard, gated to `staff`/`admin` roles:
 
-- **Sermon CMS**: create/edit/delete sermons, series, speaker, video URL, thumbnail.
-- **Events CMS**: create/edit/delete events, view/export RSVP list, day-of check-in.
-- **Connect/Prayer inbox**: view submissions from the Connect page, mark followed-up, assign to a team member, add internal notes.
-- **Groups management**: create/edit groups, approve join requests, manage rosters and leaders.
-- **Volunteer scheduling**: create serving opportunities & slots, view/manage sign-ups, send reminders.
-- **Member list**: view/search members, edit basic info, deactivate an account.
-- **Announcements**: compose and send a push/email notification to all members or a segment (e.g., one group).
-- **Auto-imported sermon review queue**: sermons pulled in automatically from the connected YouTube channel (see Admin below) land with a "needs review" flag until a staff member assigns series/speaker/description and publishes — keeps auto-import from bypassing quality control.
+- ✅ **Sermon CMS**: create/edit/delete sermons, series, speaker, video URL, thumbnail.
+- ✅ **Events CMS**: create/edit/delete events. *(Day-of check-in / RSVP export not built yet - the RSVP data exists in `eventRsvps` but there's no attendee-list view yet.)*
+- ✅ **Connect/Prayer inbox**: view submissions from the Connect page, mark followed-up. *(No per-submission assignment to a specific team member or internal notes field yet - `staffNote` exists on the model but isn't editable in the UI yet.)*
+- ✅ **Groups management**: create/edit/delete groups, approve join requests, view/remove roster members.
+- **Volunteer scheduling**: create serving opportunities & slots, view/manage sign-ups, send reminders. *(Not built - needs new `volunteerSlots`/`volunteerSignups` collections.)*
+- **Member list**: view/search members, edit basic info, deactivate an account. *(Not built - deferred alongside Phase 4's deeper role/account management.)*
+- **Announcements**: compose and send a push/email notification to all members or a segment. *(Not built - depends on push notification infra from Phase 6.)*
+- **Auto-imported sermon review queue**: sermons pulled in automatically from the connected YouTube channel (see Admin below) land with a "needs review" flag until a staff member assigns series/speaker/description and publishes — keeps auto-import from bypassing quality control. *(Not built yet - part of Phase 5.)*
 
 ### Admin (logged in, full control)
 
@@ -121,7 +121,7 @@ Each phase is independently shippable and builds on the last:
 
 1. ✅ **Auth foundation** — sign up/login/reset, `users/{uid}` + role field, route guards, baseline Firestore rules. *Done: email/password + Google/Apple sign-in, role-checked security rules (tested against the Firebase emulator), auth-aware route guards.*
 2. ✅ **Member portal MVP** — profile/household, event RSVP, groups browse/join, directory opt-in. *Done: `/account` area with profile+household editing, group browse/join-request, event RSVP (also on the public Events page), opt-in directory, and a display-only giving history page. See the README's "Accounts & member portal" section.*
-3. **Staff CMS MVP** — sermon & events CMS, Connect/prayer inbox, groups & volunteer management (the day-to-day tools staff need most).
+3. 🟡 **Staff CMS MVP** — sermon & events CMS, Connect/prayer inbox, groups & volunteer management. *Mostly done: `/admin` dashboard (gated to staff/admin) with sermon, event, and group CRUD plus a Connect inbox - 31 passing security-rule scenarios verified against the emulator. Volunteer scheduling, a member list, and announcements are the remaining pieces (see the Staff section above for specifics).*
 4. **Admin controls** — role management, **church settings UI** (replacing hardcoded config — high priority for resale), reports/audit log.
 5. **YouTube live/VOD sync** — channel connection UI, scheduled Cloud Function, homepage live banner, auto-import into the sermon review queue. Depends on Phase 3 (sermon CMS) existing so imported sermons have somewhere to land, and Phase 4 (settings UI) as the natural home for the "connect channel" control.
 6. **Polish & advanced** — push notifications, giving history sync, prayer wall, kids check-in, multi-campus support — pull items forward from here as needs surface.

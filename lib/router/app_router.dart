@@ -11,6 +11,11 @@ import '../screens/account/group_detail_screen.dart';
 import '../screens/account/groups_screen.dart';
 import '../screens/account/my_events_screen.dart';
 import '../screens/account/profile_screen.dart';
+import '../screens/admin/admin_home_screen.dart';
+import '../screens/admin/connect_admin_screen.dart';
+import '../screens/admin/events_admin_screen.dart';
+import '../screens/admin/groups_admin_screen.dart';
+import '../screens/admin/sermons_admin_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/sign_in_screen.dart';
 import '../screens/auth/sign_up_screen.dart';
@@ -31,16 +36,18 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
     redirect: (context, state) {
       final path = state.uri.path;
       final isAccountPath = path.startsWith('/account');
+      final isAdminPath = path.startsWith('/admin');
 
       // Accounts require Firebase - without it, send visitors home rather
       // than 404 on routes that were never registered.
       if (!ChurchConfig.useFirebase) {
-        if (isAccountPath || _authPaths.contains(path)) return '/';
+        if (isAccountPath || isAdminPath || _authPaths.contains(path)) return '/';
         return null;
       }
 
       final signedIn = authProvider.isSignedIn;
-      if (isAccountPath && !signedIn && !authProvider.isLoading) return '/sign-in';
+      if ((isAccountPath || isAdminPath) && !signedIn && !authProvider.isLoading) return '/sign-in';
+      if (isAdminPath && signedIn && authProvider.currentUser?.isStaff != true) return '/account';
       if (_authPaths.contains(path) && signedIn) return '/account';
       return null;
     },
@@ -74,6 +81,11 @@ GoRouter buildAppRouter(AuthProvider authProvider) {
             GoRoute(path: '/account/events', builder: (context, state) => const MyEventsScreen()),
             GoRoute(path: '/account/directory', builder: (context, state) => const DirectoryScreen()),
             GoRoute(path: '/account/giving', builder: (context, state) => const GivingHistoryScreen()),
+            GoRoute(path: '/admin', builder: (context, state) => const AdminHomeScreen()),
+            GoRoute(path: '/admin/sermons', builder: (context, state) => const SermonsAdminScreen()),
+            GoRoute(path: '/admin/events', builder: (context, state) => const EventsAdminScreen()),
+            GoRoute(path: '/admin/connect', builder: (context, state) => const ConnectAdminScreen()),
+            GoRoute(path: '/admin/groups', builder: (context, state) => const GroupsAdminScreen()),
           ],
         ],
       ),

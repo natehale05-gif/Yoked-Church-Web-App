@@ -33,4 +33,18 @@ class SermonService {
     sermons.sort((a, b) => b.date.compareTo(a.date));
     return sermons;
   }
+
+  /// Staff-only writes - the CMS only shows these when Firestore is the
+  /// backing store, and Firestore rules require a `staff`/`admin` role.
+  Future<void> createSermon(Sermon sermon) {
+    return FirebaseFirestore.instance.collection('sermons').add(sermon.toMap());
+  }
+
+  Future<void> updateSermon(Sermon sermon) {
+    return FirebaseFirestore.instance.collection('sermons').doc(sermon.id).update(sermon.toMap());
+  }
+
+  Future<void> deleteSermon(String id) {
+    return FirebaseFirestore.instance.collection('sermons').doc(id).delete();
+  }
 }

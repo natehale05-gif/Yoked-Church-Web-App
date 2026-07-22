@@ -44,10 +44,19 @@ small groups; RSVP to events (also shown right on the public Events
 page); opt into the member directory; and view giving history.
 
 New accounts default to the `member` role. To make someone `staff` or
-`admin` (which unlocks the future CMS from `ROADMAP.md`), edit their
-`role` field directly on their `users/{uid}` document in the Firebase
-console for now - there's no in-app role management yet (that's
-Phase 4 of the roadmap).
+`admin` (which unlocks the `/admin` dashboard below), edit their `role`
+field directly on their `users/{uid}` document in the Firebase console
+for now - there's no in-app role management yet (that's Phase 4 of the
+roadmap).
+
+## Staff dashboard
+
+Signed-in `staff`/`admin` users get a "Staff Dashboard" link (in the
+account menu) to `/admin`: create/edit/delete sermons and events,
+review and mark Connect-page submissions as followed up, and manage
+small groups (including approving pending join requests from each
+group's roster). Everything here is backed by the same Firestore
+collections and rules as the member portal above.
 
 **Deploy the security rules** (required before going live with
 accounts - Firestore defaults to fully locked-down otherwise):

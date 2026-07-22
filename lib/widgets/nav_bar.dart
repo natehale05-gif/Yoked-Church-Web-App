@@ -123,6 +123,15 @@ class AppNavBar extends StatelessWidget implements PreferredSizeWidget {
                   context.go('/account');
                 },
               ),
+              if (auth.currentUser?.isStaff == true)
+                ListTile(
+                  leading: const Icon(Icons.admin_panel_settings_outlined),
+                  title: const Text('Staff Dashboard'),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    context.go('/admin');
+                  },
+                ),
               ListTile(
                 leading: const Icon(Icons.logout),
                 title: const Text('Sign Out'),
@@ -176,16 +185,21 @@ class _AccountControl extends StatelessWidget {
     final name = auth.currentUser?.displayName ?? '';
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
+    final isStaff = auth.currentUser?.isStaff == true;
+
     return PopupMenuButton<String>(
       tooltip: 'Account',
       offset: const Offset(0, 44),
-      itemBuilder: (context) => const [
-        PopupMenuItem(value: 'account', child: Text('My Account')),
-        PopupMenuItem(value: 'sign-out', child: Text('Sign Out')),
+      itemBuilder: (context) => [
+        const PopupMenuItem(value: 'account', child: Text('My Account')),
+        if (isStaff) const PopupMenuItem(value: 'admin', child: Text('Staff Dashboard')),
+        const PopupMenuItem(value: 'sign-out', child: Text('Sign Out')),
       ],
       onSelected: (value) async {
         if (value == 'account') {
           context.go('/account');
+        } else if (value == 'admin') {
+          context.go('/admin');
         } else if (value == 'sign-out') {
           await auth.signOut();
           if (context.mounted) context.go('/');

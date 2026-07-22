@@ -34,4 +34,30 @@ class GroupService {
     );
     return _memberships.add(membership.toMap());
   }
+
+  /// Staff-only: manage the group directory and roster/approvals.
+  Future<void> createGroup(ChurchGroup group) {
+    return _groups.add(group.toMap());
+  }
+
+  Future<void> updateGroup(ChurchGroup group) {
+    return _groups.doc(group.id).update(group.toMap());
+  }
+
+  Future<void> deleteGroup(String id) {
+    return _groups.doc(id).delete();
+  }
+
+  Future<List<GroupMembership>> fetchMembershipsForGroup(String groupId) async {
+    final snapshot = await _memberships.where('groupId', isEqualTo: groupId).get();
+    return snapshot.docs.map((doc) => GroupMembership.fromMap(doc.id, doc.data())).toList();
+  }
+
+  Future<void> approveMembership(String membershipId) {
+    return _memberships.doc(membershipId).update({'status': 'approved'});
+  }
+
+  Future<void> removeMembership(String membershipId) {
+    return _memberships.doc(membershipId).delete();
+  }
 }

@@ -34,4 +34,16 @@ class ConnectService {
     );
     await launchUrl(uri);
   }
+
+  /// Staff inbox - only ever called when Firestore is enabled and the
+  /// caller has a staff/admin role (enforced by `firestore.rules`).
+  Future<List<ConnectSubmission>> fetchSubmissions() async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection('submissions').orderBy('submittedAt', descending: true).get();
+    return snapshot.docs.map((doc) => ConnectSubmission.fromMap(doc.id, doc.data())).toList();
+  }
+
+  Future<void> updateSubmission(ConnectSubmission submission) {
+    return FirebaseFirestore.instance.collection('submissions').doc(submission.id).update(submission.toMap());
+  }
 }

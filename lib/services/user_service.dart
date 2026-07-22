@@ -42,4 +42,10 @@ class UserService {
     final snapshot = await _users.where('directoryOptIn', isEqualTo: true).get();
     return snapshot.docs.map((doc) => AppUser.fromMap(doc.id, doc.data())).toList();
   }
+
+  Future<AppUser?> fetchUser(String uid) async {
+    final doc = await _users.doc(uid).get();
+    if (!doc.exists) return null;
+    return AppUser.fromMap(uid, doc.data()!);
+  }
 }

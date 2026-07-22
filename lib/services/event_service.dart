@@ -32,4 +32,17 @@ class EventService {
     events.sort((a, b) => a.start.compareTo(b.start));
     return events;
   }
+
+  /// Staff-only writes - see [SermonService] for the same pattern.
+  Future<void> createEvent(ChurchEvent event) {
+    return FirebaseFirestore.instance.collection('events').add(event.toMap());
+  }
+
+  Future<void> updateEvent(ChurchEvent event) {
+    return FirebaseFirestore.instance.collection('events').doc(event.id).update(event.toMap());
+  }
+
+  Future<void> deleteEvent(String id) {
+    return FirebaseFirestore.instance.collection('events').doc(id).delete();
+  }
 }
