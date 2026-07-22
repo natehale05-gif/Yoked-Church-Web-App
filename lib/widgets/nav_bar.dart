@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../config/church_config.dart';
+import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 
 class NavItem {
@@ -30,6 +32,7 @@ class AppNavBar extends StatelessWidget implements PreferredSizeWidget {
     // Use the hamburger menu below desktop width so the full link row
     // never has to squeeze into a narrow (e.g. tablet) viewport.
     final isMobile = !Breakpoints.isDesktop(context);
+    final auth = ChurchConfig.useFirebase ? context.watch<AuthProvider>() : null;
 
     return AppBar(
       toolbarHeight: preferredSize.height,
@@ -55,6 +58,10 @@ class AppNavBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             const Spacer(),
             if (!isMobile) ..._buildDesktopLinks(context, currentPath),
+            if (!isMobile && auth != null) ...[
+              const SizedBox(width: 8),
+              _AccountControl(auth: auth),
+            ],
             if (!isMobile && ChurchConfig.showGiving) ...[
               const SizedBox(width: 12),
               ElevatedButton(
@@ -66,7 +73,7 @@ class AppNavBar extends StatelessWidget implements PreferredSizeWidget {
               Builder(
                 builder: (context) => IconButton(
                   icon: const Icon(Icons.menu),
-                  onPressed: () => _openMobileMenu(context),
+                  onPressed: () => _openMobileMenu(context, auth),
                 ),
               ),
           ],
@@ -91,7 +98,7 @@ class AppNavBar extends StatelessWidget implements PreferredSizeWidget {
     }).toList();
   }
 
-  void _openMobileMenu(BuildContext context) {
+  void _openMobileMenu(BuildContext context, AuthProvider? auth) {
     showModalBottomSheet(
       context: context,
       builder: (sheetContext) => SafeArea(
@@ -107,6 +114,34 @@ class AppNavBar extends StatelessWidget implements PreferredSizeWidget {
                 },
               ),
             ),
+            if (auth != null && auth.isSignedIn) ...[
+              ListTile(
+                leading: const Icon(Icons.person_outline),
+                title: const Text('My Account'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  context.go('/account');
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text('Sign Out'),
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  await auth.signOut();
+                  if (context.mounted) context.go('/');
+                },
+              ),
+            ] else if (auth != null) ...[
+              ListTile(
+                leading: const Icon(Icons.login),
+                title: const Text('Sign In'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  context.go('/sign-in');
+                },
+              ),
+            ],
             if (ChurchConfig.showGiving)
               ListTile(
                 title: const Text('Give', style: TextStyle(fontWeight: FontWeight.w700)),
@@ -118,6 +153,48 @@ class AppNavBar extends StatelessWidget implements PreferredSizeWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AccountControl extends StatelessWidget {
+  final AuthProvider auth;
+
+  const _AccountControl({required this.auth});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!auth.isSignedIn) {
+      return TextButton(
+        onPressed: () => context.go('/sign-in'),
+        style: TextButton.styleFrom(foregroundColor: ChurchConfig.primaryColor),
+        child: const Text('Sign In', style: TextStyle(fontWeight: FontWeight.w500)),
+      );
+    }
+
+    final name = auth.currentUser?.displayName ?? '';
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+
+    return PopupMenuButton<String>(
+      tooltip: 'Account',
+      offset: const Offset(0, 44),
+      itemBuilder: (context) => const [
+        PopupMenuItem(value: 'account', child: Text('My Account')),
+        PopupMenuItem(value: 'sign-out', child: Text('Sign Out')),
+      ],
+      onSelected: (value) async {
+        if (value == 'account') {
+          context.go('/account');
+        } else if (value == 'sign-out') {
+          await auth.signOut();
+          if (context.mounted) context.go('/');
+        }
+      },
+      child: CircleAvatar(
+        radius: 18,
+        backgroundColor: ChurchConfig.primaryColor.withValues(alpha: 0.12),
+        child: Text(initial, style: TextStyle(color: ChurchConfig.primaryColor, fontWeight: FontWeight.w700)),
       ),
     );
   }

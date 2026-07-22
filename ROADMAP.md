@@ -119,17 +119,17 @@ firms up.
 
 Each phase is independently shippable and builds on the last:
 
-1. **Auth foundation** — sign up/login/reset, `users/{uid}` + role field, route guards, baseline Firestore rules. No new visible features yet, but unlocks everything else.
-2. **Member portal MVP** — profile/household, event RSVP, groups browse/join, directory opt-in.
+1. ✅ **Auth foundation** — sign up/login/reset, `users/{uid}` + role field, route guards, baseline Firestore rules. *Done: email/password + Google/Apple sign-in, role-checked security rules (tested against the Firebase emulator), auth-aware route guards.*
+2. ✅ **Member portal MVP** — profile/household, event RSVP, groups browse/join, directory opt-in. *Done: `/account` area with profile+household editing, group browse/join-request, event RSVP (also on the public Events page), opt-in directory, and a display-only giving history page. See the README's "Accounts & member portal" section.*
 3. **Staff CMS MVP** — sermon & events CMS, Connect/prayer inbox, groups & volunteer management (the day-to-day tools staff need most).
 4. **Admin controls** — role management, **church settings UI** (replacing hardcoded config — high priority for resale), reports/audit log.
 5. **YouTube live/VOD sync** — channel connection UI, scheduled Cloud Function, homepage live banner, auto-import into the sermon review queue. Depends on Phase 3 (sermon CMS) existing so imported sermons have somewhere to land, and Phase 4 (settings UI) as the natural home for the "connect channel" control.
 6. **Polish & advanced** — push notifications, giving history sync, prayer wall, kids check-in, multi-campus support — pull items forward from here as needs surface.
 
-## Open questions to resolve before Phase 1 starts
+## Open questions
 
-- **Giving history**: does the church's existing giving provider (e.g., Tithe.ly, from `ChurchConfig.givingUrl`) expose an API/webhook to sync gift records into Firestore, or should "giving history" start as members manually viewing statements the provider emails them, with in-app history deferred until a specific provider integration is chosen?
-- **Directory opt-in default**: opt-in (safer, recommended) or opt-out for the member directory?
+- ✅ **Giving history** — resolved for now: display-only, populated by staff manual entry (Phase 3) rather than a payment-provider API sync. Revisit if/when a specific provider integration becomes worth building.
+- ✅ **Directory opt-in default** — resolved: opt-in, off by default.
 - **Kids check-in / safety**: is a check-in/security system in scope at all, or does the church already use a dedicated kids-check-in product (e.g., Church Community Builder, Planning Center) that this app should just link out to?
 - **YouTube auto-import behavior**: should newly-ended livestreams auto-publish to the public sermon library immediately, or always sit in the staff review queue first (recommended, to avoid an unedited/mistitled stream going live on the site unattended)?
 - **YouTube API key management**: needs a Google Cloud project with the YouTube Data API v3 enabled and an API key stored server-side (Cloud Functions config/secret) — confirm you're OK provisioning that per-deployment (it's a one-time setup step per church, similar to the Firebase project setup already documented in the README).

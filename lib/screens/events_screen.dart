@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../config/church_config.dart';
 import '../models/church_event.dart';
+import '../providers/auth_provider.dart';
 import '../services/event_service.dart';
+import '../services/rsvp_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/section_container.dart';
 
@@ -80,28 +83,63 @@ class _EventsScreenState extends State<EventsScreen> {
   }
 }
 
-class _EventTile extends StatelessWidget {
+class _EventTile extends StatefulWidget {
   final ChurchEvent event;
 
   const _EventTile({required this.event});
 
+  @override
+  State<_EventTile> createState() => _EventTileState();
+}
+
+class _EventTileState extends State<_EventTile> {
+  final RsvpService _rsvpService = RsvpService();
+  bool? _rsvpd;
+  bool _busy = false;
+
   String get _googleCalendarUrl {
     final formatter = DateFormat("yyyyMMdd'T'HHmmss");
-    final start = formatter.format(event.start);
-    final end = formatter.format(event.end ?? event.start.add(const Duration(hours: 1)));
+    final start = formatter.format(widget.event.start);
+    final end = formatter.format(widget.event.end ?? widget.event.start.add(const Duration(hours: 1)));
     final params = {
       'action': 'TEMPLATE',
-      'text': event.title,
+      'text': widget.event.title,
       'dates': '$start/$end',
-      'details': event.description,
-      'location': event.location,
+      'details': widget.event.description,
+      'location': widget.event.location,
     };
     final query = params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&');
     return 'https://calendar.google.com/calendar/render?$query';
   }
 
+  Future<void> _loadRsvpStatus(String uid) async {
+    final myRsvps = await _rsvpService.fetchMyRsvps(uid);
+    if (!mounted) return;
+    setState(() => _rsvpd = myRsvps.any((r) => r.eventId == widget.event.id));
+  }
+
+  Future<void> _toggleRsvp(String uid) async {
+    setState(() => _busy = true);
+    if (_rsvpd == true) {
+      await _rsvpService.cancelRsvp(eventId: widget.event.id, uid: uid);
+    } else {
+      await _rsvpService.rsvp(eventId: widget.event.id, uid: uid);
+    }
+    if (!mounted) return;
+    setState(() {
+      _rsvpd = !(_rsvpd ?? false);
+      _busy = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final auth = ChurchConfig.useFirebase ? context.watch<AuthProvider>() : null;
+    final uid = auth?.currentUser?.uid;
+    if (uid != null && _rsvpd == null) {
+      _loadRsvpStatus(uid);
+    }
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
@@ -118,9 +156,9 @@ class _EventTile extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Text(DateFormat.MMM().format(event.start).toUpperCase(),
+                  Text(DateFormat.MMM().format(widget.event.start).toUpperCase(),
                       style: TextStyle(color: ChurchConfig.accentColor, fontWeight: FontWeight.w700, fontSize: 12)),
-                  Text(DateFormat.d().format(event.start),
+                  Text(DateFormat.d().format(widget.event.start),
                       style: TextStyle(color: ChurchConfig.primaryColor, fontWeight: FontWeight.w700, fontSize: 22)),
                 ],
               ),
@@ -130,22 +168,37 @@ class _EventTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(event.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
+                  Text(widget.event.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
                   const SizedBox(height: 4),
                   Text(
-                    '${DateFormat.jm().format(event.start)} · ${event.location}',
+                    '${DateFormat.jm().format(widget.event.start)} · ${widget.event.location}',
                     style: const TextStyle(color: Colors.black54),
                   ),
                   const SizedBox(height: 8),
-                  Text(event.description, style: const TextStyle(color: Colors.black87)),
+                  Text(widget.event.description, style: const TextStyle(color: Colors.black87)),
                   const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: OutlinedButton.icon(
-                      onPressed: () => launchUrl(Uri.parse(_googleCalendarUrl), webOnlyWindowName: '_blank'),
-                      icon: const Icon(Icons.calendar_today, size: 16),
-                      label: const Text('Add to Calendar'),
-                    ),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () => launchUrl(Uri.parse(_googleCalendarUrl), webOnlyWindowName: '_blank'),
+                        icon: const Icon(Icons.calendar_today, size: 16),
+                        label: const Text('Add to Calendar'),
+                      ),
+                      if (uid != null)
+                        _busy || _rsvpd == null
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : OutlinedButton.icon(
+                                onPressed: () => _toggleRsvp(uid),
+                                icon: Icon(_rsvpd! ? Icons.check_circle : Icons.check_circle_outline, size: 16),
+                                label: Text(_rsvpd! ? "You're Going" : 'RSVP'),
+                              ),
+                    ],
                   ),
                 ],
               ),

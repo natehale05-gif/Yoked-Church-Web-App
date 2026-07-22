@@ -2,8 +2,9 @@
 
 A cross-platform Flutter church app/website, built to be resold as a customizable template: sermons & livestream, events, online giving, and prayer requests / connect cards - deployed as a static site on GitHub Pages.
 
-See [`ROADMAP.md`](ROADMAP.md) for the planned member portal, staff/admin
-dashboard, and YouTube live-sync features not yet built.
+See [`ROADMAP.md`](ROADMAP.md) for the planned staff/admin dashboard and
+YouTube live-sync features not yet built (accounts and the member portal
+below are done).
 
 ## Quick start
 
@@ -34,20 +35,62 @@ connect card submissions in Firestore instead:
 
 Expected Firestore collections: `sermons`, `events`, `submissions` (see the `fromMap`/`toMap` methods in `lib/models/` for the exact field shapes).
 
+## Accounts & member portal
+
+With `useFirebase = true`, the site gains a "Sign In" link and a
+protected `/account` area: sign up with email/password, Google, or
+Apple; edit your profile and household; browse and request to join
+small groups; RSVP to events (also shown right on the public Events
+page); opt into the member directory; and view giving history.
+
+New accounts default to the `member` role. To make someone `staff` or
+`admin` (which unlocks the future CMS from `ROADMAP.md`), edit their
+`role` field directly on their `users/{uid}` document in the Firebase
+console for now - there's no in-app role management yet (that's
+Phase 4 of the roadmap).
+
+**Deploy the security rules** (required before going live with
+accounts - Firestore defaults to fully locked-down otherwise):
+
+```bash
+npm install -g firebase-tools
+firebase login
+firebase deploy --only firestore:rules,firestore:indexes --project <your-firebase-project-id>
+```
+
+### Local development with the Firebase emulator
+
+Test the whole accounts/member-portal flow without touching your real
+Firebase project:
+
+```bash
+firebase emulators:start --project demo-yoked-church --only auth,firestore
+flutter run -d chrome --dart-define=USE_FIREBASE_EMULATOR=true
+```
+
+(with `useFirebase = true` in `church_config.dart` for that run). The
+emulator UI is at `http://127.0.0.1:4000`. The security rules
+themselves are also covered by an automated test suite using
+`@firebase/rules-unit-testing` against this same emulator - ask your
+AI assistant to regenerate it from `firestore.rules` if the rules ever
+change.
+
 ## Project structure
 
 ```
 lib/
   config/     church_config.dart - single source of truth for branding/content
-  models/     Sermon, ChurchEvent, ConnectSubmission
+  models/     Sermon, ChurchEvent, ConnectSubmission, AppUser, ChurchGroup, GroupMembership, EventRsvp, GivingRecord
   services/   data loading (bundled JSON, or Firestore when enabled)
-  screens/    one file per page (home, sermons, events, giving, connect)
-  widgets/    shared nav bar, footer, responsive layout helpers
+  providers/  AuthProvider - session/role state, only active when useFirebase is true
+  screens/    home, sermons, events, giving, connect, auth/ (sign in/up), account/ (member portal)
+  widgets/    shared nav bar, footer, account sub-nav, responsive layout helpers
   theme/      colors, typography (Lora + Work Sans, bundled locally), breakpoints
-  router/     go_router route table
+  router/     go_router route table + auth-aware redirects
 assets/
   data/       sample sermons.json / events.json
   fonts/      Lora + Work Sans (OFL licensed, bundled so text never depends on a CDN)
+firestore.rules, firestore.indexes.json, firebase.json - Firestore security rules and emulator config
 ```
 
 ## Deploying to GitHub Pages

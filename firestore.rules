@@ -1,0 +1,83 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isStaff() {
+      return isSignedIn() && myRole() in ['staff', 'admin'];
+    }
+
+    function isAdmin() {
+      return isSignedIn() && myRole() == 'admin';
+    }
+
+    // Public content - visible to anyone, editable by staff/admin only.
+    match /sermons/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /events/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    // Connect page: prayer requests / connect cards. Anyone (including
+    // visitors, if this were ever opened up client-side) can submit;
+    // only staff can read/manage the inbox.
+    match /submissions/{id} {
+      allow create: if true;
+      allow read, update, delete: if isStaff();
+    }
+
+    // Member profiles. A member always sees/edits their own doc; staff
+    // see all; any signed-in member can see another member's doc *only*
+    // if that member opted into the directory.
+    match /users/{uid} {
+      allow read: if isSignedIn() &&
+        (request.auth.uid == uid || isStaff() || resource.data.directoryOptIn == true);
+      allow create: if isSignedIn() && request.auth.uid == uid && request.resource.data.role == 'member';
+      allow update: if isAdmin() ||
+        (isSignedIn() && request.auth.uid == uid && request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin();
+    }
+
+    match /groups/{id} {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+
+    // Members can request to join (create their own pending membership)
+    // and see their own membership records; staff manage/approve all.
+    match /groupMemberships/{id} {
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isStaff());
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid &&
+        request.resource.data.status == 'pending';
+      allow update, delete: if isStaff();
+    }
+
+    // Members RSVP/un-RSVP for themselves; staff can read all for
+    // check-in lists.
+    match /eventRsvps/{id} {
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isStaff());
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // Giving records: members can only ever read their own; entry is a
+    // staff-only (manual, for now) operation.
+    match /givingRecords/{id} {
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isStaff());
+      allow write: if isStaff();
+    }
+  }
+}

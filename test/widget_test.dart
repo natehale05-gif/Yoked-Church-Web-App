@@ -4,7 +4,7 @@ import 'package:yoked_church_app/app.dart';
 
 void main() {
   testWidgets('Home page renders church name and nav links', (WidgetTester tester) async {
-    await tester.pumpWidget(const YokedChurchApp());
+    await tester.pumpWidget(YokedChurchApp());
     await tester.pumpAndSettle();
 
     expect(find.text('Yoked Church'), findsWidgets);
