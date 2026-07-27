@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yoked_church_app/core/config/church_settings.dart';
 import 'package:yoked_church_app/core/config/settings_providers.dart';
 import 'package:yoked_church_app/core/config/settings_repository.dart';
 import 'package:yoked_church_app/core/firestore/crud_repository.dart';
+import 'package:yoked_church_app/features/auth/application/auth_providers.dart';
+import 'package:yoked_church_app/features/auth/data/auth_repository.dart';
+import 'package:yoked_church_app/features/auth/data/user_repository.dart';
+import 'package:yoked_church_app/features/auth/domain/app_user.dart';
 import 'package:yoked_church_app/features/church_info/application/church_info_providers.dart';
 import 'package:yoked_church_app/features/church_info/data/church_info_repository.dart';
 import 'package:yoked_church_app/features/church_info/domain/church_info.dart';
@@ -10,12 +16,27 @@ import 'package:yoked_church_app/features/connect/application/connect_providers.
 import 'package:yoked_church_app/features/connect/data/connect_repository.dart';
 import 'package:yoked_church_app/features/connect/domain/connect_submission.dart';
 import 'package:yoked_church_app/features/events/application/event_providers.dart';
+import 'package:yoked_church_app/features/events/application/rsvp_providers.dart';
 import 'package:yoked_church_app/features/events/data/event_repository.dart';
+import 'package:yoked_church_app/features/events/data/rsvp_repository.dart';
 import 'package:yoked_church_app/features/events/domain/church_event.dart';
+import 'package:yoked_church_app/features/events/domain/event_rsvp.dart';
+import 'package:yoked_church_app/features/giving/application/giving_providers.dart';
+import 'package:yoked_church_app/features/giving/data/giving_repository.dart';
+import 'package:yoked_church_app/features/giving/domain/giving_record.dart';
+import 'package:yoked_church_app/features/groups/application/group_providers.dart';
+import 'package:yoked_church_app/features/groups/data/group_repository.dart';
+import 'package:yoked_church_app/features/groups/domain/group.dart';
+import 'package:yoked_church_app/features/notifications/application/notification_providers.dart';
+import 'package:yoked_church_app/features/notifications/data/notification_repository.dart';
+import 'package:yoked_church_app/features/notifications/domain/app_notification.dart';
 import 'package:yoked_church_app/features/sermons/application/sermon_providers.dart';
 import 'package:yoked_church_app/features/sermons/data/sermon_repository.dart';
 import 'package:yoked_church_app/features/sermons/domain/sermon.dart';
 import 'package:yoked_church_app/features/sermons/domain/sermon_series.dart';
+import 'package:yoked_church_app/features/volunteering/application/volunteering_providers.dart';
+import 'package:yoked_church_app/features/volunteering/data/volunteering_repository.dart';
+import 'package:yoked_church_app/features/volunteering/domain/volunteering.dart';
 
 /// Pure in-memory repositories for tests.
 ///
@@ -127,36 +148,240 @@ ChurchSettings testSettings({String churchName = 'Test Church', FeatureFlags? fe
       features: features ?? const FeatureFlags(),
     );
 
+class FakeGroupRepository extends LocalCrudRepository<ChurchGroup> implements GroupRepository {
+  @override
+  ChurchGroup fromMap(String id, Map<String, dynamic> map) => ChurchGroup.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(ChurchGroup entity) => entity.toMap();
+  @override
+  String idOf(ChurchGroup entity) => entity.id;
+}
+
+class FakeMembershipRepository extends LocalCrudRepository<GroupMembership> implements MembershipRepository {
+  @override
+  GroupMembership fromMap(String id, Map<String, dynamic> map) => GroupMembership.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(GroupMembership entity) => entity.toMap();
+  @override
+  String idOf(GroupMembership entity) => entity.id;
+  @override
+  Future<List<GroupMembership>> forMember(String uid) => fetchWhere((m) => m.uid == uid);
+  @override
+  Future<List<GroupMembership>> forGroup(String groupId) => fetchWhere((m) => m.groupId == groupId);
+}
+
+class FakeRsvpRepository extends LocalCrudRepository<EventRsvp> implements RsvpRepository {
+  @override
+  EventRsvp fromMap(String id, Map<String, dynamic> map) => EventRsvp.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(EventRsvp entity) => entity.toMap();
+  @override
+  String idOf(EventRsvp entity) => entity.id;
+  @override
+  Future<List<EventRsvp>> forMember(String uid) => fetchWhere((r) => r.uid == uid);
+  @override
+  Future<List<EventRsvp>> forEvent(String eventId) => fetchWhere((r) => r.eventId == eventId);
+  @override
+  Future<void> setRsvp(EventRsvp rsvp) => update(EventRsvp(
+        id: rsvpId(rsvp.eventId, rsvp.uid),
+        eventId: rsvp.eventId,
+        uid: rsvp.uid,
+        memberName: rsvp.memberName,
+        partySize: rsvp.partySize,
+        respondedAt: rsvp.respondedAt,
+      ));
+  @override
+  Future<void> cancel({required String eventId, required String uid}) => delete(rsvpId(eventId, uid));
+}
+
+class FakeVolunteerPositionRepository extends LocalCrudRepository<VolunteerPosition>
+    implements VolunteerPositionRepository {
+  @override
+  VolunteerPosition fromMap(String id, Map<String, dynamic> map) => VolunteerPosition.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(VolunteerPosition entity) => entity.toMap();
+  @override
+  String idOf(VolunteerPosition entity) => entity.id;
+}
+
+class FakeVolunteerAssignmentRepository extends LocalCrudRepository<VolunteerAssignment>
+    implements VolunteerAssignmentRepository {
+  @override
+  VolunteerAssignment fromMap(String id, Map<String, dynamic> map) => VolunteerAssignment.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(VolunteerAssignment entity) => entity.toMap();
+  @override
+  String idOf(VolunteerAssignment entity) => entity.id;
+  @override
+  Future<List<VolunteerAssignment>> forMember(String uid) => fetchWhere((a) => a.uid == uid);
+  @override
+  Future<List<VolunteerAssignment>> forPosition(String id) => fetchWhere((a) => a.positionId == id);
+  @override
+  Future<List<VolunteerAssignment>> forPositions(List<String> ids) =>
+      fetchWhere((a) => ids.contains(a.positionId));
+}
+
+class FakeNotificationRepository extends LocalCrudRepository<AppNotification>
+    implements NotificationRepository {
+  @override
+  AppNotification fromMap(String id, Map<String, dynamic> map) => AppNotification.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(AppNotification entity) => entity.toMap();
+  @override
+  String idOf(AppNotification entity) => entity.id;
+  @override
+  Stream<List<AppNotification>> watchForMember(String uid) async* {
+    yield await fetchWhere((n) => n.uid == uid);
+  }
+
+  @override
+  Future<void> markRead(String id) async {
+    final existing = await fetchById(id);
+    if (existing != null) await update(existing.copyWith(read: true));
+  }
+}
+
+class FakeGivingRepository extends LocalCrudRepository<GivingRecord> implements GivingRepository {
+  @override
+  GivingRecord fromMap(String id, Map<String, dynamic> map) => GivingRecord.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(GivingRecord entity) => entity.toMap();
+  @override
+  String idOf(GivingRecord entity) => entity.id;
+  @override
+  Future<List<GivingRecord>> forMember(String uid) => fetchWhere((r) => r.uid == uid);
+}
+
+class FakeUserRepository extends LocalCrudRepository<AppUser> implements UserRepository {
+  @override
+  AppUser fromMap(String id, Map<String, dynamic> map) => AppUser.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(AppUser entity) => entity.toMap();
+  @override
+  String idOf(AppUser entity) => entity.uid;
+  @override
+  Future<List<AppUser>> fetchDirectory() => fetchWhere((u) => u.directoryOptIn);
+  @override
+  Future<void> updateRole(String uid, UserRole role) async {
+    final user = await fetchById(uid);
+    if (user != null) await update(user.copyWith(role: role));
+  }
+}
+
 /// A complete override set backed by fakes, optionally pre-seeded.
+///
+/// Pass [signedInAs] to start the test with an authenticated member -
+/// every screen behind the auth guard is reachable without any Firebase.
 List<Override> fakeOverrides({
   ChurchSettings? settings,
+  AppUser? signedInAs,
   List<Sermon> sermons = const [],
   List<SermonSeries> series = const [],
   List<ChurchEvent> events = const [],
   List<StaffMember> staff = const [],
   List<ChurchLocation> locations = const [],
   List<Faq> faqs = const [],
+  List<ChurchGroup> groups = const [],
+  List<GroupMembership> memberships = const [],
+  List<VolunteerPosition> positions = const [],
+  List<VolunteerAssignment> assignments = const [],
+  List<AppNotification> notifications = const [],
+  List<GivingRecord> giving = const [],
+  List<AppUser> members = const [],
   FakeConnectRepository? connect,
+  FakeRsvpRepository? rsvps,
+  FakeVolunteerAssignmentRepository? assignmentRepo,
 }) {
-  final sermonRepo = FakeSermonRepository()..seedInMemory(sermons);
-  final seriesRepo = FakeSermonSeriesRepository()..seedInMemory(series);
-  final eventRepo = FakeEventRepository()..seedInMemory(events);
-  final staffRepo = FakeStaffRepository()..seedInMemory(staff);
-  final locationRepo = FakeLocationRepository()..seedInMemory(locations);
-  final faqRepo = FakeFaqRepository()..seedInMemory(faqs);
-  final connectRepo = connect ?? (FakeConnectRepository()..seedInMemory(const []));
+  final connectRepo = connect ?? FakeConnectRepository()
+    ..seedInMemory(const []);
+  final rsvpRepo = rsvps ?? FakeRsvpRepository()
+    ..seedInMemory(const []);
+  final assignRepo = assignmentRepo ?? FakeVolunteerAssignmentRepository()
+    ..seedInMemory(assignments);
 
   return [
     settingsRepositoryProvider.overrideWithValue(FakeSettingsRepository(settings)),
-    sermonRepositoryProvider.overrideWithValue(sermonRepo),
-    sermonSeriesRepositoryProvider.overrideWithValue(seriesRepo),
-    eventRepositoryProvider.overrideWithValue(eventRepo),
+    authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInAs)),
+    userRepositoryProvider.overrideWithValue(FakeUserRepository()..seedInMemory(members)),
+    sermonRepositoryProvider.overrideWithValue(FakeSermonRepository()..seedInMemory(sermons)),
+    sermonSeriesRepositoryProvider.overrideWithValue(FakeSermonSeriesRepository()..seedInMemory(series)),
+    eventRepositoryProvider.overrideWithValue(FakeEventRepository()..seedInMemory(events)),
+    rsvpRepositoryProvider.overrideWithValue(rsvpRepo),
     connectRepositoryProvider.overrideWithValue(connectRepo),
-    staffRepositoryProvider.overrideWithValue(staffRepo),
-    locationRepositoryProvider.overrideWithValue(locationRepo),
-    faqRepositoryProvider.overrideWithValue(faqRepo),
+    staffRepositoryProvider.overrideWithValue(FakeStaffRepository()..seedInMemory(staff)),
+    locationRepositoryProvider.overrideWithValue(FakeLocationRepository()..seedInMemory(locations)),
+    faqRepositoryProvider.overrideWithValue(FakeFaqRepository()..seedInMemory(faqs)),
+    groupRepositoryProvider.overrideWithValue(FakeGroupRepository()..seedInMemory(groups)),
+    membershipRepositoryProvider.overrideWithValue(FakeMembershipRepository()..seedInMemory(memberships)),
+    volunteerPositionRepositoryProvider
+        .overrideWithValue(FakeVolunteerPositionRepository()..seedInMemory(positions)),
+    volunteerAssignmentRepositoryProvider.overrideWithValue(assignRepo),
+    notificationRepositoryProvider
+        .overrideWithValue(FakeNotificationRepository()..seedInMemory(notifications)),
+    givingRepositoryProvider.overrideWithValue(FakeGivingRepository()..seedInMemory(giving)),
   ];
 }
+
+/// Auth fake that can start signed-in and supports sign-out/sign-in.
+class FakeAuthRepository implements AuthRepository {
+  final _controller = StreamController<AppUser?>.broadcast();
+  AppUser? _current;
+
+  FakeAuthRepository([this._current]);
+
+  @override
+  bool get supportsSocialSignIn => true;
+  @override
+  bool get isDemo => false;
+
+  @override
+  Stream<AppUser?> authStateChanges() async* {
+    yield _current;
+    yield* _controller.stream;
+  }
+
+  void _emit(AppUser? user) {
+    _current = user;
+    _controller.add(user);
+  }
+
+  @override
+  Future<void> signIn({required String email, required String password}) async {
+    if (password == 'wrong') throw const AuthFailure("We couldn't sign you in with that email and password.");
+    _emit(testMember(email: email));
+  }
+
+  @override
+  Future<void> signUp({required String email, required String password, required String displayName}) async =>
+      _emit(testMember(email: email, displayName: displayName));
+
+  @override
+  Future<void> signInWithGoogle() async => _emit(testMember());
+  @override
+  Future<void> signInWithApple() async => _emit(testMember());
+  @override
+  Future<void> sendPasswordReset(String email) async {}
+  @override
+  Future<void> signOut() async => _emit(null);
+  @override
+  Future<void> signInAsDemo(UserRole role) async => _emit(testMember(role: role));
+}
+
+AppUser testMember({
+  String uid = 'u1',
+  String email = 'member@example.org',
+  String displayName = 'Test Member',
+  UserRole role = UserRole.member,
+  bool directoryOptIn = false,
+}) =>
+    AppUser(
+      uid: uid,
+      email: email,
+      displayName: displayName,
+      role: role,
+      directoryOptIn: directoryOptIn,
+      createdAt: DateTime(2025, 1, 1),
+    );
 
 Sermon testSermon({
   String id = 's1',

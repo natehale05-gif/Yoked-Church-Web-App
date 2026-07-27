@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/theme.dart';
+import '../../features/auth/application/auth_providers.dart';
+import '../../features/notifications/application/notification_providers.dart';
 import '../config/church_settings.dart';
 import '../config/settings_providers.dart';
 
@@ -92,6 +94,11 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
                   selected: currentPath == destination.path,
                   color: settings.colors,
                 ),
+            const NotificationBell(),
+            if (!collapsed) ...[
+              const SizedBox(width: 4),
+              const AccountControl(),
+            ],
             if (!collapsed && settings.features.giving) ...[
               const SizedBox(width: 12),
               ElevatedButton(onPressed: () => context.go('/give'), child: const Text('Give')),
@@ -111,29 +118,129 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
   void _openMenu(BuildContext context, List<NavDestination> destinations, ChurchSettings settings) {
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final destination in destinations)
-              ListTile(
-                title: Text(destination.label),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  context.go(destination.path);
-                },
-              ),
-            if (settings.features.giving)
-              ListTile(
-                leading: Icon(Icons.favorite, color: settings.colors.accent),
-                title: const Text('Give', style: TextStyle(fontWeight: FontWeight.w700)),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  context.go('/give');
-                },
-              ),
-          ],
+        child: SingleChildScrollView(
+          child: Consumer(
+            builder: (sheetContext, ref, _) {
+              final user = ref.watch(currentUserProvider);
+
+              void go(String path) {
+                Navigator.pop(sheetContext);
+                context.go(path);
+              }
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final destination in destinations)
+                    ListTile(title: Text(destination.label), onTap: () => go(destination.path)),
+                  const Divider(height: 1),
+                  if (user == null)
+                    ListTile(
+                      leading: const Icon(Icons.login),
+                      title: const Text('Sign In'),
+                      onTap: () => go('/sign-in'),
+                    )
+                  else ...[
+                    ListTile(
+                      leading: const Icon(Icons.person_outline),
+                      title: const Text('My Account'),
+                      onTap: () => go('/account'),
+                    ),
+                    if (user.isStaff)
+                      ListTile(
+                        leading: const Icon(Icons.admin_panel_settings_outlined),
+                        title: const Text('Staff Dashboard'),
+                        onTap: () => go('/admin'),
+                      ),
+                    ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: const Text('Sign Out'),
+                      onTap: () async {
+                        Navigator.pop(sheetContext);
+                        await ref.read(authControllerProvider.notifier).signOut();
+                        if (context.mounted) context.go('/');
+                      },
+                    ),
+                  ],
+                  if (settings.features.giving)
+                    ListTile(
+                      leading: Icon(Icons.favorite, color: settings.colors.accent),
+                      title: const Text('Give', style: TextStyle(fontWeight: FontWeight.w700)),
+                      onTap: () => go('/give'),
+                    ),
+                ],
+              );
+            },
+          ),
         ),
+      ),
+    );
+  }
+}
+
+/// Sign-in link when signed out; avatar menu when signed in.
+class AccountControl extends ConsumerWidget {
+  const AccountControl({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final user = ref.watch(currentUserProvider);
+
+    if (user == null) {
+      return TextButton(
+        onPressed: () => context.go('/sign-in'),
+        style: TextButton.styleFrom(foregroundColor: settings.colors.primary),
+        child: const Text('Sign In', style: TextStyle(fontWeight: FontWeight.w500)),
+      );
+    }
+
+    return PopupMenuButton<String>(
+      tooltip: 'Account',
+      offset: const Offset(0, 48),
+      itemBuilder: (context) => [
+        const PopupMenuItem(value: '/account', child: Text('My Account')),
+        if (user.isStaff) const PopupMenuItem(value: '/admin', child: Text('Staff Dashboard')),
+        const PopupMenuItem(value: 'sign-out', child: Text('Sign Out')),
+      ],
+      onSelected: (value) async {
+        if (value == 'sign-out') {
+          await ref.read(authControllerProvider.notifier).signOut();
+          if (context.mounted) context.go('/');
+        } else {
+          context.go(value);
+        }
+      },
+      child: CircleAvatar(
+        radius: 18,
+        backgroundColor: settings.colors.primary.withValues(alpha: 0.12),
+        child: Text(
+          user.initial,
+          style: TextStyle(color: settings.colors.primary, fontWeight: FontWeight.w700),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bell with an unread badge. Hidden entirely when signed out.
+class NotificationBell extends ConsumerWidget {
+  const NotificationBell({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(currentUserProvider) == null) return const SizedBox.shrink();
+    final unread = ref.watch(unreadNotificationCountProvider);
+
+    return IconButton(
+      tooltip: 'Notifications',
+      onPressed: () => context.go('/account/notifications'),
+      icon: Badge(
+        isLabelVisible: unread > 0,
+        label: Text('$unread'),
+        child: const Icon(Icons.notifications_outlined),
       ),
     );
   }

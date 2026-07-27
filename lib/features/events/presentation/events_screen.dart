@@ -8,7 +8,9 @@ import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/section_container.dart';
+import '../../auth/application/auth_providers.dart';
 import '../application/event_providers.dart';
+import '../application/rsvp_providers.dart';
 import '../domain/church_event.dart';
 
 class EventsScreen extends ConsumerWidget {
@@ -29,11 +31,38 @@ class EventsScreen extends ConsumerWidget {
             errorContext: 'events',
             emptyMessage: 'No upcoming events - check back soon.',
             data: (events) => Column(
-              children: [for (final event in events) EventTile(event: event)],
+              children: [
+                for (final event in events)
+                  EventTile(event: event, trailing: _RsvpButton(event: event)),
+              ],
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// RSVP control for the public events list.
+///
+/// Membership is read once per page from [myRsvpEventIdsProvider] rather
+/// than issuing a query per row - the previous implementation fired an
+/// async Firestore read from inside `build()` for every card on screen.
+class _RsvpButton extends ConsumerWidget {
+  final ChurchEvent event;
+
+  const _RsvpButton({required this.event});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!event.rsvpEnabled) return const SizedBox.shrink();
+    if (ref.watch(currentUserProvider) == null) return const SizedBox.shrink();
+
+    final going = ref.watch(myRsvpEventIdsProvider).contains(event.id);
+    return OutlinedButton.icon(
+      onPressed: () => ref.read(rsvpControllerProvider).toggle(event.id),
+      icon: Icon(going ? Icons.check_circle : Icons.check_circle_outline, size: 16),
+      label: Text(going ? "You're Going" : 'RSVP'),
     );
   }
 }

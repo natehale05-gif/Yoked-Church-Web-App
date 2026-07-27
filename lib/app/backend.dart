@@ -2,48 +2,80 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config/settings_providers.dart';
 import '../core/config/settings_repository.dart';
+import '../features/auth/application/auth_providers.dart';
+import '../features/auth/data/auth_repository.dart';
+import '../features/auth/data/user_repository.dart';
 import '../features/church_info/application/church_info_providers.dart';
 import '../features/church_info/data/church_info_repository.dart';
 import '../features/connect/application/connect_providers.dart';
 import '../features/connect/data/connect_repository.dart';
 import '../features/events/application/event_providers.dart';
+import '../features/events/application/rsvp_providers.dart';
 import '../features/events/data/event_repository.dart';
+import '../features/events/data/rsvp_repository.dart';
+import '../features/giving/application/giving_providers.dart';
+import '../features/giving/data/giving_repository.dart';
+import '../features/groups/application/group_providers.dart';
+import '../features/groups/data/group_repository.dart';
+import '../features/notifications/application/notification_providers.dart';
+import '../features/notifications/data/notification_repository.dart';
 import '../features/sermons/application/sermon_providers.dart';
 import '../features/sermons/data/sermon_repository.dart';
+import '../features/volunteering/application/volunteering_providers.dart';
+import '../features/volunteering/data/volunteering_repository.dart';
 
 /// Which data source the app is running against.
 ///
 /// This is the *only* place that decision is made. Everything downstream
 /// depends on repository interfaces and is oblivious to the backend -
-/// which is what makes the whole app testable and lets a single build
-/// serve both a live church and a zero-backend preview.
+/// which is what makes the app testable and lets one build serve both a
+/// live church and a zero-backend preview.
 enum Backend { local, firestore }
 
 /// Bundled-content mode: reads come from `assets/data/*.json`, writes are
-/// held in memory for the session. The entire app - including staff and
-/// admin screens - is fully usable in this mode, which is what makes the
-/// template demo-able before a customer sets up Firebase.
+/// held in memory for the session, and auth is a demo that can preview any
+/// role. The entire app - including staff screens - is usable this way,
+/// which is what makes the template demo-able before a customer sets up
+/// Firebase.
 List<Override> localOverrides() => [
       settingsRepositoryProvider.overrideWithValue(LocalSettingsRepository()),
+      authRepositoryProvider.overrideWithValue(LocalAuthRepository()),
+      userRepositoryProvider.overrideWithValue(LocalUserRepository()),
       sermonRepositoryProvider.overrideWithValue(LocalSermonRepository()),
       sermonSeriesRepositoryProvider.overrideWithValue(LocalSermonSeriesRepository()),
       eventRepositoryProvider.overrideWithValue(LocalEventRepository()),
+      rsvpRepositoryProvider.overrideWithValue(LocalRsvpRepository()),
       connectRepositoryProvider.overrideWithValue(LocalConnectRepository()),
       staffRepositoryProvider.overrideWithValue(LocalStaffRepository()),
       locationRepositoryProvider.overrideWithValue(LocalLocationRepository()),
       faqRepositoryProvider.overrideWithValue(LocalFaqRepository()),
+      groupRepositoryProvider.overrideWithValue(LocalGroupRepository()),
+      membershipRepositoryProvider.overrideWithValue(LocalMembershipRepository()),
+      volunteerPositionRepositoryProvider.overrideWithValue(LocalVolunteerPositionRepository()),
+      volunteerAssignmentRepositoryProvider.overrideWithValue(LocalVolunteerAssignmentRepository()),
+      notificationRepositoryProvider.overrideWithValue(LocalNotificationRepository()),
+      givingRepositoryProvider.overrideWithValue(LocalGivingRepository()),
     ];
 
 /// Live mode against a configured Firebase project.
 List<Override> firestoreOverrides() => [
       settingsRepositoryProvider.overrideWithValue(FirestoreSettingsRepository()),
+      authRepositoryProvider.overrideWithValue(FirebaseAuthRepository()),
+      userRepositoryProvider.overrideWithValue(FirestoreUserRepository()),
       sermonRepositoryProvider.overrideWithValue(FirestoreSermonRepository()),
       sermonSeriesRepositoryProvider.overrideWithValue(FirestoreSermonSeriesRepository()),
       eventRepositoryProvider.overrideWithValue(FirestoreEventRepository()),
+      rsvpRepositoryProvider.overrideWithValue(FirestoreRsvpRepository()),
       connectRepositoryProvider.overrideWithValue(FirestoreConnectRepository()),
       staffRepositoryProvider.overrideWithValue(FirestoreStaffRepository()),
       locationRepositoryProvider.overrideWithValue(FirestoreLocationRepository()),
       faqRepositoryProvider.overrideWithValue(FirestoreFaqRepository()),
+      groupRepositoryProvider.overrideWithValue(FirestoreGroupRepository()),
+      membershipRepositoryProvider.overrideWithValue(FirestoreMembershipRepository()),
+      volunteerPositionRepositoryProvider.overrideWithValue(FirestoreVolunteerPositionRepository()),
+      volunteerAssignmentRepositoryProvider.overrideWithValue(FirestoreVolunteerAssignmentRepository()),
+      notificationRepositoryProvider.overrideWithValue(FirestoreNotificationRepository()),
+      givingRepositoryProvider.overrideWithValue(FirestoreGivingRepository()),
     ];
 
 List<Override> overridesFor(Backend backend) =>
