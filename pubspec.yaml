@@ -35,10 +35,18 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # Routing, i18n-ish formatting, and outbound links.
   go_router: ^14.6.2
   url_launcher: ^6.3.1
   intl: ^0.19.0
-  provider: ^6.1.2
+
+  # State management + DI. Repository implementations are swapped by
+  # overriding providers once at startup (see lib/main.dart), which is
+  # what removes the old compile-time `useFirebase` flag.
+  flutter_riverpod: ^2.6.1
+
+  # Backend. Optional at runtime - the app falls back to bundled sample
+  # content when no Firebase project is configured.
   firebase_core: ^3.8.0
   cloud_firestore: ^5.5.0
   firebase_auth: ^5.3.1

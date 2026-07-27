@@ -1,0 +1,30 @@
+[
+  {
+    "name": "John Miller",
+    "role": "Lead Pastor",
+    "bio": "John has served here since 2014. He and his wife Anna have three kids and an aging beagle named Barnabas.",
+    "email": "john@yokedchurch.org",
+    "sortOrder": 1
+  },
+  {
+    "name": "Sarah Lee",
+    "role": "Associate Pastor",
+    "bio": "Sarah leads our teaching and small groups ministries, and never turns down a good hospitality shift.",
+    "email": "sarah@yokedchurch.org",
+    "sortOrder": 2
+  },
+  {
+    "name": "Marcus Reed",
+    "role": "Worship Director",
+    "bio": "Marcus has led worship for fifteen years and still gets nervous before every Sunday.",
+    "email": "marcus@yokedchurch.org",
+    "sortOrder": 3
+  },
+  {
+    "name": "Priya Raman",
+    "role": "Kids &amp; Family Minister",
+    "bio": "Priya runs our kids ministry and check-in, and knows every child in the building by name.",
+    "email": "priya@yokedchurch.org",
+    "sortOrder": 4
+  }
+]

@@ -1,0 +1,46 @@
+{
+  "churchName": "Yoked Church",
+  "tagline": "Take my yoke upon you, and learn from me.",
+  "logoUrl": "",
+  "aboutHeadline": "Welcome Home",
+  "aboutBody": "Whoever you are and wherever you are on your journey, there's a place for you here. We're a community learning to walk yoked with Christ - together, unhurried, and free.",
+  "beliefs": "We believe the Bible is God's word to us, that Jesus is the Son of God who died and rose again, and that new life is a gift received by grace through faith. We gather weekly to worship, to learn, and to care for one another and our neighbors.",
+  "visitInfo": "Come as you are. Park anywhere in the main lot - look for a greeter in a blue lanyard near the front doors, and they'll help you find the sanctuary, kids check-in, or just a good seat. Services run about 70 minutes.",
+  "colors": {
+    "primary": "#1B3A4B",
+    "accent": "#C9A24B",
+    "background": "#F7F5F0"
+  },
+  "contact": {
+    "address": "123 Faith Ave, Hometown, ST 00000",
+    "phone": "(555) 123-4567",
+    "email": "info@yokedchurch.org",
+    "mapUrl": "https://maps.google.com/?q=123+Faith+Ave"
+  },
+  "social": {
+    "facebook": "https://facebook.com/yokedchurch",
+    "instagram": "https://instagram.com/yokedchurch",
+    "youtube": "https://youtube.com/@yokedchurch",
+    "givingUrl": "https://tithe.ly/give?c=yokedchurch",
+    "liveStreamUrl": "https://www.youtube.com/@yokedchurch/live"
+  },
+  "serviceTimes": [
+    { "day": "Sunday", "time": "9:00 AM", "label": "Traditional Service" },
+    { "day": "Sunday", "time": "11:00 AM", "label": "Contemporary Service" },
+    { "day": "Wednesday", "time": "6:30 PM", "label": "Midweek Bible Study" }
+  ],
+  "features": {
+    "sermons": true,
+    "events": true,
+    "giving": true,
+    "connect": true,
+    "groups": true,
+    "volunteering": true,
+    "prayerWall": true,
+    "readingPlans": true,
+    "devotionals": true,
+    "resources": true,
+    "kidsCheckIn": true,
+    "roomBooking": true
+  }
+}
