@@ -43,21 +43,10 @@ class AdminHomeScreen extends ConsumerWidget {
                 spacing: 20,
                 runSpacing: 20,
                 children: [
-                  const _Tile(icon: Icons.play_circle_outline, label: 'Sermons', path: '/admin/sermons'),
-                  const _Tile(icon: Icons.event_outlined, label: 'Events', path: '/admin/events'),
-                  const _Tile(icon: Icons.groups_outlined, label: 'Groups', path: '/admin/groups'),
-                  const _Tile(
-                    icon: Icons.volunteer_activism_outlined,
-                    label: 'Volunteering',
-                    path: '/admin/volunteering',
-                  ),
-                  const _Tile(icon: Icons.inbox_outlined, label: 'Connect Inbox', path: '/admin/connect'),
-                  const _Tile(icon: Icons.campaign_outlined, label: 'Announcements', path: '/admin/announcements'),
-                  if (isAdmin) ...[
-                    const _Tile(icon: Icons.people_alt_outlined, label: 'Members', path: '/admin/members'),
-                    const _Tile(icon: Icons.tune, label: 'Church Settings', path: '/admin/settings'),
-                    const _Tile(icon: Icons.history, label: 'Audit Log', path: '/admin/audit'),
-                  ],
+                  // Skip Overview - it's the page you're already on.
+                  for (final tab in visibleAdminTabs(ref.watch(featureFlagsProvider), isAdmin: isAdmin)
+                      .where((t) => t.path != '/admin'))
+                    _Tile(icon: tab.icon, label: tab.label, path: tab.path),
                 ],
               ),
               const SizedBox(height: 32),

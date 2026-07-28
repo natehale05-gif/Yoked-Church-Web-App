@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/church_settings.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
@@ -11,18 +12,39 @@ import '../../auth/application/auth_providers.dart';
 /// Tabs for the staff dashboard. Content tools are open to staff; the
 /// three that can reshape the church - members/roles, settings, and the
 /// audit trail - are admin-only, matching the route guards.
-List<({String label, String path, bool adminOnly})> adminTabs() => const [
-      (label: 'Overview', path: '/admin', adminOnly: false),
-      (label: 'Sermons', path: '/admin/sermons', adminOnly: false),
-      (label: 'Events', path: '/admin/events', adminOnly: false),
-      (label: 'Groups', path: '/admin/groups', adminOnly: false),
-      (label: 'Volunteering', path: '/admin/volunteering', adminOnly: false),
-      (label: 'Inbox', path: '/admin/connect', adminOnly: false),
-      (label: 'Announcements', path: '/admin/announcements', adminOnly: false),
-      (label: 'Members', path: '/admin/members', adminOnly: true),
-      (label: 'Settings', path: '/admin/settings', adminOnly: true),
-      (label: 'Audit Log', path: '/admin/audit', adminOnly: true),
+///
+/// Filtered by feature flags for the same reason [primaryNav] is: a
+/// church that doesn't run devotionals has no use for the tab, and
+/// without this the row would keep growing past what fits on screen.
+typedef AdminTab = ({String label, String path, IconData icon, bool adminOnly});
+
+List<AdminTab> adminTabs(FeatureFlags flags) => [
+      (label: 'Overview', path: '/admin', icon: Icons.dashboard_outlined, adminOnly: false),
+      if (flags.sermons)
+        (label: 'Sermons', path: '/admin/sermons', icon: Icons.play_circle_outline, adminOnly: false),
+      if (flags.events) (label: 'Events', path: '/admin/events', icon: Icons.event_outlined, adminOnly: false),
+      if (flags.groups) (label: 'Groups', path: '/admin/groups', icon: Icons.groups_outlined, adminOnly: false),
+      if (flags.volunteering)
+        (
+          label: 'Volunteering',
+          path: '/admin/volunteering',
+          icon: Icons.volunteer_activism_outlined,
+          adminOnly: false
+        ),
+      if (flags.devotionals)
+        (label: 'Devotionals', path: '/admin/devotionals', icon: Icons.auto_stories_outlined, adminOnly: false),
+      if (flags.connect) (label: 'Inbox', path: '/admin/connect', icon: Icons.inbox_outlined, adminOnly: false),
+      (label: 'Announcements', path: '/admin/announcements', icon: Icons.campaign_outlined, adminOnly: false),
+      (label: 'Members', path: '/admin/members', icon: Icons.people_alt_outlined, adminOnly: true),
+      (label: 'Settings', path: '/admin/settings', icon: Icons.tune, adminOnly: true),
+      (label: 'Audit Log', path: '/admin/audit', icon: Icons.history, adminOnly: true),
     ];
+
+/// The tabs a given user should actually see. The header row and the
+/// overview's "Manage" grid both read this, so the two can't drift apart
+/// or disagree about which features are switched on.
+List<AdminTab> visibleAdminTabs(FeatureFlags flags, {required bool isAdmin}) =>
+    adminTabs(flags).where((t) => isAdmin || !t.adminOnly).toList();
 
 /// Deliberately dark, unlike the member portal's brand-colored banner, so
 /// staff always know at a glance they're in the management area rather
@@ -37,7 +59,7 @@ class AdminHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isAdmin = ref.watch(isAdminProvider);
     final current = GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
-    final tabs = adminTabs().where((t) => isAdmin || !t.adminOnly);
+    final tabs = visibleAdminTabs(ref.watch(featureFlagsProvider), isAdmin: isAdmin);
 
     return PageBanner(
       color: Colors.black87,

@@ -21,6 +21,9 @@ import 'package:yoked_church_app/features/church_info/domain/church_info.dart';
 import 'package:yoked_church_app/features/connect/application/connect_providers.dart';
 import 'package:yoked_church_app/features/connect/data/connect_repository.dart';
 import 'package:yoked_church_app/features/connect/domain/connect_submission.dart';
+import 'package:yoked_church_app/features/devotionals/application/devotional_providers.dart';
+import 'package:yoked_church_app/features/devotionals/data/devotional_repository.dart';
+import 'package:yoked_church_app/features/devotionals/domain/devotional.dart';
 import 'package:yoked_church_app/features/events/application/event_providers.dart';
 import 'package:yoked_church_app/features/events/application/rsvp_providers.dart';
 import 'package:yoked_church_app/features/events/data/event_repository.dart';
@@ -285,6 +288,17 @@ class FakeAnnouncementRepository extends LocalCrudRepository<Announcement>
   int Function(Announcement, Announcement)? get sorter => (a, b) => b.sentAt.compareTo(a.sentAt);
 }
 
+class FakeDevotionalRepository extends LocalCrudRepository<Devotional> implements DevotionalRepository {
+  @override
+  Devotional fromMap(String id, Map<String, dynamic> map) => Devotional.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(Devotional entity) => entity.toMap();
+  @override
+  String idOf(Devotional entity) => entity.id;
+  @override
+  int Function(Devotional, Devotional)? get sorter => (a, b) => b.publishDate.compareTo(a.publishDate);
+}
+
 class FakeAuditRepository extends LocalCrudRepository<AuditEntry> implements AuditRepository {
   @override
   AuditEntry fromMap(String id, Map<String, dynamic> map) => AuditEntry.fromMap(id, map);
@@ -316,6 +330,7 @@ List<Override> fakeOverrides({
   List<AppNotification> notifications = const [],
   List<GivingRecord> giving = const [],
   List<AppUser> members = const [],
+  List<Devotional> devotionals = const [],
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
   FakeVolunteerAssignmentRepository? assignmentRepo,
@@ -350,8 +365,28 @@ List<Override> fakeOverrides({
     announcementRepositoryProvider
         .overrideWithValue(FakeAnnouncementRepository()..seedInMemory(const [])),
     auditRepositoryProvider.overrideWithValue(FakeAuditRepository()..seedInMemory(const [])),
+    devotionalRepositoryProvider.overrideWithValue(FakeDevotionalRepository()..seedInMemory(devotionals)),
   ];
 }
+
+Devotional testDevotional({
+  String id = 'd1',
+  String title = 'Test Devotional',
+  String body = 'Body copy for the devotional.',
+  String scripture = 'Psalm 23:1',
+  String author = 'Pastor Test',
+  DateTime? publishDate,
+  bool published = true,
+}) =>
+    Devotional(
+      id: id,
+      title: title,
+      body: body,
+      scripture: scripture,
+      author: author,
+      publishDate: publishDate ?? DateTime(2026, 7, 1),
+      published: published,
+    );
 
 /// Auth fake that can start signed-in and supports sign-out/sign-in.
 class FakeAuthRepository implements AuthRepository {

@@ -30,6 +30,15 @@ service cloud.firestore {
       allow write: if isStaff();
     }
 
+    // Drafts and future-dated entries are filtered client-side, not here:
+    // a rule cannot express "published and dated on or before today"
+    // without an index-backed query, and the list read is a single
+    // collection fetch. Treat publishDate as scheduling, not secrecy.
+    match /devotionals/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
     // Connect page: prayer requests / connect cards. Anyone (including
     // visitors, if this were ever opened up client-side) can submit;
     // only staff can read/manage the inbox.

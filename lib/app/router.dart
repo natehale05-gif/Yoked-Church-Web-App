@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/config/church_settings.dart';
+import '../core/config/settings_providers.dart';
 import '../core/widgets/app_shell.dart';
 import '../core/widgets/section_container.dart';
 import '../features/account/presentation/account_home_screen.dart';
@@ -16,6 +18,7 @@ import '../features/admin/presentation/admin_home_screen.dart';
 import '../features/admin/presentation/announcements_admin_screen.dart';
 import '../features/admin/presentation/audit_admin_screen.dart';
 import '../features/admin/presentation/connect_admin_screen.dart';
+import '../features/admin/presentation/devotionals_admin_screen.dart';
 import '../features/admin/presentation/events_admin_screen.dart';
 import '../features/admin/presentation/groups_admin_screen.dart';
 import '../features/admin/presentation/members_admin_screen.dart';
@@ -29,6 +32,8 @@ import '../features/auth/presentation/sign_up_screen.dart';
 import '../features/church_info/presentation/about_screen.dart';
 import '../features/church_info/presentation/visit_screen.dart';
 import '../features/connect/presentation/connect_screen.dart';
+import '../features/devotionals/presentation/devotional_detail_screen.dart';
+import '../features/devotionals/presentation/devotionals_screen.dart';
 import '../features/events/presentation/events_screen.dart';
 import '../features/giving/presentation/giving_screen.dart';
 import '../features/home/presentation/home_screen.dart';
@@ -37,6 +42,21 @@ import '../features/sermons/presentation/sermons_screen.dart';
 
 const _authPaths = {'/sign-in', '/sign-up', '/forgot-password'};
 const _adminOnlyPaths = {'/admin/members', '/admin/settings', '/admin/audit'};
+
+/// Route prefixes owned by a feature flag. Turning a feature off has to
+/// close the route as well as hide the nav link, or the page stays live
+/// for anyone with the URL - and for search engines that already indexed
+/// it.
+bool _flagAllows(FeatureFlags flags, String path) {
+  bool owns(String prefix) => path == prefix || path.startsWith('$prefix/');
+
+  if (owns('/sermons') || owns('/admin/sermons')) return flags.sermons;
+  if (owns('/events') || owns('/admin/events')) return flags.events;
+  if (owns('/give')) return flags.giving;
+  if (owns('/connect') || owns('/admin/connect')) return flags.connect;
+  if (owns('/devotionals') || owns('/admin/devotionals')) return flags.devotionals;
+  return true;
+}
 
 /// Every route is registered unconditionally; access is decided by the
 /// redirect below at request time.
@@ -56,6 +76,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Don't bounce anyone while the first auth check is still in flight,
       // or a signed-in member refreshing /account lands on the login page.
       if (loading) return null;
+
+      if (!_flagAllows(ref.read(featureFlagsProvider), path)) return '/';
 
       if (path.startsWith('/account') && !signedIn) return '/sign-in';
       if (path.startsWith('/admin')) {
@@ -88,6 +110,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/connect', builder: (_, _) => const ConnectScreen()),
           GoRoute(path: '/about', builder: (_, _) => const AboutScreen()),
           GoRoute(path: '/visit', builder: (_, _) => const VisitScreen()),
+          GoRoute(path: '/devotionals', builder: (_, _) => const DevotionalsScreen()),
+          GoRoute(
+            path: '/devotionals/:id',
+            builder: (_, state) => DevotionalDetailScreen(devotionalId: state.pathParameters['id']!),
+          ),
 
           GoRoute(path: '/account', builder: (_, _) => const AccountHomeScreen()),
           GoRoute(path: '/account/profile', builder: (_, _) => const ProfileScreen()),
@@ -105,6 +132,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/volunteering', builder: (_, _) => const VolunteeringAdminScreen()),
           GoRoute(path: '/admin/connect', builder: (_, _) => const ConnectAdminScreen()),
           GoRoute(path: '/admin/announcements', builder: (_, _) => const AnnouncementsAdminScreen()),
+          GoRoute(path: '/admin/devotionals', builder: (_, _) => const DevotionalsAdminScreen()),
           GoRoute(path: '/admin/members', builder: (_, _) => const MembersAdminScreen()),
           GoRoute(path: '/admin/settings', builder: (_, _) => const SettingsAdminScreen()),
           GoRoute(path: '/admin/audit', builder: (_, _) => const AuditAdminScreen()),

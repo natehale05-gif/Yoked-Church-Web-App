@@ -9,6 +9,7 @@ import '../../../core/config/church_settings.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/section_container.dart';
+import '../../devotionals/application/devotional_providers.dart';
 import '../../events/application/event_providers.dart';
 import '../../sermons/application/sermon_providers.dart';
 import '../../sermons/presentation/sermons_screen.dart';
@@ -26,6 +27,7 @@ class HomeScreen extends ConsumerWidget {
         if (settings.serviceTimes.isNotEmpty) _ServiceTimes(settings: settings),
         const _QuickLinks(),
         if (settings.features.sermons) const _LatestSermons(),
+        if (settings.features.devotionals) const _TodaysDevotional(),
         if (settings.features.events) const _UpcomingEvents(),
         _Welcome(settings: settings),
       ],
@@ -152,6 +154,8 @@ class _QuickLinks extends ConsumerWidget {
     final links = <({IconData icon, String label, String path})>[
       if (flags.sermons) (icon: Icons.play_circle_outline, label: 'Sermons', path: '/sermons'),
       if (flags.events) (icon: Icons.event_outlined, label: 'Events', path: '/events'),
+      if (flags.devotionals)
+        (icon: Icons.auto_stories_outlined, label: 'Devotionals', path: '/devotionals'),
       if (flags.giving) (icon: Icons.favorite_outline, label: 'Give', path: '/give'),
       if (flags.connect) (icon: Icons.mail_outline, label: 'Connect', path: '/connect'),
     ];
@@ -214,6 +218,57 @@ class _LatestSermons extends ConsumerWidget {
             spacing: 24,
             runSpacing: 24,
             children: [for (final sermon in latest) SermonCard(sermon: sermon)],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TodaysDevotional extends ConsumerWidget {
+  const _TodaysDevotional();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final devotional = ref.watch(todaysDevotionalProvider).valueOrNull;
+    if (devotional == null) return const SizedBox.shrink();
+    final brand = ref.watch(settingsProvider).colors;
+    final isMobile = Breakpoints.isMobile(context);
+
+    return SectionContainer(
+      backgroundColor: brand.primary.withValues(alpha: 0.05),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "TODAY'S DEVOTIONAL",
+            style: TextStyle(color: brand.accent, fontWeight: FontWeight.w700, letterSpacing: 1.5, fontSize: 12),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            devotional.title,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: isMobile ? 26 : 32),
+          ),
+          if (devotional.scripture.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              devotional.scripture,
+              style: TextStyle(color: brand.primary, fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Text(devotional.excerpt, style: const TextStyle(fontSize: 16, height: 1.7, color: Colors.black87)),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              ElevatedButton(
+                onPressed: () => context.go('/devotionals/${devotional.id}'),
+                child: const Text('Read today'),
+              ),
+              TextButton(onPressed: () => context.go('/devotionals'), child: const Text('All devotionals')),
+            ],
           ),
         ],
       ),

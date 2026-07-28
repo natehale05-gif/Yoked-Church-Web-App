@@ -13,6 +13,8 @@ import '../features/church_info/application/church_info_providers.dart';
 import '../features/church_info/data/church_info_repository.dart';
 import '../features/connect/application/connect_providers.dart';
 import '../features/connect/data/connect_repository.dart';
+import '../features/devotionals/application/devotional_providers.dart';
+import '../features/devotionals/data/devotional_repository.dart';
 import '../features/events/application/event_providers.dart';
 import '../features/events/application/rsvp_providers.dart';
 import '../features/events/data/event_repository.dart';
@@ -66,6 +68,7 @@ List<Override> localOverrides() {
       givingRepositoryProvider.overrideWithValue(LocalGivingRepository()),
       announcementRepositoryProvider.overrideWithValue(LocalAnnouncementRepository()),
       auditRepositoryProvider.overrideWithValue(LocalAuditRepository()),
+      devotionalRepositoryProvider.overrideWithValue(LocalDevotionalRepository()),
     ];
 }
 
@@ -90,6 +93,7 @@ List<Override> firestoreOverrides() => [
       givingRepositoryProvider.overrideWithValue(FirestoreGivingRepository()),
       announcementRepositoryProvider.overrideWithValue(FirestoreAnnouncementRepository()),
       auditRepositoryProvider.overrideWithValue(FirestoreAuditRepository()),
+      devotionalRepositoryProvider.overrideWithValue(FirestoreDevotionalRepository()),
     ];
 
 List<Override> overridesFor(Backend backend) =>

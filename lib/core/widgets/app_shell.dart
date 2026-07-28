@@ -22,6 +22,7 @@ List<NavDestination> primaryNav(FeatureFlags flags) => [
       const NavDestination('Home', '/'),
       if (flags.sermons) const NavDestination('Sermons', '/sermons'),
       if (flags.events) const NavDestination('Events', '/events'),
+      if (flags.devotionals) const NavDestination('Devotionals', '/devotionals'),
       const NavDestination('About', '/about'),
       const NavDestination('Visit', '/visit'),
       if (flags.connect) const NavDestination('Connect', '/connect'),
@@ -66,6 +67,17 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Rebuild whenever the router navigates. This bar is built as
+    // `const AppNavBar()`, so Dart canonicalises it to a single instance
+    // and Flutter skips the subtree on rebuild - without listening here,
+    // the highlight sticks on whichever page was open first.
+    return ListenableBuilder(
+      listenable: GoRouter.of(context).routerDelegate,
+      builder: (context, _) => _buildBar(context, ref),
+    );
+  }
+
+  Widget _buildBar(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     // Read the location straight off the router delegate's configuration.
     // Both `GoRouterState.of(context)` and `GoRouter.of(context).state`
@@ -86,14 +98,27 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
         child: Row(
           children: [
             _Wordmark(settings: settings),
-            const Spacer(),
-            if (!collapsed)
-              for (final destination in destinations)
-                _NavLink(
-                  destination: destination,
-                  selected: currentPath == destination.path,
-                  color: settings.colors,
-                ),
+            // The link row scrolls rather than overflows. A church can
+            // switch on every feature at once, and the wordmark is its
+            // own name - neither has a length this bar can assume.
+            Expanded(
+              child: !collapsed
+                  ? SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      reverse: true,
+                      child: Row(
+                        children: [
+                          for (final destination in destinations)
+                            _NavLink(
+                              destination: destination,
+                              selected: currentPath == destination.path,
+                              color: settings.colors,
+                            ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
             const NotificationBell(),
             if (!collapsed) ...[
               const SizedBox(width: 4),
