@@ -52,6 +52,14 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
     }
 
+    // A member's own notes on a sermon - the most private data the app
+    // holds. Distinct from the church's published outline, which lives
+    // on the sermon document itself. No staff read here either.
+    match /sermonNotes/{id} {
+      allow read, update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+    }
+
     // Connect page: prayer requests / connect cards. Anyone (including
     // visitors, if this were ever opened up client-side) can submit;
     // only staff can read/manage the inbox.

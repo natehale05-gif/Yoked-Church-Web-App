@@ -8,6 +8,7 @@ import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/section_container.dart';
+import '../../sermon_notes/presentation/my_note_card.dart';
 import '../application/sermon_providers.dart';
 import '../domain/sermon.dart';
 
@@ -111,6 +112,8 @@ class _SermonBody extends ConsumerWidget {
         ],
         if (sermon.notes.isNotEmpty) ...[
           const SizedBox(height: 32),
+          // The church's own outline, published to everyone - distinct
+          // from the member's private notes below.
           Text('Sermon Notes', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           Card(
@@ -120,6 +123,8 @@ class _SermonBody extends ConsumerWidget {
             ),
           ),
         ],
+        const SizedBox(height: 32),
+        MyNoteCard(sermon: sermon),
       ],
     );
   }

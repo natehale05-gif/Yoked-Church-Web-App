@@ -11,6 +11,7 @@ import '../features/account/presentation/directory_screen.dart';
 import '../features/account/presentation/giving_history_screen.dart';
 import '../features/account/presentation/my_events_screen.dart';
 import '../features/account/presentation/my_groups_screen.dart';
+import '../features/account/presentation/my_notes_screen.dart';
 import '../features/account/presentation/my_reading_screen.dart';
 import '../features/account/presentation/my_volunteering_screen.dart';
 import '../features/account/presentation/notifications_screen.dart';
@@ -54,7 +55,7 @@ const _adminOnlyPaths = {'/admin/members', '/admin/settings', '/admin/audit'};
 bool _flagAllows(FeatureFlags flags, String path) {
   bool owns(String prefix) => path == prefix || path.startsWith('$prefix/');
 
-  if (owns('/sermons') || owns('/admin/sermons')) return flags.sermons;
+  if (owns('/sermons') || owns('/admin/sermons') || owns('/account/notes')) return flags.sermons;
   if (owns('/events') || owns('/admin/events')) return flags.events;
   if (owns('/give')) return flags.giving;
   if (owns('/connect') || owns('/admin/connect')) return flags.connect;
@@ -136,6 +137,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/account/directory', builder: (_, _) => const DirectoryScreen()),
           GoRoute(path: '/account/giving', builder: (_, _) => const GivingHistoryScreen()),
           GoRoute(path: '/account/reading', builder: (_, _) => const MyReadingScreen()),
+          GoRoute(path: '/account/notes', builder: (_, _) => const MyNotesScreen()),
           GoRoute(path: '/account/notifications', builder: (_, _) => const NotificationsScreen()),
 
           GoRoute(path: '/admin', builder: (_, _) => const AdminHomeScreen()),

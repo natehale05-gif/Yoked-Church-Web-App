@@ -42,6 +42,9 @@ import 'package:yoked_church_app/features/notifications/domain/app_notification.
 import 'package:yoked_church_app/features/reading_plans/application/reading_plan_providers.dart';
 import 'package:yoked_church_app/features/reading_plans/data/reading_plan_repository.dart';
 import 'package:yoked_church_app/features/reading_plans/domain/reading_plan.dart';
+import 'package:yoked_church_app/features/sermon_notes/application/sermon_note_providers.dart';
+import 'package:yoked_church_app/features/sermon_notes/data/sermon_note_repository.dart';
+import 'package:yoked_church_app/features/sermon_notes/domain/sermon_note.dart';
 import 'package:yoked_church_app/features/sermons/application/sermon_providers.dart';
 import 'package:yoked_church_app/features/sermons/data/sermon_repository.dart';
 import 'package:yoked_church_app/features/sermons/domain/sermon.dart';
@@ -334,6 +337,29 @@ class FakePlanProgressRepository extends LocalCrudRepository<PlanProgress>
       ));
 }
 
+class FakeSermonNoteRepository extends LocalCrudRepository<SermonNote> implements SermonNoteRepository {
+  @override
+  SermonNote fromMap(String id, Map<String, dynamic> map) => SermonNote.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(SermonNote entity) => entity.toMap();
+  @override
+  String idOf(SermonNote entity) => entity.id;
+  @override
+  int Function(SermonNote, SermonNote)? get sorter => (a, b) => b.updatedAt.compareTo(a.updatedAt);
+  @override
+  Future<List<SermonNote>> forMember(String uid) => fetchWhere((n) => n.uid == uid);
+  @override
+  Future<void> setNote(SermonNote note) => update(SermonNote(
+        id: sermonNoteId(note.sermonId, note.uid),
+        uid: note.uid,
+        sermonId: note.sermonId,
+        sermonTitle: note.sermonTitle,
+        sermonDate: note.sermonDate,
+        body: note.body,
+        updatedAt: note.updatedAt,
+      ));
+}
+
 class FakeAuditRepository extends LocalCrudRepository<AuditEntry> implements AuditRepository {
   @override
   AuditEntry fromMap(String id, Map<String, dynamic> map) => AuditEntry.fromMap(id, map);
@@ -368,6 +394,7 @@ List<Override> fakeOverrides({
   List<Devotional> devotionals = const [],
   List<ReadingPlan> readingPlans = const [],
   List<PlanProgress> planProgress = const [],
+  List<SermonNote> sermonNotes = const [],
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
   FakeVolunteerAssignmentRepository? assignmentRepo,
@@ -406,6 +433,7 @@ List<Override> fakeOverrides({
     readingPlanRepositoryProvider.overrideWithValue(FakeReadingPlanRepository()..seedInMemory(readingPlans)),
     planProgressRepositoryProvider
         .overrideWithValue(FakePlanProgressRepository()..seedInMemory(planProgress)),
+    sermonNoteRepositoryProvider.overrideWithValue(FakeSermonNoteRepository()..seedInMemory(sermonNotes)),
   ];
 }
 
