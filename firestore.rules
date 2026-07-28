@@ -144,6 +144,27 @@ service cloud.firestore {
       allow read, update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
     }
 
+    // The prayer wall. Members-only to read at all: a request often
+    // names a person or a diagnosis, and that does not belong on a
+    // public page. A member creates their own as `pending` and can never
+    // self-approve; only staff move it to `approved`.
+    match /prayerPosts/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid &&
+        request.resource.data.status == 'pending';
+      allow update, delete: if isStaff();
+    }
+
+    // One record per member per post, under a deterministic id, so a
+    // second tap cannot double-count. A member may only ever create or
+    // remove their own.
+    match /prayerIntercessions/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
     // Announcements are archived so members can browse past ones; the
     // fan-out to individual inboxes is the `notifications` rule above.
     // Nothing is ever edited after sending - a sent announcement is a

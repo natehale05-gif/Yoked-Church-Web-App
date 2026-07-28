@@ -1,0 +1,47 @@
+[
+  {
+    "uid": "local-0",
+    "authorName": "Hannah Brooks",
+    "body": "Starting a new job on Monday after eight months of looking. Grateful, and more nervous than I expected.",
+    "anonymous": false,
+    "status": "approved",
+    "createdAt": "2026-07-26T14:20:00",
+    "moderatedBy": "Sarah Lee"
+  },
+  {
+    "uid": "local-1",
+    "authorName": "",
+    "body": "For my marriage. We are in a hard stretch and I do not have words for it yet.",
+    "anonymous": true,
+    "status": "approved",
+    "createdAt": "2026-07-25T09:05:00",
+    "moderatedBy": "Sarah Lee"
+  },
+  {
+    "uid": "local-1",
+    "authorName": "Dev Patel",
+    "body": "My mother has surgery on Thursday. Praying it is straightforward and that she recovers well at home.",
+    "anonymous": false,
+    "status": "approved",
+    "createdAt": "2026-07-24T18:40:00",
+    "moderatedBy": "John Miller"
+  },
+  {
+    "uid": "local-0",
+    "authorName": "Hannah Brooks",
+    "body": "For our small group as we start the Yoked study - that it would go past the surface.",
+    "anonymous": false,
+    "status": "pending",
+    "createdAt": "2026-07-28T08:15:00",
+    "moderatedBy": ""
+  },
+  {
+    "uid": "local-1",
+    "authorName": "",
+    "body": "This one is waiting for review, and demonstrates the moderation queue.",
+    "anonymous": true,
+    "status": "pending",
+    "createdAt": "2026-07-27T21:30:00",
+    "moderatedBy": ""
+  }
+]

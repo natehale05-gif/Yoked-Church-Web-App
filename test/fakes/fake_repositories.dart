@@ -41,6 +41,9 @@ import 'package:yoked_church_app/features/notifications/application/notification
 import 'package:yoked_church_app/features/notifications/data/notification_repository.dart';
 import 'package:yoked_church_app/features/notifications/domain/app_notification.dart';
 import 'package:yoked_church_app/core/storage/file_storage.dart';
+import 'package:yoked_church_app/features/prayer_wall/application/prayer_providers.dart';
+import 'package:yoked_church_app/features/prayer_wall/data/prayer_repository.dart';
+import 'package:yoked_church_app/features/prayer_wall/domain/prayer_post.dart';
 import 'package:yoked_church_app/features/reading_plans/application/reading_plan_providers.dart';
 import 'package:yoked_church_app/features/reading_plans/data/reading_plan_repository.dart';
 import 'package:yoked_church_app/features/reading_plans/domain/reading_plan.dart';
@@ -405,6 +408,41 @@ class FakeFileStorage implements FileStorage {
   Future<void> deleteAt(String url) async => deleted.add(url);
 }
 
+class FakePrayerPostRepository extends LocalCrudRepository<PrayerPost> implements PrayerPostRepository {
+  @override
+  PrayerPost fromMap(String id, Map<String, dynamic> map) => PrayerPost.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(PrayerPost entity) => entity.toMap();
+  @override
+  String idOf(PrayerPost entity) => entity.id;
+  @override
+  int Function(PrayerPost, PrayerPost)? get sorter => (a, b) => b.createdAt.compareTo(a.createdAt);
+}
+
+class FakeIntercessionRepository extends LocalCrudRepository<PrayerIntercession>
+    implements IntercessionRepository {
+  @override
+  PrayerIntercession fromMap(String id, Map<String, dynamic> map) => PrayerIntercession.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(PrayerIntercession entity) => entity.toMap();
+  @override
+  String idOf(PrayerIntercession entity) => entity.id;
+  @override
+  Future<List<PrayerIntercession>> forMember(String uid) => fetchWhere((i) => i.uid == uid);
+  @override
+  Future<List<PrayerIntercession>> forPosts(List<String> ids) => fetchWhere((i) => ids.contains(i.postId));
+  @override
+  Future<void> pray(PrayerIntercession intercession) => update(PrayerIntercession(
+        id: intercessionId(intercession.postId, intercession.uid),
+        postId: intercession.postId,
+        uid: intercession.uid,
+        prayedAt: intercession.prayedAt,
+      ));
+  @override
+  Future<void> unpray({required String postId, required String uid}) =>
+      delete(intercessionId(postId, uid));
+}
+
 class FakeAuditRepository extends LocalCrudRepository<AuditEntry> implements AuditRepository {
   @override
   AuditEntry fromMap(String id, Map<String, dynamic> map) => AuditEntry.fromMap(id, map);
@@ -441,6 +479,8 @@ List<Override> fakeOverrides({
   List<PlanProgress> planProgress = const [],
   List<SermonNote> sermonNotes = const [],
   List<Resource> resources = const [],
+  List<PrayerPost> prayerPosts = const [],
+  List<PrayerIntercession> intercessions = const [],
   FakeFileStorage? storage,
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
@@ -483,6 +523,9 @@ List<Override> fakeOverrides({
     sermonNoteRepositoryProvider.overrideWithValue(FakeSermonNoteRepository()..seedInMemory(sermonNotes)),
     resourceRepositoryProvider.overrideWithValue(FakeResourceRepository()..seedInMemory(resources)),
     fileStorageProvider.overrideWithValue(storage ?? FakeFileStorage()),
+    prayerPostRepositoryProvider.overrideWithValue(FakePrayerPostRepository()..seedInMemory(prayerPosts)),
+    intercessionRepositoryProvider
+        .overrideWithValue(FakeIntercessionRepository()..seedInMemory(intercessions)),
   ];
 }
 

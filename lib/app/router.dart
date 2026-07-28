@@ -15,6 +15,7 @@ import '../features/account/presentation/my_notes_screen.dart';
 import '../features/account/presentation/my_reading_screen.dart';
 import '../features/account/presentation/my_volunteering_screen.dart';
 import '../features/account/presentation/notifications_screen.dart';
+import '../features/account/presentation/prayer_wall_screen.dart';
 import '../features/account/presentation/profile_screen.dart';
 import '../features/admin/presentation/admin_home_screen.dart';
 import '../features/admin/presentation/announcements_admin_screen.dart';
@@ -25,6 +26,7 @@ import '../features/admin/presentation/events_admin_screen.dart';
 import '../features/admin/presentation/groups_admin_screen.dart';
 import '../features/admin/presentation/members_admin_screen.dart';
 import '../features/admin/presentation/reading_plans_admin_screen.dart';
+import '../features/admin/presentation/prayer_admin_screen.dart';
 import '../features/admin/presentation/resources_admin_screen.dart';
 import '../features/admin/presentation/sermons_admin_screen.dart';
 import '../features/admin/presentation/settings_admin_screen.dart';
@@ -66,6 +68,7 @@ bool _flagAllows(FeatureFlags flags, String path) {
     return flags.readingPlans;
   }
   if (owns('/resources') || owns('/admin/resources')) return flags.resources;
+  if (owns('/account/prayer') || owns('/admin/prayer')) return flags.prayerWall;
   return true;
 }
 
@@ -142,6 +145,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/account/giving', builder: (_, _) => const GivingHistoryScreen()),
           GoRoute(path: '/account/reading', builder: (_, _) => const MyReadingScreen()),
           GoRoute(path: '/account/notes', builder: (_, _) => const MyNotesScreen()),
+          GoRoute(path: '/account/prayer', builder: (_, _) => const PrayerWallScreen()),
           GoRoute(path: '/account/notifications', builder: (_, _) => const NotificationsScreen()),
 
           GoRoute(path: '/admin', builder: (_, _) => const AdminHomeScreen()),
@@ -154,6 +158,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/devotionals', builder: (_, _) => const DevotionalsAdminScreen()),
           GoRoute(path: '/admin/reading-plans', builder: (_, _) => const ReadingPlansAdminScreen()),
           GoRoute(path: '/admin/resources', builder: (_, _) => const ResourcesAdminScreen()),
+          GoRoute(path: '/admin/prayer', builder: (_, _) => const PrayerAdminScreen()),
           GoRoute(path: '/admin/members', builder: (_, _) => const MembersAdminScreen()),
           GoRoute(path: '/admin/settings', builder: (_, _) => const SettingsAdminScreen()),
           GoRoute(path: '/admin/audit', builder: (_, _) => const AuditAdminScreen()),

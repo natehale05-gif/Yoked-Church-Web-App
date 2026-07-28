@@ -8,6 +8,7 @@ import '../../../core/widgets/section_container.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../connect/application/connect_providers.dart';
 import '../../groups/application/group_providers.dart';
+import '../../prayer_wall/application/prayer_providers.dart';
 import '../../groups/domain/group.dart';
 import '../../volunteering/application/volunteering_providers.dart';
 import '../../volunteering/domain/volunteering.dart';
@@ -82,13 +83,22 @@ class _NeedsAttention extends ConsumerWidget {
         .where((a) => a.status == AssignmentStatus.pending)
         .length;
 
+    final flags = ref.watch(featureFlagsProvider);
+
     return Wrap(
       spacing: 16,
       runSpacing: 16,
       children: [
-        _Stat(label: 'Open messages', value: openSubmissions, path: '/admin/connect'),
-        _Stat(label: 'Group requests', value: pendingGroups, path: '/admin/groups'),
-        _Stat(label: 'Volunteer requests', value: pendingVolunteers, path: '/admin/volunteering'),
+        if (flags.connect) _Stat(label: 'Open messages', value: openSubmissions, path: '/admin/connect'),
+        if (flags.groups) _Stat(label: 'Group requests', value: pendingGroups, path: '/admin/groups'),
+        if (flags.volunteering)
+          _Stat(label: 'Volunteer requests', value: pendingVolunteers, path: '/admin/volunteering'),
+        if (flags.prayerWall)
+          _Stat(
+            label: 'Prayer requests',
+            value: ref.watch(pendingPrayerCountProvider),
+            path: '/admin/prayer',
+          ),
       ],
     );
   }
