@@ -406,6 +406,7 @@ class AppFooter extends ConsumerWidget {
               if (social.facebook.isNotEmpty) _SocialLink(icon: Icons.facebook, url: social.facebook),
               if (social.instagram.isNotEmpty) _SocialLink(icon: Icons.camera_alt_outlined, url: social.instagram),
               if (social.youtube.isNotEmpty) _SocialLink(icon: Icons.play_circle_outline, url: social.youtube),
+              if (social.podcastUrl.isNotEmpty) _SocialLink(icon: Icons.podcasts, url: social.podcastUrl),
             ],
           ),
           const SizedBox(height: 20),

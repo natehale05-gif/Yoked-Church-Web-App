@@ -22,7 +22,8 @@
     "instagram": "https://instagram.com/yokedchurch",
     "youtube": "https://youtube.com/@yokedchurch",
     "givingUrl": "https://tithe.ly/give?c=yokedchurch",
-    "liveStreamUrl": "https://www.youtube.com/@yokedchurch/live"
+    "liveStreamUrl": "https://www.youtube.com/@yokedchurch/live",
+    "podcastUrl": "https://podcasts.example.org/yoked-church/feed.xml"
   },
   "serviceTimes": [
     { "day": "Sunday", "time": "9:00 AM", "label": "Traditional Service" },

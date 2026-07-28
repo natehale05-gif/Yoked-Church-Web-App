@@ -192,12 +192,19 @@ class SocialLinks {
   final String givingUrl;
   final String liveStreamUrl;
 
+  /// An existing feed on Anchor, Buzzsprout, Spotify, wherever. A
+  /// podcast feed has to be static XML at a fixed URL that Apple and
+  /// Spotify poll on a schedule; a client-side build on static hosting
+  /// cannot serve one, so this links out rather than pretending.
+  final String podcastUrl;
+
   const SocialLinks({
     required this.facebook,
     required this.instagram,
     required this.youtube,
     required this.givingUrl,
     required this.liveStreamUrl,
+    this.podcastUrl = '',
   });
 
   factory SocialLinks.fromMap(Map<String, dynamic> map) => SocialLinks(
@@ -206,6 +213,7 @@ class SocialLinks {
         youtube: map['youtube'] as String? ?? '',
         givingUrl: map['givingUrl'] as String? ?? '',
         liveStreamUrl: map['liveStreamUrl'] as String? ?? '',
+        podcastUrl: map['podcastUrl'] as String? ?? '',
       );
 
   Map<String, dynamic> toMap() => {
@@ -214,6 +222,7 @@ class SocialLinks {
         'youtube': youtube,
         'givingUrl': givingUrl,
         'liveStreamUrl': liveStreamUrl,
+        'podcastUrl': podcastUrl,
       };
 
   static const SocialLinks fallback =

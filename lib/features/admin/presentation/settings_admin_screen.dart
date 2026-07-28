@@ -48,6 +48,7 @@ class _SettingsAdminScreenState extends ConsumerState<SettingsAdminScreen> {
     _field('youtube', s.social.youtube);
     _field('givingUrl', s.social.givingUrl);
     _field('liveStreamUrl', s.social.liveStreamUrl);
+    _field('podcastUrl', s.social.podcastUrl);
     _colors = s.colors;
     _flags = s.features;
     for (final service in s.serviceTimes) {
@@ -89,6 +90,7 @@ class _SettingsAdminScreenState extends ConsumerState<SettingsAdminScreen> {
           youtube: _text('youtube'),
           givingUrl: _text('givingUrl'),
           liveStreamUrl: _text('liveStreamUrl'),
+          podcastUrl: _text('podcastUrl'),
         ),
         serviceTimes: [
           for (final row in _serviceTimes)
@@ -239,6 +241,7 @@ class _SettingsAdminScreenState extends ConsumerState<SettingsAdminScreen> {
                 children: [
                   _text_('Giving URL', 'givingUrl'),
                   _text_('Live stream URL', 'liveStreamUrl'),
+                  _text_('Podcast feed URL', 'podcastUrl'),
                   _text_('Facebook', 'facebook'),
                   _text_('Instagram', 'instagram'),
                   _text_('YouTube', 'youtube'),

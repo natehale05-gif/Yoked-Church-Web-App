@@ -18,22 +18,39 @@ class SermonsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final liveUrl = settings.social.liveStreamUrl;
+    final podcastUrl = settings.social.podcastUrl;
+
+    final onWhite = OutlinedButton.styleFrom(
+      foregroundColor: Colors.white,
+      side: const BorderSide(color: Colors.white70),
+    );
 
     return PageBody(
       children: [
         PageBanner(
           title: 'Sermons',
           subtitle: 'Catch up on past messages or watch this week live.',
-          action: liveUrl.isEmpty
+          action: (liveUrl.isEmpty && podcastUrl.isEmpty)
               ? null
-              : OutlinedButton.icon(
-                  onPressed: () => launchUrl(Uri.parse(liveUrl), webOnlyWindowName: '_blank'),
-                  icon: const Icon(Icons.live_tv, color: Colors.white),
-                  label: const Text('Watch Live'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.white70),
-                  ),
+              : Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    if (liveUrl.isNotEmpty)
+                      OutlinedButton.icon(
+                        onPressed: () => launchUrl(Uri.parse(liveUrl), webOnlyWindowName: '_blank'),
+                        icon: const Icon(Icons.live_tv, color: Colors.white),
+                        label: const Text('Watch Live'),
+                        style: onWhite,
+                      ),
+                    if (podcastUrl.isNotEmpty)
+                      OutlinedButton.icon(
+                        onPressed: () => launchUrl(Uri.parse(podcastUrl), webOnlyWindowName: '_blank'),
+                        icon: const Icon(Icons.podcasts, color: Colors.white),
+                        label: const Text('Listen on your podcast app'),
+                        style: onWhite,
+                      ),
+                  ],
                 ),
         ),
         SectionContainer(
