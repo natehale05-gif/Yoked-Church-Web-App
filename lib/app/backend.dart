@@ -25,6 +25,8 @@ import '../features/groups/application/group_providers.dart';
 import '../features/groups/data/group_repository.dart';
 import '../features/notifications/application/notification_providers.dart';
 import '../features/notifications/data/notification_repository.dart';
+import '../features/reading_plans/application/reading_plan_providers.dart';
+import '../features/reading_plans/data/reading_plan_repository.dart';
 import '../features/sermons/application/sermon_providers.dart';
 import '../features/sermons/data/sermon_repository.dart';
 import '../features/volunteering/application/volunteering_providers.dart';
@@ -69,6 +71,8 @@ List<Override> localOverrides() {
       announcementRepositoryProvider.overrideWithValue(LocalAnnouncementRepository()),
       auditRepositoryProvider.overrideWithValue(LocalAuditRepository()),
       devotionalRepositoryProvider.overrideWithValue(LocalDevotionalRepository()),
+      readingPlanRepositoryProvider.overrideWithValue(LocalReadingPlanRepository()),
+      planProgressRepositoryProvider.overrideWithValue(LocalPlanProgressRepository()),
     ];
 }
 
@@ -94,6 +98,8 @@ List<Override> firestoreOverrides() => [
       announcementRepositoryProvider.overrideWithValue(FirestoreAnnouncementRepository()),
       auditRepositoryProvider.overrideWithValue(FirestoreAuditRepository()),
       devotionalRepositoryProvider.overrideWithValue(FirestoreDevotionalRepository()),
+      readingPlanRepositoryProvider.overrideWithValue(FirestoreReadingPlanRepository()),
+      planProgressRepositoryProvider.overrideWithValue(FirestorePlanProgressRepository()),
     ];
 
 List<Override> overridesFor(Backend backend) =>

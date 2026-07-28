@@ -11,6 +11,7 @@ import '../features/account/presentation/directory_screen.dart';
 import '../features/account/presentation/giving_history_screen.dart';
 import '../features/account/presentation/my_events_screen.dart';
 import '../features/account/presentation/my_groups_screen.dart';
+import '../features/account/presentation/my_reading_screen.dart';
 import '../features/account/presentation/my_volunteering_screen.dart';
 import '../features/account/presentation/notifications_screen.dart';
 import '../features/account/presentation/profile_screen.dart';
@@ -22,6 +23,7 @@ import '../features/admin/presentation/devotionals_admin_screen.dart';
 import '../features/admin/presentation/events_admin_screen.dart';
 import '../features/admin/presentation/groups_admin_screen.dart';
 import '../features/admin/presentation/members_admin_screen.dart';
+import '../features/admin/presentation/reading_plans_admin_screen.dart';
 import '../features/admin/presentation/sermons_admin_screen.dart';
 import '../features/admin/presentation/settings_admin_screen.dart';
 import '../features/admin/presentation/volunteering_admin_screen.dart';
@@ -37,6 +39,8 @@ import '../features/devotionals/presentation/devotionals_screen.dart';
 import '../features/events/presentation/events_screen.dart';
 import '../features/giving/presentation/giving_screen.dart';
 import '../features/home/presentation/home_screen.dart';
+import '../features/reading_plans/presentation/reading_plan_detail_screen.dart';
+import '../features/reading_plans/presentation/reading_plans_screen.dart';
 import '../features/sermons/presentation/sermon_detail_screen.dart';
 import '../features/sermons/presentation/sermons_screen.dart';
 
@@ -55,6 +59,9 @@ bool _flagAllows(FeatureFlags flags, String path) {
   if (owns('/give')) return flags.giving;
   if (owns('/connect') || owns('/admin/connect')) return flags.connect;
   if (owns('/devotionals') || owns('/admin/devotionals')) return flags.devotionals;
+  if (owns('/reading-plans') || owns('/admin/reading-plans') || owns('/account/reading')) {
+    return flags.readingPlans;
+  }
   return true;
 }
 
@@ -115,6 +122,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/devotionals/:id',
             builder: (_, state) => DevotionalDetailScreen(devotionalId: state.pathParameters['id']!),
           ),
+          GoRoute(path: '/reading-plans', builder: (_, _) => const ReadingPlansScreen()),
+          GoRoute(
+            path: '/reading-plans/:id',
+            builder: (_, state) => ReadingPlanDetailScreen(planId: state.pathParameters['id']!),
+          ),
 
           GoRoute(path: '/account', builder: (_, _) => const AccountHomeScreen()),
           GoRoute(path: '/account/profile', builder: (_, _) => const ProfileScreen()),
@@ -123,6 +135,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/account/volunteering', builder: (_, _) => const MyVolunteeringScreen()),
           GoRoute(path: '/account/directory', builder: (_, _) => const DirectoryScreen()),
           GoRoute(path: '/account/giving', builder: (_, _) => const GivingHistoryScreen()),
+          GoRoute(path: '/account/reading', builder: (_, _) => const MyReadingScreen()),
           GoRoute(path: '/account/notifications', builder: (_, _) => const NotificationsScreen()),
 
           GoRoute(path: '/admin', builder: (_, _) => const AdminHomeScreen()),
@@ -133,6 +146,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/connect', builder: (_, _) => const ConnectAdminScreen()),
           GoRoute(path: '/admin/announcements', builder: (_, _) => const AnnouncementsAdminScreen()),
           GoRoute(path: '/admin/devotionals', builder: (_, _) => const DevotionalsAdminScreen()),
+          GoRoute(path: '/admin/reading-plans', builder: (_, _) => const ReadingPlansAdminScreen()),
           GoRoute(path: '/admin/members', builder: (_, _) => const MembersAdminScreen()),
           GoRoute(path: '/admin/settings', builder: (_, _) => const SettingsAdminScreen()),
           GoRoute(path: '/admin/audit', builder: (_, _) => const AuditAdminScreen()),

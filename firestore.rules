@@ -39,6 +39,19 @@ service cloud.firestore {
       allow write: if isStaff();
     }
 
+    match /readingPlans/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    // A member's progress through a plan. Deliberately not readable by
+    // staff: how far someone got in their Bible reading is between them
+    // and God, and a church has no operational need for it.
+    match /planProgress/{id} {
+      allow read, update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+    }
+
     // Connect page: prayer requests / connect cards. Anyone (including
     // visitors, if this were ever opened up client-side) can submit;
     // only staff can read/manage the inbox.

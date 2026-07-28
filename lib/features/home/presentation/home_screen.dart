@@ -156,6 +156,8 @@ class _QuickLinks extends ConsumerWidget {
       if (flags.events) (icon: Icons.event_outlined, label: 'Events', path: '/events'),
       if (flags.devotionals)
         (icon: Icons.auto_stories_outlined, label: 'Devotionals', path: '/devotionals'),
+      if (flags.readingPlans)
+        (icon: Icons.menu_book_outlined, label: 'Reading Plans', path: '/reading-plans'),
       if (flags.giving) (icon: Icons.favorite_outline, label: 'Give', path: '/give'),
       if (flags.connect) (icon: Icons.mail_outline, label: 'Connect', path: '/connect'),
     ];

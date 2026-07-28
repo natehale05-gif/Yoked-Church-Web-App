@@ -33,6 +33,13 @@ List<AdminTab> adminTabs(FeatureFlags flags) => [
         ),
       if (flags.devotionals)
         (label: 'Devotionals', path: '/admin/devotionals', icon: Icons.auto_stories_outlined, adminOnly: false),
+      if (flags.readingPlans)
+        (
+          label: 'Reading Plans',
+          path: '/admin/reading-plans',
+          icon: Icons.menu_book_outlined,
+          adminOnly: false
+        ),
       if (flags.connect) (label: 'Inbox', path: '/admin/connect', icon: Icons.inbox_outlined, adminOnly: false),
       (label: 'Announcements', path: '/admin/announcements', icon: Icons.campaign_outlined, adminOnly: false),
       (label: 'Members', path: '/admin/members', icon: Icons.people_alt_outlined, adminOnly: true),

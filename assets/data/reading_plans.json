@@ -1,0 +1,48 @@
+[
+  {
+    "title": "Yoked: 7 Days in Matthew 11",
+    "description": "A short week walking slowly through one of the most quoted invitations in Scripture, and the chapter that surrounds it.",
+    "published": true,
+    "days": [
+      { "dayNumber": 1, "reference": "Matthew 11:1-6", "note": "John's question from prison." },
+      { "dayNumber": 2, "reference": "Matthew 11:7-15", "note": "What Jesus says about John." },
+      { "dayNumber": 3, "reference": "Matthew 11:16-19", "note": "The generation that would not dance or mourn." },
+      { "dayNumber": 4, "reference": "Matthew 11:20-24", "note": "Hard words for familiar towns." },
+      { "dayNumber": 5, "reference": "Matthew 11:25-27", "note": "Hidden from the wise, revealed to children." },
+      { "dayNumber": 6, "reference": "Matthew 11:28-30", "note": "The invitation itself. Read it twice." },
+      { "dayNumber": 7, "reference": "Matthew 11", "note": "The whole chapter in one sitting." }
+    ]
+  },
+  {
+    "title": "The Psalms of Ascent",
+    "description": "Fifteen psalms Israel sang walking up to Jerusalem. One a day, for the seasons when you are climbing.",
+    "published": true,
+    "days": [
+      { "dayNumber": 1, "reference": "Psalm 120" },
+      { "dayNumber": 2, "reference": "Psalm 121" },
+      { "dayNumber": 3, "reference": "Psalm 122" },
+      { "dayNumber": 4, "reference": "Psalm 123" },
+      { "dayNumber": 5, "reference": "Psalm 124" },
+      { "dayNumber": 6, "reference": "Psalm 125" },
+      { "dayNumber": 7, "reference": "Psalm 126" },
+      { "dayNumber": 8, "reference": "Psalm 127" },
+      { "dayNumber": 9, "reference": "Psalm 128" },
+      { "dayNumber": 10, "reference": "Psalm 129" },
+      { "dayNumber": 11, "reference": "Psalm 130" },
+      { "dayNumber": 12, "reference": "Psalm 131" },
+      { "dayNumber": 13, "reference": "Psalm 132" },
+      { "dayNumber": 14, "reference": "Psalm 133" },
+      { "dayNumber": 15, "reference": "Psalm 134" }
+    ]
+  },
+  {
+    "title": "Advent: Waiting Well",
+    "description": "A draft plan for December. Unpublished, so it shows in the staff list but not to members.",
+    "published": false,
+    "days": [
+      { "dayNumber": 1, "reference": "Isaiah 9:2-7" },
+      { "dayNumber": 2, "reference": "Micah 5:2-5" },
+      { "dayNumber": 3, "reference": "Luke 1:26-38" }
+    ]
+  }
+]

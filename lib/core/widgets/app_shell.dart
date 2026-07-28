@@ -11,22 +11,42 @@ import '../config/settings_providers.dart';
 
 class NavDestination {
   final String label;
-  final String path;
 
-  const NavDestination(this.label, this.path);
+  /// Empty for a group heading, which navigates nowhere itself.
+  final String path;
+  final List<NavDestination> children;
+
+  const NavDestination(this.label, this.path, {this.children = const []});
+
+  bool get isGroup => children.isNotEmpty;
+
+  /// True when this entry, or anything under it, is the open page.
+  bool covers(String currentPath) =>
+      path == currentPath || children.any((child) => child.path == currentPath);
 }
 
 /// Primary nav is derived from feature flags, so a church that turns off
 /// (say) sermons never sees a dead link.
-List<NavDestination> primaryNav(FeatureFlags flags) => [
-      const NavDestination('Home', '/'),
-      if (flags.sermons) const NavDestination('Sermons', '/sermons'),
-      if (flags.events) const NavDestination('Events', '/events'),
-      if (flags.devotionals) const NavDestination('Devotionals', '/devotionals'),
-      const NavDestination('About', '/about'),
-      const NavDestination('Visit', '/visit'),
-      if (flags.connect) const NavDestination('Connect', '/connect'),
-    ];
+///
+/// The discipleship sections are grouped under one menu rather than laid
+/// out flat: a church running all of them would otherwise push the bar
+/// to eight top-level links, and they read as one area anyway.
+List<NavDestination> primaryNav(FeatureFlags flags) {
+  final grow = <NavDestination>[
+    if (flags.devotionals) const NavDestination('Devotionals', '/devotionals'),
+    if (flags.readingPlans) const NavDestination('Reading Plans', '/reading-plans'),
+  ];
+
+  return [
+    const NavDestination('Home', '/'),
+    if (flags.sermons) const NavDestination('Sermons', '/sermons'),
+    if (flags.events) const NavDestination('Events', '/events'),
+    if (grow.isNotEmpty) NavDestination('Grow', '', children: grow),
+    const NavDestination('About', '/about'),
+    const NavDestination('Visit', '/visit'),
+    if (flags.connect) const NavDestination('Connect', '/connect'),
+  ];
+}
 
 /// Wraps every public page with the shared nav bar.
 ///
@@ -111,7 +131,7 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
                           for (final destination in destinations)
                             _NavLink(
                               destination: destination,
-                              selected: currentPath == destination.path,
+                              selected: destination.covers(currentPath),
                               color: settings.colors,
                             ),
                         ],
@@ -158,8 +178,14 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // The sheet has room to be flat, so groups are shown
+                  // expanded rather than as a nested menu.
                   for (final destination in destinations)
-                    ListTile(title: Text(destination.label), onTap: () => go(destination.path)),
+                    if (destination.isGroup)
+                      for (final child in destination.children)
+                        ListTile(title: Text(child.label), onTap: () => go(child.path))
+                    else
+                      ListTile(title: Text(destination.label), onTap: () => go(destination.path)),
                   const Divider(height: 1),
                   if (user == null)
                     ListTile(
@@ -315,13 +341,35 @@ class _NavLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final style = TextStyle(fontWeight: selected ? FontWeight.w700 : FontWeight.w500);
+    final foreground = selected ? color.accent : color.primary;
+
+    if (destination.isGroup) {
+      return PopupMenuButton<String>(
+        tooltip: destination.label,
+        offset: const Offset(0, 44),
+        onSelected: context.go,
+        itemBuilder: (context) => [
+          for (final child in destination.children)
+            PopupMenuItem(value: child.path, child: Text(child.label)),
+        ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(destination.label, style: style.copyWith(color: foreground)),
+              Icon(Icons.arrow_drop_down, size: 20, color: foreground),
+            ],
+          ),
+        ),
+      );
+    }
+
     return TextButton(
       onPressed: () => context.go(destination.path),
-      style: TextButton.styleFrom(foregroundColor: selected ? color.accent : color.primary),
-      child: Text(
-        destination.label,
-        style: TextStyle(fontWeight: selected ? FontWeight.w700 : FontWeight.w500),
-      ),
+      style: TextButton.styleFrom(foregroundColor: foreground),
+      child: Text(destination.label, style: style),
     );
   }
 }

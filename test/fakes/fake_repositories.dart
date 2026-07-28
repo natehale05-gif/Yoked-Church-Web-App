@@ -39,6 +39,9 @@ import 'package:yoked_church_app/features/groups/domain/group.dart';
 import 'package:yoked_church_app/features/notifications/application/notification_providers.dart';
 import 'package:yoked_church_app/features/notifications/data/notification_repository.dart';
 import 'package:yoked_church_app/features/notifications/domain/app_notification.dart';
+import 'package:yoked_church_app/features/reading_plans/application/reading_plan_providers.dart';
+import 'package:yoked_church_app/features/reading_plans/data/reading_plan_repository.dart';
+import 'package:yoked_church_app/features/reading_plans/domain/reading_plan.dart';
 import 'package:yoked_church_app/features/sermons/application/sermon_providers.dart';
 import 'package:yoked_church_app/features/sermons/data/sermon_repository.dart';
 import 'package:yoked_church_app/features/sermons/domain/sermon.dart';
@@ -299,6 +302,38 @@ class FakeDevotionalRepository extends LocalCrudRepository<Devotional> implement
   int Function(Devotional, Devotional)? get sorter => (a, b) => b.publishDate.compareTo(a.publishDate);
 }
 
+class FakeReadingPlanRepository extends LocalCrudRepository<ReadingPlan> implements ReadingPlanRepository {
+  @override
+  ReadingPlan fromMap(String id, Map<String, dynamic> map) => ReadingPlan.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(ReadingPlan entity) => entity.toMap();
+  @override
+  String idOf(ReadingPlan entity) => entity.id;
+  @override
+  int Function(ReadingPlan, ReadingPlan)? get sorter => (a, b) => a.title.compareTo(b.title);
+}
+
+class FakePlanProgressRepository extends LocalCrudRepository<PlanProgress>
+    implements PlanProgressRepository {
+  @override
+  PlanProgress fromMap(String id, Map<String, dynamic> map) => PlanProgress.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(PlanProgress entity) => entity.toMap();
+  @override
+  String idOf(PlanProgress entity) => entity.id;
+  @override
+  Future<List<PlanProgress>> forMember(String uid) => fetchWhere((p) => p.uid == uid);
+  @override
+  Future<void> setProgress(PlanProgress progress) => update(PlanProgress(
+        id: progressId(progress.planId, progress.uid),
+        uid: progress.uid,
+        planId: progress.planId,
+        completedDays: progress.completedDays,
+        startedAt: progress.startedAt,
+        lastReadAt: progress.lastReadAt,
+      ));
+}
+
 class FakeAuditRepository extends LocalCrudRepository<AuditEntry> implements AuditRepository {
   @override
   AuditEntry fromMap(String id, Map<String, dynamic> map) => AuditEntry.fromMap(id, map);
@@ -331,6 +366,8 @@ List<Override> fakeOverrides({
   List<GivingRecord> giving = const [],
   List<AppUser> members = const [],
   List<Devotional> devotionals = const [],
+  List<ReadingPlan> readingPlans = const [],
+  List<PlanProgress> planProgress = const [],
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
   FakeVolunteerAssignmentRepository? assignmentRepo,
@@ -366,8 +403,28 @@ List<Override> fakeOverrides({
         .overrideWithValue(FakeAnnouncementRepository()..seedInMemory(const [])),
     auditRepositoryProvider.overrideWithValue(FakeAuditRepository()..seedInMemory(const [])),
     devotionalRepositoryProvider.overrideWithValue(FakeDevotionalRepository()..seedInMemory(devotionals)),
+    readingPlanRepositoryProvider.overrideWithValue(FakeReadingPlanRepository()..seedInMemory(readingPlans)),
+    planProgressRepositoryProvider
+        .overrideWithValue(FakePlanProgressRepository()..seedInMemory(planProgress)),
   ];
 }
+
+ReadingPlan testPlan({
+  String id = 'p1',
+  String title = 'Test Plan',
+  String description = 'A plan for testing.',
+  int days = 3,
+  bool published = true,
+}) =>
+    ReadingPlan(
+      id: id,
+      title: title,
+      description: description,
+      published: published,
+      days: [
+        for (var i = 1; i <= days; i++) ReadingDay(dayNumber: i, reference: 'John $i:1-10'),
+      ],
+    );
 
 Devotional testDevotional({
   String id = 'd1',
