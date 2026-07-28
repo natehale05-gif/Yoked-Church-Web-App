@@ -12,6 +12,7 @@ import '../features/account/presentation/giving_history_screen.dart';
 import '../features/account/presentation/my_bookings_screen.dart';
 import '../features/account/presentation/my_events_screen.dart';
 import '../features/account/presentation/my_groups_screen.dart';
+import '../features/account/presentation/my_kids_screen.dart';
 import '../features/account/presentation/my_notes_screen.dart';
 import '../features/account/presentation/my_reading_screen.dart';
 import '../features/account/presentation/my_volunteering_screen.dart';
@@ -25,6 +26,7 @@ import '../features/admin/presentation/connect_admin_screen.dart';
 import '../features/admin/presentation/devotionals_admin_screen.dart';
 import '../features/admin/presentation/events_admin_screen.dart';
 import '../features/admin/presentation/groups_admin_screen.dart';
+import '../features/admin/presentation/kids_admin_screen.dart';
 import '../features/admin/presentation/members_admin_screen.dart';
 import '../features/admin/presentation/reading_plans_admin_screen.dart';
 import '../features/admin/presentation/prayer_admin_screen.dart';
@@ -72,6 +74,7 @@ bool _flagAllows(FeatureFlags flags, String path) {
   if (owns('/resources') || owns('/admin/resources')) return flags.resources;
   if (owns('/account/prayer') || owns('/admin/prayer')) return flags.prayerWall;
   if (owns('/account/bookings') || owns('/admin/rooms')) return flags.roomBooking;
+  if (owns('/account/kids') || owns('/admin/kids')) return flags.kidsCheckIn;
   return true;
 }
 
@@ -150,6 +153,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/account/notes', builder: (_, _) => const MyNotesScreen()),
           GoRoute(path: '/account/prayer', builder: (_, _) => const PrayerWallScreen()),
           GoRoute(path: '/account/bookings', builder: (_, _) => const MyBookingsScreen()),
+          GoRoute(path: '/account/kids', builder: (_, _) => const MyKidsScreen()),
           GoRoute(path: '/account/notifications', builder: (_, _) => const NotificationsScreen()),
 
           GoRoute(path: '/admin', builder: (_, _) => const AdminHomeScreen()),
@@ -164,6 +168,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/resources', builder: (_, _) => const ResourcesAdminScreen()),
           GoRoute(path: '/admin/prayer', builder: (_, _) => const PrayerAdminScreen()),
           GoRoute(path: '/admin/rooms', builder: (_, _) => const RoomsAdminScreen()),
+          GoRoute(path: '/admin/kids', builder: (_, _) => const KidsAdminScreen()),
           GoRoute(path: '/admin/members', builder: (_, _) => const MembersAdminScreen()),
           GoRoute(path: '/admin/settings', builder: (_, _) => const SettingsAdminScreen()),
           GoRoute(path: '/admin/audit', builder: (_, _) => const AuditAdminScreen()),

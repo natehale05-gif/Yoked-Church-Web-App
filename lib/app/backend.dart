@@ -24,6 +24,8 @@ import '../features/giving/application/giving_providers.dart';
 import '../features/giving/data/giving_repository.dart';
 import '../features/groups/application/group_providers.dart';
 import '../features/groups/data/group_repository.dart';
+import '../features/kids/application/check_in_providers.dart';
+import '../features/kids/data/check_in_repository.dart';
 import '../features/notifications/application/notification_providers.dart';
 import '../features/notifications/data/notification_repository.dart';
 import '../features/prayer_wall/application/prayer_providers.dart';
@@ -86,6 +88,7 @@ List<Override> localOverrides() {
       resourceRepositoryProvider.overrideWithValue(LocalResourceRepository()),
       fileStorageProvider.overrideWithValue(const UnavailableFileStorage()),
       roomRepositoryProvider.overrideWithValue(LocalRoomRepository()),
+      checkInRepositoryProvider.overrideWithValue(LocalCheckInRepository()),
       bookingRepositoryProvider.overrideWithValue(LocalBookingRepository()),
       prayerPostRepositoryProvider.overrideWithValue(LocalPrayerPostRepository()),
       intercessionRepositoryProvider.overrideWithValue(LocalIntercessionRepository()),
@@ -120,6 +123,7 @@ List<Override> firestoreOverrides() => [
       resourceRepositoryProvider.overrideWithValue(FirestoreResourceRepository()),
       fileStorageProvider.overrideWithValue(FirebaseFileStorage()),
       roomRepositoryProvider.overrideWithValue(FirestoreRoomRepository()),
+      checkInRepositoryProvider.overrideWithValue(FirestoreCheckInRepository()),
       bookingRepositoryProvider.overrideWithValue(FirestoreBookingRepository()),
       prayerPostRepositoryProvider.overrideWithValue(FirestorePrayerPostRepository()),
       intercessionRepositoryProvider.overrideWithValue(FirestoreIntercessionRepository()),

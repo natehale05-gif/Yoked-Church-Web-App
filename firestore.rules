@@ -149,6 +149,19 @@ service cloud.firestore {
       allow write: if isStaff();
     }
 
+    // Kids check-in. A guardian may read their own children's sessions,
+    // so the pickup code is on their phone - and nobody else's. Only
+    // staff at the desk create or release, because releasing is the act
+    // of handing over a child.
+    //
+    // Codes are short by necessity: a parent reads one aloud at a desk.
+    // The protection is this rule plus single use, not the code's
+    // entropy.
+    match /checkIns/{id} {
+      allow read: if isStaff() || (isSignedIn() && resource.data.guardianUid == request.auth.uid);
+      allow write: if isStaff();
+    }
+
     // A member files their own request as `pending` and can withdraw it.
     // Only staff can approve - approving is what actually holds the
     // room, so self-approval would make the conflict check meaningless.

@@ -51,6 +51,8 @@ List<AdminTab> adminTabs(FeatureFlags flags) => [
         ),
       if (flags.roomBooking)
         (label: 'Rooms', path: '/admin/rooms', icon: Icons.meeting_room_outlined, adminOnly: false),
+      if (flags.kidsCheckIn)
+        (label: 'Kids', path: '/admin/kids', icon: Icons.child_care_outlined, adminOnly: false),
       if (flags.connect) (label: 'Inbox', path: '/admin/connect', icon: Icons.inbox_outlined, adminOnly: false),
       (label: 'Announcements', path: '/admin/announcements', icon: Icons.campaign_outlined, adminOnly: false),
       (label: 'Members', path: '/admin/members', icon: Icons.people_alt_outlined, adminOnly: true),

@@ -37,6 +37,9 @@ import 'package:yoked_church_app/features/giving/domain/giving_record.dart';
 import 'package:yoked_church_app/features/groups/application/group_providers.dart';
 import 'package:yoked_church_app/features/groups/data/group_repository.dart';
 import 'package:yoked_church_app/features/groups/domain/group.dart';
+import 'package:yoked_church_app/features/kids/application/check_in_providers.dart';
+import 'package:yoked_church_app/features/kids/data/check_in_repository.dart';
+import 'package:yoked_church_app/features/kids/domain/check_in.dart';
 import 'package:yoked_church_app/features/notifications/application/notification_providers.dart';
 import 'package:yoked_church_app/features/notifications/data/notification_repository.dart';
 import 'package:yoked_church_app/features/notifications/domain/app_notification.dart';
@@ -472,6 +475,22 @@ class FakeBookingRepository extends LocalCrudRepository<RoomBooking> implements 
   Future<List<RoomBooking>> forRoom(String roomId) => fetchWhere((b) => b.roomId == roomId);
 }
 
+class FakeCheckInRepository extends LocalCrudRepository<CheckInSession> implements CheckInRepository {
+  @override
+  CheckInSession fromMap(String id, Map<String, dynamic> map) => CheckInSession.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(CheckInSession entity) => entity.toMap();
+  @override
+  String idOf(CheckInSession entity) => entity.id;
+  @override
+  int Function(CheckInSession, CheckInSession)? get sorter =>
+      (a, b) => b.checkedInAt.compareTo(a.checkedInAt);
+  @override
+  Future<List<CheckInSession>> forGuardian(String uid) => fetchWhere((s) => s.guardianUid == uid);
+  @override
+  Future<List<CheckInSession>> forRoom(String roomId) => fetchWhere((s) => s.roomId == roomId);
+}
+
 class FakeAuditRepository extends LocalCrudRepository<AuditEntry> implements AuditRepository {
   @override
   AuditEntry fromMap(String id, Map<String, dynamic> map) => AuditEntry.fromMap(id, map);
@@ -512,6 +531,7 @@ List<Override> fakeOverrides({
   List<PrayerIntercession> intercessions = const [],
   List<Room> rooms = const [],
   List<RoomBooking> bookings = const [],
+  List<CheckInSession> checkIns = const [],
   FakeFileStorage? storage,
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
@@ -559,6 +579,7 @@ List<Override> fakeOverrides({
         .overrideWithValue(FakeIntercessionRepository()..seedInMemory(intercessions)),
     roomRepositoryProvider.overrideWithValue(FakeRoomRepository()..seedInMemory(rooms)),
     bookingRepositoryProvider.overrideWithValue(FakeBookingRepository()..seedInMemory(bookings)),
+    checkInRepositoryProvider.overrideWithValue(FakeCheckInRepository()..seedInMemory(checkIns)),
   ];
 }
 

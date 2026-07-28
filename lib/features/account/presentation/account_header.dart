@@ -28,6 +28,7 @@ class AccountHeader extends ConsumerWidget {
       if (flags.sermons) (label: 'My Notes', path: '/account/notes'),
       if (flags.prayerWall) (label: 'Prayer', path: '/account/prayer'),
       if (flags.roomBooking) (label: 'Bookings', path: '/account/bookings'),
+      if (flags.kidsCheckIn) (label: 'Kids', path: '/account/kids'),
       (label: 'Directory', path: '/account/directory'),
       if (flags.giving) (label: 'Giving', path: '/account/giving'),
       (label: 'Notifications', path: '/account/notifications'),

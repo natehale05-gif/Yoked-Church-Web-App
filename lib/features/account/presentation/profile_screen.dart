@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/section_container.dart';
@@ -111,6 +112,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           rows: _household,
                           onAdd: () => setState(() => _household.add(_HouseholdRow.empty())),
                           onRemove: (i) => setState(() => _household.removeAt(i).dispose()),
+                          onBirthDate: (i, date) => setState(() => _household[i].birthDate = date),
                         ),
                         const SizedBox(height: 32),
                         Text('Privacy', style: Theme.of(context).textTheme.titleLarge),
@@ -168,8 +170,14 @@ class _Household extends StatelessWidget {
   final List<_HouseholdRow> rows;
   final VoidCallback onAdd;
   final void Function(int index) onRemove;
+  final void Function(int index, DateTime? birthDate) onBirthDate;
 
-  const _Household({required this.rows, required this.onAdd, required this.onRemove});
+  const _Household({
+    required this.rows,
+    required this.onAdd,
+    required this.onRemove,
+    required this.onBirthDate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -203,6 +211,45 @@ class _Household extends StatelessWidget {
                     decoration: const InputDecoration(labelText: 'Relationship'),
                   ),
                 ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: InkWell(
+                    onTap: () async {
+                      final existing = rows[i].birthDate;
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: existing ?? DateTime(DateTime.now().year - 6),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now(),
+                        helpText: 'Date of birth',
+                      );
+                      if (picked != null) onBirthDate(i, picked);
+                    },
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'Date of birth',
+                        // Only children need one, and saying so keeps
+                        // adults from wondering whether it is required.
+                        helperText: 'For kids check-in',
+                        suffixIcon: rows[i].birthDate == null
+                            ? const Icon(Icons.calendar_today_outlined, size: 18)
+                            : IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                tooltip: 'Clear',
+                                onPressed: () => onBirthDate(i, null),
+                              ),
+                      ),
+                      child: Text(
+                        rows[i].birthDate == null
+                            ? 'Optional'
+                            : DateFormat.yMMMd().format(rows[i].birthDate!),
+                        style: TextStyle(
+                          color: rows[i].birthDate == null ? Colors.black45 : Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 IconButton(
                   onPressed: () => onRemove(i),
                   icon: const Icon(Icons.delete_outline),
@@ -224,7 +271,11 @@ class _Household extends StatelessWidget {
 class _HouseholdRow {
   final TextEditingController name;
   final TextEditingController relationship;
-  final DateTime? birthDate;
+
+  /// Mutable: the field existed from the start but nothing could set it,
+  /// so no parent could record a child's age and kids check-in had
+  /// nothing to show a volunteer.
+  DateTime? birthDate;
 
   _HouseholdRow({required this.name, required this.relationship, this.birthDate});
 
