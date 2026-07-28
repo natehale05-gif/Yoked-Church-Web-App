@@ -50,6 +50,9 @@ import 'package:yoked_church_app/features/reading_plans/domain/reading_plan.dart
 import 'package:yoked_church_app/features/resources/application/resource_providers.dart';
 import 'package:yoked_church_app/features/resources/data/resource_repository.dart';
 import 'package:yoked_church_app/features/resources/domain/resource.dart';
+import 'package:yoked_church_app/features/rooms/application/room_providers.dart';
+import 'package:yoked_church_app/features/rooms/data/room_repository.dart';
+import 'package:yoked_church_app/features/rooms/domain/room.dart';
 import 'package:yoked_church_app/features/sermon_notes/application/sermon_note_providers.dart';
 import 'package:yoked_church_app/features/sermon_notes/data/sermon_note_repository.dart';
 import 'package:yoked_church_app/features/sermon_notes/domain/sermon_note.dart';
@@ -443,6 +446,32 @@ class FakeIntercessionRepository extends LocalCrudRepository<PrayerIntercession>
       delete(intercessionId(postId, uid));
 }
 
+class FakeRoomRepository extends LocalCrudRepository<Room> implements RoomRepository {
+  @override
+  Room fromMap(String id, Map<String, dynamic> map) => Room.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(Room entity) => entity.toMap();
+  @override
+  String idOf(Room entity) => entity.id;
+  @override
+  int Function(Room, Room)? get sorter => (a, b) => a.name.compareTo(b.name);
+}
+
+class FakeBookingRepository extends LocalCrudRepository<RoomBooking> implements BookingRepository {
+  @override
+  RoomBooking fromMap(String id, Map<String, dynamic> map) => RoomBooking.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(RoomBooking entity) => entity.toMap();
+  @override
+  String idOf(RoomBooking entity) => entity.id;
+  @override
+  int Function(RoomBooking, RoomBooking)? get sorter => (a, b) => a.start.compareTo(b.start);
+  @override
+  Future<List<RoomBooking>> forMember(String uid) => fetchWhere((b) => b.requestedByUid == uid);
+  @override
+  Future<List<RoomBooking>> forRoom(String roomId) => fetchWhere((b) => b.roomId == roomId);
+}
+
 class FakeAuditRepository extends LocalCrudRepository<AuditEntry> implements AuditRepository {
   @override
   AuditEntry fromMap(String id, Map<String, dynamic> map) => AuditEntry.fromMap(id, map);
@@ -481,6 +510,8 @@ List<Override> fakeOverrides({
   List<Resource> resources = const [],
   List<PrayerPost> prayerPosts = const [],
   List<PrayerIntercession> intercessions = const [],
+  List<Room> rooms = const [],
+  List<RoomBooking> bookings = const [],
   FakeFileStorage? storage,
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
@@ -526,6 +557,8 @@ List<Override> fakeOverrides({
     prayerPostRepositoryProvider.overrideWithValue(FakePrayerPostRepository()..seedInMemory(prayerPosts)),
     intercessionRepositoryProvider
         .overrideWithValue(FakeIntercessionRepository()..seedInMemory(intercessions)),
+    roomRepositoryProvider.overrideWithValue(FakeRoomRepository()..seedInMemory(rooms)),
+    bookingRepositoryProvider.overrideWithValue(FakeBookingRepository()..seedInMemory(bookings)),
   ];
 }
 

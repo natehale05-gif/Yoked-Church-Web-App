@@ -144,6 +144,24 @@ service cloud.firestore {
       allow read, update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
     }
 
+    match /rooms/{id} {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+
+    // A member files their own request as `pending` and can withdraw it.
+    // Only staff can approve - approving is what actually holds the
+    // room, so self-approval would make the conflict check meaningless.
+    match /roomBookings/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.requestedByUid == request.auth.uid &&
+        request.resource.data.status == 'pending';
+      allow update: if isStaff() ||
+        (isSignedIn() && resource.data.requestedByUid == request.auth.uid &&
+         request.resource.data.status == 'cancelled');
+      allow delete: if isStaff();
+    }
+
     // The prayer wall. Members-only to read at all: a request often
     // names a person or a diagnosis, and that does not belong on a
     // public page. A member creates their own as `pending` and can never

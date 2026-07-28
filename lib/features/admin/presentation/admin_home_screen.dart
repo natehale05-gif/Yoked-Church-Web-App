@@ -9,6 +9,7 @@ import '../../auth/application/auth_providers.dart';
 import '../../connect/application/connect_providers.dart';
 import '../../groups/application/group_providers.dart';
 import '../../prayer_wall/application/prayer_providers.dart';
+import '../../rooms/application/room_providers.dart';
 import '../../groups/domain/group.dart';
 import '../../volunteering/application/volunteering_providers.dart';
 import '../../volunteering/domain/volunteering.dart';
@@ -98,6 +99,12 @@ class _NeedsAttention extends ConsumerWidget {
             label: 'Prayer requests',
             value: ref.watch(pendingPrayerCountProvider),
             path: '/admin/prayer',
+          ),
+        if (flags.roomBooking)
+          _Stat(
+            label: 'Room requests',
+            value: ref.watch(pendingBookingCountProvider),
+            path: '/admin/rooms',
           ),
       ],
     );

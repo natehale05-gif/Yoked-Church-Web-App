@@ -30,6 +30,8 @@ import '../features/prayer_wall/application/prayer_providers.dart';
 import '../features/prayer_wall/data/prayer_repository.dart';
 import '../features/reading_plans/application/reading_plan_providers.dart';
 import '../features/reading_plans/data/reading_plan_repository.dart';
+import '../features/rooms/application/room_providers.dart';
+import '../features/rooms/data/room_repository.dart';
 import '../features/resources/application/resource_providers.dart';
 import '../features/resources/data/resource_repository.dart';
 import '../features/sermon_notes/application/sermon_note_providers.dart';
@@ -83,6 +85,8 @@ List<Override> localOverrides() {
       sermonNoteRepositoryProvider.overrideWithValue(LocalSermonNoteRepository()),
       resourceRepositoryProvider.overrideWithValue(LocalResourceRepository()),
       fileStorageProvider.overrideWithValue(const UnavailableFileStorage()),
+      roomRepositoryProvider.overrideWithValue(LocalRoomRepository()),
+      bookingRepositoryProvider.overrideWithValue(LocalBookingRepository()),
       prayerPostRepositoryProvider.overrideWithValue(LocalPrayerPostRepository()),
       intercessionRepositoryProvider.overrideWithValue(LocalIntercessionRepository()),
     ];
@@ -115,6 +119,8 @@ List<Override> firestoreOverrides() => [
       sermonNoteRepositoryProvider.overrideWithValue(FirestoreSermonNoteRepository()),
       resourceRepositoryProvider.overrideWithValue(FirestoreResourceRepository()),
       fileStorageProvider.overrideWithValue(FirebaseFileStorage()),
+      roomRepositoryProvider.overrideWithValue(FirestoreRoomRepository()),
+      bookingRepositoryProvider.overrideWithValue(FirestoreBookingRepository()),
       prayerPostRepositoryProvider.overrideWithValue(FirestorePrayerPostRepository()),
       intercessionRepositoryProvider.overrideWithValue(FirestoreIntercessionRepository()),
     ];

@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Fellowship Hall",
+    "description": "The big room off the lobby. Tables and chairs, kitchen access.",
+    "capacity": 120,
+    "bookable": true
+  },
+  {
+    "name": "Main Sanctuary",
+    "description": "Seats the whole congregation. Sound desk needs a volunteer.",
+    "capacity": 400,
+    "bookable": true
+  },
+  {
+    "name": "Upper Room",
+    "description": "Quiet space upstairs. Good for a small group or a meeting.",
+    "capacity": 20,
+    "bookable": true
+  },
+  {
+    "name": "Room 101",
+    "description": "Classroom with a whiteboard.",
+    "capacity": 30,
+    "bookable": true
+  },
+  {
+    "name": "Nursery",
+    "description": "Ages 0-2. Staffed during services - not a meeting space.",
+    "capacity": 12,
+    "bookable": false
+  },
+  {
+    "name": "Kids Room A",
+    "description": "Ages 3-6.",
+    "capacity": 20,
+    "bookable": false
+  },
+  {
+    "name": "Kids Room B",
+    "description": "Ages 7-11.",
+    "capacity": 24,
+    "bookable": false
+  }
+]
