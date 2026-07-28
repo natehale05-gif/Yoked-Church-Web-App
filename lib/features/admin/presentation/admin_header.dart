@@ -40,6 +40,8 @@ List<AdminTab> adminTabs(FeatureFlags flags) => [
           icon: Icons.menu_book_outlined,
           adminOnly: false
         ),
+      if (flags.resources)
+        (label: 'Resources', path: '/admin/resources', icon: Icons.folder_outlined, adminOnly: false),
       if (flags.connect) (label: 'Inbox', path: '/admin/connect', icon: Icons.inbox_outlined, adminOnly: false),
       (label: 'Announcements', path: '/admin/announcements', icon: Icons.campaign_outlined, adminOnly: false),
       (label: 'Members', path: '/admin/members', icon: Icons.people_alt_outlined, adminOnly: true),

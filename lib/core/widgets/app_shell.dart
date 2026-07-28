@@ -35,6 +35,7 @@ List<NavDestination> primaryNav(FeatureFlags flags) {
   final grow = <NavDestination>[
     if (flags.devotionals) const NavDestination('Devotionals', '/devotionals'),
     if (flags.readingPlans) const NavDestination('Reading Plans', '/reading-plans'),
+    if (flags.resources) const NavDestination('Resources', '/resources'),
   ];
 
   return [

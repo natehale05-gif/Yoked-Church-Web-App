@@ -58,7 +58,7 @@ void main() {
     final container = ProviderContainer(
       overrides: fakeOverrides(
         settings: testSettings(
-          features: const FeatureFlags(devotionals: false, readingPlans: false),
+          features: const FeatureFlags(devotionals: false, readingPlans: false, resources: false),
         ),
       ),
     );

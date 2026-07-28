@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config/settings_providers.dart';
 import '../core/config/settings_repository.dart';
+import '../core/storage/file_storage.dart';
 import '../features/announcements/application/announcement_providers.dart';
 import '../features/announcements/data/announcement_repository.dart';
 import '../features/audit_log/application/audit_providers.dart';
@@ -27,6 +28,8 @@ import '../features/notifications/application/notification_providers.dart';
 import '../features/notifications/data/notification_repository.dart';
 import '../features/reading_plans/application/reading_plan_providers.dart';
 import '../features/reading_plans/data/reading_plan_repository.dart';
+import '../features/resources/application/resource_providers.dart';
+import '../features/resources/data/resource_repository.dart';
 import '../features/sermon_notes/application/sermon_note_providers.dart';
 import '../features/sermon_notes/data/sermon_note_repository.dart';
 import '../features/sermons/application/sermon_providers.dart';
@@ -76,6 +79,8 @@ List<Override> localOverrides() {
       readingPlanRepositoryProvider.overrideWithValue(LocalReadingPlanRepository()),
       planProgressRepositoryProvider.overrideWithValue(LocalPlanProgressRepository()),
       sermonNoteRepositoryProvider.overrideWithValue(LocalSermonNoteRepository()),
+      resourceRepositoryProvider.overrideWithValue(LocalResourceRepository()),
+      fileStorageProvider.overrideWithValue(const UnavailableFileStorage()),
     ];
 }
 
@@ -104,6 +109,8 @@ List<Override> firestoreOverrides() => [
       readingPlanRepositoryProvider.overrideWithValue(FirestoreReadingPlanRepository()),
       planProgressRepositoryProvider.overrideWithValue(FirestorePlanProgressRepository()),
       sermonNoteRepositoryProvider.overrideWithValue(FirestoreSermonNoteRepository()),
+      resourceRepositoryProvider.overrideWithValue(FirestoreResourceRepository()),
+      fileStorageProvider.overrideWithValue(FirebaseFileStorage()),
     ];
 
 List<Override> overridesFor(Backend backend) =>

@@ -25,6 +25,7 @@ import '../features/admin/presentation/events_admin_screen.dart';
 import '../features/admin/presentation/groups_admin_screen.dart';
 import '../features/admin/presentation/members_admin_screen.dart';
 import '../features/admin/presentation/reading_plans_admin_screen.dart';
+import '../features/admin/presentation/resources_admin_screen.dart';
 import '../features/admin/presentation/sermons_admin_screen.dart';
 import '../features/admin/presentation/settings_admin_screen.dart';
 import '../features/admin/presentation/volunteering_admin_screen.dart';
@@ -42,6 +43,7 @@ import '../features/giving/presentation/giving_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/reading_plans/presentation/reading_plan_detail_screen.dart';
 import '../features/reading_plans/presentation/reading_plans_screen.dart';
+import '../features/resources/presentation/resources_screen.dart';
 import '../features/sermons/presentation/sermon_detail_screen.dart';
 import '../features/sermons/presentation/sermons_screen.dart';
 
@@ -63,6 +65,7 @@ bool _flagAllows(FeatureFlags flags, String path) {
   if (owns('/reading-plans') || owns('/admin/reading-plans') || owns('/account/reading')) {
     return flags.readingPlans;
   }
+  if (owns('/resources') || owns('/admin/resources')) return flags.resources;
   return true;
 }
 
@@ -123,6 +126,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/devotionals/:id',
             builder: (_, state) => DevotionalDetailScreen(devotionalId: state.pathParameters['id']!),
           ),
+          GoRoute(path: '/resources', builder: (_, _) => const ResourcesScreen()),
           GoRoute(path: '/reading-plans', builder: (_, _) => const ReadingPlansScreen()),
           GoRoute(
             path: '/reading-plans/:id',
@@ -149,6 +153,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/announcements', builder: (_, _) => const AnnouncementsAdminScreen()),
           GoRoute(path: '/admin/devotionals', builder: (_, _) => const DevotionalsAdminScreen()),
           GoRoute(path: '/admin/reading-plans', builder: (_, _) => const ReadingPlansAdminScreen()),
+          GoRoute(path: '/admin/resources', builder: (_, _) => const ResourcesAdminScreen()),
           GoRoute(path: '/admin/members', builder: (_, _) => const MembersAdminScreen()),
           GoRoute(path: '/admin/settings', builder: (_, _) => const SettingsAdminScreen()),
           GoRoute(path: '/admin/audit', builder: (_, _) => const AuditAdminScreen()),

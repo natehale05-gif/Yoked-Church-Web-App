@@ -44,6 +44,14 @@ service cloud.firestore {
       allow write: if isStaff();
     }
 
+    // membersOnly is enforced here, not just in the UI filter: a
+    // signed-out visitor must not be able to read an internal document
+    // by querying the collection directly.
+    match /resources/{id} {
+      allow read: if isSignedIn() || resource.data.membersOnly == false;
+      allow write: if isStaff();
+    }
+
     // A member's progress through a plan. Deliberately not readable by
     // staff: how far someone got in their Bible reading is between them
     // and God, and a church has no operational need for it.

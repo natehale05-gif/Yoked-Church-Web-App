@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yoked_church_app/core/config/church_settings.dart';
@@ -39,9 +40,13 @@ import 'package:yoked_church_app/features/groups/domain/group.dart';
 import 'package:yoked_church_app/features/notifications/application/notification_providers.dart';
 import 'package:yoked_church_app/features/notifications/data/notification_repository.dart';
 import 'package:yoked_church_app/features/notifications/domain/app_notification.dart';
+import 'package:yoked_church_app/core/storage/file_storage.dart';
 import 'package:yoked_church_app/features/reading_plans/application/reading_plan_providers.dart';
 import 'package:yoked_church_app/features/reading_plans/data/reading_plan_repository.dart';
 import 'package:yoked_church_app/features/reading_plans/domain/reading_plan.dart';
+import 'package:yoked_church_app/features/resources/application/resource_providers.dart';
+import 'package:yoked_church_app/features/resources/data/resource_repository.dart';
+import 'package:yoked_church_app/features/resources/domain/resource.dart';
 import 'package:yoked_church_app/features/sermon_notes/application/sermon_note_providers.dart';
 import 'package:yoked_church_app/features/sermon_notes/data/sermon_note_repository.dart';
 import 'package:yoked_church_app/features/sermon_notes/domain/sermon_note.dart';
@@ -360,6 +365,46 @@ class FakeSermonNoteRepository extends LocalCrudRepository<SermonNote> implement
       ));
 }
 
+class FakeResourceRepository extends LocalCrudRepository<Resource> implements ResourceRepository {
+  @override
+  Resource fromMap(String id, Map<String, dynamic> map) => Resource.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(Resource entity) => entity.toMap();
+  @override
+  String idOf(Resource entity) => entity.id;
+  @override
+  int Function(Resource, Resource)? get sorter => (a, b) => b.createdAt.compareTo(a.createdAt);
+}
+
+/// In-memory storage that records what it was asked to do, so the upload
+/// path is testable without Firebase. Set [failWith] to exercise the
+/// error branch.
+class FakeFileStorage implements FileStorage {
+  final Map<String, Uint8List> stored = {};
+  final List<String> deleted = [];
+  final bool uploadsSupported;
+  String? failWith;
+
+  FakeFileStorage({this.uploadsSupported = true});
+
+  @override
+  bool get supportsUpload => uploadsSupported;
+
+  @override
+  Future<String> upload({
+    required String path,
+    required Uint8List bytes,
+    required String contentType,
+  }) async {
+    if (failWith != null) throw UploadFailure(failWith!);
+    stored[path] = bytes;
+    return 'https://files.example.org/$path';
+  }
+
+  @override
+  Future<void> deleteAt(String url) async => deleted.add(url);
+}
+
 class FakeAuditRepository extends LocalCrudRepository<AuditEntry> implements AuditRepository {
   @override
   AuditEntry fromMap(String id, Map<String, dynamic> map) => AuditEntry.fromMap(id, map);
@@ -395,6 +440,8 @@ List<Override> fakeOverrides({
   List<ReadingPlan> readingPlans = const [],
   List<PlanProgress> planProgress = const [],
   List<SermonNote> sermonNotes = const [],
+  List<Resource> resources = const [],
+  FakeFileStorage? storage,
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
   FakeVolunteerAssignmentRepository? assignmentRepo,
@@ -434,8 +481,33 @@ List<Override> fakeOverrides({
     planProgressRepositoryProvider
         .overrideWithValue(FakePlanProgressRepository()..seedInMemory(planProgress)),
     sermonNoteRepositoryProvider.overrideWithValue(FakeSermonNoteRepository()..seedInMemory(sermonNotes)),
+    resourceRepositoryProvider.overrideWithValue(FakeResourceRepository()..seedInMemory(resources)),
+    fileStorageProvider.overrideWithValue(storage ?? FakeFileStorage()),
   ];
 }
+
+Resource testResource({
+  String id = 'r1',
+  String title = 'Test Resource',
+  String description = 'A resource for testing.',
+  String category = 'Forms',
+  String url = 'https://example.org/thing.pdf',
+  String fileName = 'thing.pdf',
+  String storagePath = '',
+  bool membersOnly = false,
+  DateTime? createdAt,
+}) =>
+    Resource(
+      id: id,
+      title: title,
+      description: description,
+      category: category,
+      url: url,
+      fileName: fileName,
+      storagePath: storagePath,
+      membersOnly: membersOnly,
+      createdAt: createdAt ?? DateTime(2026, 7, 1),
+    );
 
 ReadingPlan testPlan({
   String id = 'p1',
