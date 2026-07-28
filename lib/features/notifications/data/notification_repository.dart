@@ -45,9 +45,8 @@ class LocalNotificationRepository extends LocalCrudRepository<AppNotification>
   int Function(AppNotification, AppNotification)? get sorter => (a, b) => b.createdAt.compareTo(a.createdAt);
 
   @override
-  Stream<List<AppNotification>> watchForMember(String uid) async* {
-    yield await fetchWhere((n) => n.uid == uid);
-  }
+  Stream<List<AppNotification>> watchForMember(String uid) =>
+      watchDerived(() => fetchWhere((n) => n.uid == uid));
 
   @override
   Future<void> markRead(String id) async {

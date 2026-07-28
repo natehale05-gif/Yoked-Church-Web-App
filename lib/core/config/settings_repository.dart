@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,6 +22,8 @@ abstract interface class SettingsRepository {
 /// Loads the bundled `assets/data/church_settings.json`. Used for the
 /// zero-backend demo/preview mode and in tests.
 class LocalSettingsRepository implements SettingsRepository {
+  final StreamController<ChurchSettings> _changes = StreamController<ChurchSettings>.broadcast();
+
   ChurchSettings? _cached;
 
   @override
@@ -36,14 +39,18 @@ class LocalSettingsRepository implements SettingsRepository {
     return _cached!;
   }
 
+  /// Mirrors Firestore's live document stream, so an admin's edit
+  /// re-themes every open screen in preview mode too.
   @override
   Stream<ChurchSettings> watch() async* {
     yield await fetch();
+    yield* _changes.stream;
   }
 
   @override
   Future<void> save(ChurchSettings settings) async {
     _cached = settings;
+    if (!_changes.isClosed) _changes.add(settings);
   }
 }
 

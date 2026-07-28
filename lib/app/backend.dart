@@ -2,6 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config/settings_providers.dart';
 import '../core/config/settings_repository.dart';
+import '../features/announcements/application/announcement_providers.dart';
+import '../features/announcements/data/announcement_repository.dart';
+import '../features/audit_log/application/audit_providers.dart';
+import '../features/audit_log/data/audit_repository.dart';
 import '../features/auth/application/auth_providers.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/data/user_repository.dart';
@@ -37,10 +41,15 @@ enum Backend { local, firestore }
 /// role. The entire app - including staff screens - is usable this way,
 /// which is what makes the template demo-able before a customer sets up
 /// Firebase.
-List<Override> localOverrides() => [
+List<Override> localOverrides() {
+  // Shared, so a demo sign-in enrols that account in the same in-memory
+  // congregation every other screen reads from.
+  final users = LocalUserRepository();
+
+  return [
       settingsRepositoryProvider.overrideWithValue(LocalSettingsRepository()),
-      authRepositoryProvider.overrideWithValue(LocalAuthRepository()),
-      userRepositoryProvider.overrideWithValue(LocalUserRepository()),
+      authRepositoryProvider.overrideWithValue(LocalAuthRepository(users)),
+      userRepositoryProvider.overrideWithValue(users),
       sermonRepositoryProvider.overrideWithValue(LocalSermonRepository()),
       sermonSeriesRepositoryProvider.overrideWithValue(LocalSermonSeriesRepository()),
       eventRepositoryProvider.overrideWithValue(LocalEventRepository()),
@@ -55,7 +64,10 @@ List<Override> localOverrides() => [
       volunteerAssignmentRepositoryProvider.overrideWithValue(LocalVolunteerAssignmentRepository()),
       notificationRepositoryProvider.overrideWithValue(LocalNotificationRepository()),
       givingRepositoryProvider.overrideWithValue(LocalGivingRepository()),
+      announcementRepositoryProvider.overrideWithValue(LocalAnnouncementRepository()),
+      auditRepositoryProvider.overrideWithValue(LocalAuditRepository()),
     ];
+}
 
 /// Live mode against a configured Firebase project.
 List<Override> firestoreOverrides() => [
@@ -76,6 +88,8 @@ List<Override> firestoreOverrides() => [
       volunteerAssignmentRepositoryProvider.overrideWithValue(FirestoreVolunteerAssignmentRepository()),
       notificationRepositoryProvider.overrideWithValue(FirestoreNotificationRepository()),
       givingRepositoryProvider.overrideWithValue(FirestoreGivingRepository()),
+      announcementRepositoryProvider.overrideWithValue(FirestoreAnnouncementRepository()),
+      auditRepositoryProvider.overrideWithValue(FirestoreAuditRepository()),
     ];
 
 List<Override> overridesFor(Backend backend) =>

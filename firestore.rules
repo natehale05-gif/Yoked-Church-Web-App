@@ -105,5 +105,24 @@ service cloud.firestore {
       allow create: if isStaff();
       allow read, update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
     }
+
+    // Announcements are archived so members can browse past ones; the
+    // fan-out to individual inboxes is the `notifications` rule above.
+    // Nothing is ever edited after sending - a sent announcement is a
+    // record of what people received.
+    match /announcements/{id} {
+      allow read: if isSignedIn();
+      allow create: if isStaff();
+      allow update, delete: if false;
+    }
+
+    // The audit trail. Append-only by design: staff append by acting, and
+    // nobody - not even an admin - can rewrite or erase history, which is
+    // the entire point of keeping it. Reading is admin-only.
+    match /auditLog/{id} {
+      allow read: if isAdmin();
+      allow create: if isStaff() && request.resource.data.actorUid == request.auth.uid;
+      allow update, delete: if false;
+    }
   }
 }

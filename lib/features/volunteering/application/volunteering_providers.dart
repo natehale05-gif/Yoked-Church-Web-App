@@ -32,6 +32,13 @@ final positionAssignmentsProvider =
   return ref.watch(volunteerAssignmentRepositoryProvider).forPosition(positionId);
 });
 
+/// Staff view of every assignment - used for the "requests waiting on
+/// you" count on the admin overview.
+final allAssignmentsProvider = FutureProvider<List<VolunteerAssignment>>((ref) {
+  ref.watch(volunteerRefreshProvider);
+  return ref.watch(volunteerAssignmentRepositoryProvider).fetchAll();
+});
+
 /// Remaining slots per position, computed from a single batched read of
 /// all assignments rather than one query per position.
 final openSlotsProvider = FutureProvider<Map<String, int>>((ref) async {

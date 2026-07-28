@@ -35,6 +35,13 @@ final groupMembershipsProvider = FutureProvider.family<List<GroupMembership>, St
   return ref.watch(membershipRepositoryProvider).forGroup(groupId);
 });
 
+/// Staff view of every membership across all groups - used for the
+/// "requests waiting on you" count on the admin overview.
+final allMembershipsProvider = FutureProvider<List<GroupMembership>>((ref) {
+  ref.watch(groupRefreshProvider);
+  return ref.watch(membershipRepositoryProvider).fetchAll();
+});
+
 final groupControllerProvider = Provider<GroupController>((ref) => GroupController(ref));
 
 class GroupController {

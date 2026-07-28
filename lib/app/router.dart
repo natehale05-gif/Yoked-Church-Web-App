@@ -12,6 +12,16 @@ import '../features/account/presentation/my_groups_screen.dart';
 import '../features/account/presentation/my_volunteering_screen.dart';
 import '../features/account/presentation/notifications_screen.dart';
 import '../features/account/presentation/profile_screen.dart';
+import '../features/admin/presentation/admin_home_screen.dart';
+import '../features/admin/presentation/announcements_admin_screen.dart';
+import '../features/admin/presentation/audit_admin_screen.dart';
+import '../features/admin/presentation/connect_admin_screen.dart';
+import '../features/admin/presentation/events_admin_screen.dart';
+import '../features/admin/presentation/groups_admin_screen.dart';
+import '../features/admin/presentation/members_admin_screen.dart';
+import '../features/admin/presentation/sermons_admin_screen.dart';
+import '../features/admin/presentation/settings_admin_screen.dart';
+import '../features/admin/presentation/volunteering_admin_screen.dart';
 import '../features/auth/application/auth_providers.dart';
 import '../features/auth/presentation/forgot_password_screen.dart';
 import '../features/auth/presentation/sign_in_screen.dart';
@@ -26,6 +36,7 @@ import '../features/sermons/presentation/sermon_detail_screen.dart';
 import '../features/sermons/presentation/sermons_screen.dart';
 
 const _authPaths = {'/sign-in', '/sign-up', '/forgot-password'};
+const _adminOnlyPaths = {'/admin/members', '/admin/settings', '/admin/audit'};
 
 /// Every route is registered unconditionally; access is decided by the
 /// redirect below at request time.
@@ -50,6 +61,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (path.startsWith('/admin')) {
         if (!signedIn) return '/sign-in';
         if (!ref.read(isStaffProvider)) return '/account';
+        // Members/roles, settings, and the audit trail can reshape the
+        // church, so they are admin-only even among staff.
+        if (_adminOnlyPaths.contains(path) && !ref.read(isAdminProvider)) return '/admin';
       }
       if (_authPaths.contains(path) && signedIn) return '/account';
       return null;
@@ -83,6 +97,17 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/account/directory', builder: (_, _) => const DirectoryScreen()),
           GoRoute(path: '/account/giving', builder: (_, _) => const GivingHistoryScreen()),
           GoRoute(path: '/account/notifications', builder: (_, _) => const NotificationsScreen()),
+
+          GoRoute(path: '/admin', builder: (_, _) => const AdminHomeScreen()),
+          GoRoute(path: '/admin/sermons', builder: (_, _) => const SermonsAdminScreen()),
+          GoRoute(path: '/admin/events', builder: (_, _) => const EventsAdminScreen()),
+          GoRoute(path: '/admin/groups', builder: (_, _) => const GroupsAdminScreen()),
+          GoRoute(path: '/admin/volunteering', builder: (_, _) => const VolunteeringAdminScreen()),
+          GoRoute(path: '/admin/connect', builder: (_, _) => const ConnectAdminScreen()),
+          GoRoute(path: '/admin/announcements', builder: (_, _) => const AnnouncementsAdminScreen()),
+          GoRoute(path: '/admin/members', builder: (_, _) => const MembersAdminScreen()),
+          GoRoute(path: '/admin/settings', builder: (_, _) => const SettingsAdminScreen()),
+          GoRoute(path: '/admin/audit', builder: (_, _) => const AuditAdminScreen()),
         ],
       ),
     ],

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 import '../domain/app_user.dart';
+import 'user_repository.dart';
 
 /// Raised for any sign-in/sign-up failure, already carrying a message
 /// that is safe and useful to show a member.
@@ -144,7 +145,16 @@ class FirebaseAuthRepository implements AuthRepository {
 /// project. Nothing is persisted beyond the browser session.
 class LocalAuthRepository implements AuthRepository {
   final _controller = StreamController<AppUser?>.broadcast();
+
+  /// The in-memory congregation, so a demo account can be enrolled in it
+  /// on sign-in. Without this the previewing admin is not a member of
+  /// their own church: announcements they send reach nobody they can see,
+  /// and they never appear in the members list.
+  final UserRepository? _users;
+
   AppUser? _current;
+
+  LocalAuthRepository([this._users]);
 
   @override
   bool get supportsSocialSignIn => false;
@@ -161,6 +171,13 @@ class LocalAuthRepository implements AuthRepository {
   void _emit(AppUser? user) {
     _current = user;
     _controller.add(user);
+  }
+
+  /// Upsert into the congregation, then sign in. Ordered this way so the
+  /// member exists before any screen reacts to the auth change.
+  Future<void> _enrolAndEmit(AppUser user) async {
+    await _users?.update(user);
+    _emit(user);
   }
 
   AppUser _demoUser(UserRole role, {String? email, String? displayName}) {
@@ -180,14 +197,12 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> signIn({required String email, required String password}) async {
-    _emit(_demoUser(UserRole.member, email: email));
-  }
+  Future<void> signIn({required String email, required String password}) =>
+      _enrolAndEmit(_demoUser(UserRole.member, email: email));
 
   @override
-  Future<void> signUp({required String email, required String password, required String displayName}) async {
-    _emit(_demoUser(UserRole.member, email: email, displayName: displayName));
-  }
+  Future<void> signUp({required String email, required String password, required String displayName}) =>
+      _enrolAndEmit(_demoUser(UserRole.member, email: email, displayName: displayName));
 
   @override
   Future<void> signInWithGoogle() async =>
@@ -207,5 +222,5 @@ class LocalAuthRepository implements AuthRepository {
   Future<void> signOut() async => _emit(null);
 
   @override
-  Future<void> signInAsDemo(UserRole role) async => _emit(_demoUser(role));
+  Future<void> signInAsDemo(UserRole role) => _enrolAndEmit(_demoUser(role));
 }

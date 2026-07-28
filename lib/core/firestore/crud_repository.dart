@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -104,8 +105,27 @@ abstract class LocalCrudRepository<T> with EntityCodec<T> implements CrudReposit
   int Function(T a, T b)? get sorter => null;
 
   final Map<String, T> _items = {};
+
+  /// Ticks on every mutation so open [watchAll] subscriptions re-emit.
+  /// Firestore's snapshot streams are live, and anything long-lived
+  /// (the nav bar's notification bell, say) subscribes once at startup -
+  /// without this, local mode would show those listeners a snapshot
+  /// frozen at app launch.
+  final StreamController<void> _changes = StreamController<void>.broadcast();
+
   bool _seeded = false;
   int _nextId = 0;
+
+  void _notifyChanged() {
+    if (!_changes.isClosed) _changes.add(null);
+  }
+
+  /// Re-emits [read] on every mutation, starting with the current value.
+  /// Feature repositories build their filtered watches on this.
+  Stream<R> watchDerived<R>(Future<R> Function() read) async* {
+    yield await read();
+    yield* _changes.stream.asyncMap((_) => read());
+  }
 
   Future<void> _ensureSeeded() async {
     if (_seeded) return;
@@ -138,9 +158,7 @@ abstract class LocalCrudRepository<T> with EntityCodec<T> implements CrudReposit
   }
 
   @override
-  Stream<List<T>> watchAll() async* {
-    yield await fetchAll();
-  }
+  Stream<List<T>> watchAll() => watchDerived(fetchAll);
 
   @override
   Future<T?> fetchById(String id) async {
@@ -153,6 +171,7 @@ abstract class LocalCrudRepository<T> with EntityCodec<T> implements CrudReposit
     await _ensureSeeded();
     final id = 'local-${_nextId++}';
     _items[id] = fromMap(id, toMap(entity));
+    _notifyChanged();
     return id;
   }
 
@@ -161,12 +180,14 @@ abstract class LocalCrudRepository<T> with EntityCodec<T> implements CrudReposit
     await _ensureSeeded();
     final id = idOf(entity);
     _items[id] = entity;
+    _notifyChanged();
   }
 
   @override
   Future<void> delete(String id) async {
     await _ensureSeeded();
     _items.remove(id);
+    _notifyChanged();
   }
 
   Future<List<T>> fetchWhere(bool Function(T item) test) async {
@@ -181,5 +202,6 @@ abstract class LocalCrudRepository<T> with EntityCodec<T> implements CrudReposit
       final id = idOf(entity).isEmpty ? 'local-${_nextId++}' : idOf(entity);
       _items[id] = entity;
     }
+    _notifyChanged();
   }
 }

@@ -5,6 +5,12 @@ import 'package:yoked_church_app/core/config/church_settings.dart';
 import 'package:yoked_church_app/core/config/settings_providers.dart';
 import 'package:yoked_church_app/core/config/settings_repository.dart';
 import 'package:yoked_church_app/core/firestore/crud_repository.dart';
+import 'package:yoked_church_app/features/announcements/application/announcement_providers.dart';
+import 'package:yoked_church_app/features/announcements/data/announcement_repository.dart';
+import 'package:yoked_church_app/features/announcements/domain/announcement.dart';
+import 'package:yoked_church_app/features/audit_log/application/audit_providers.dart';
+import 'package:yoked_church_app/features/audit_log/data/audit_repository.dart';
+import 'package:yoked_church_app/features/audit_log/domain/audit_entry.dart';
 import 'package:yoked_church_app/features/auth/application/auth_providers.dart';
 import 'package:yoked_church_app/features/auth/data/auth_repository.dart';
 import 'package:yoked_church_app/features/auth/data/user_repository.dart';
@@ -230,9 +236,8 @@ class FakeNotificationRepository extends LocalCrudRepository<AppNotification>
   @override
   String idOf(AppNotification entity) => entity.id;
   @override
-  Stream<List<AppNotification>> watchForMember(String uid) async* {
-    yield await fetchWhere((n) => n.uid == uid);
-  }
+  Stream<List<AppNotification>> watchForMember(String uid) =>
+      watchDerived(() => fetchWhere((n) => n.uid == uid));
 
   @override
   Future<void> markRead(String id) async {
@@ -266,6 +271,29 @@ class FakeUserRepository extends LocalCrudRepository<AppUser> implements UserRep
     final user = await fetchById(uid);
     if (user != null) await update(user.copyWith(role: role));
   }
+}
+
+class FakeAnnouncementRepository extends LocalCrudRepository<Announcement>
+    implements AnnouncementRepository {
+  @override
+  Announcement fromMap(String id, Map<String, dynamic> map) => Announcement.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(Announcement entity) => entity.toMap();
+  @override
+  String idOf(Announcement entity) => entity.id;
+  @override
+  int Function(Announcement, Announcement)? get sorter => (a, b) => b.sentAt.compareTo(a.sentAt);
+}
+
+class FakeAuditRepository extends LocalCrudRepository<AuditEntry> implements AuditRepository {
+  @override
+  AuditEntry fromMap(String id, Map<String, dynamic> map) => AuditEntry.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(AuditEntry entity) => entity.toMap();
+  @override
+  String idOf(AuditEntry entity) => entity.id;
+  @override
+  int Function(AuditEntry, AuditEntry)? get sorter => (a, b) => b.at.compareTo(a.at);
 }
 
 /// A complete override set backed by fakes, optionally pre-seeded.
@@ -319,6 +347,9 @@ List<Override> fakeOverrides({
     notificationRepositoryProvider
         .overrideWithValue(FakeNotificationRepository()..seedInMemory(notifications)),
     givingRepositoryProvider.overrideWithValue(FakeGivingRepository()..seedInMemory(giving)),
+    announcementRepositoryProvider
+        .overrideWithValue(FakeAnnouncementRepository()..seedInMemory(const [])),
+    auditRepositoryProvider.overrideWithValue(FakeAuditRepository()..seedInMemory(const [])),
   ];
 }
 
