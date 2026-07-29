@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../audit_log/application/audit_providers.dart';
+import '../../auth/application/auth_providers.dart';
+import '../../auth/domain/app_user.dart';
 import '../../forms/application/form_providers.dart';
 import '../../forms/domain/church_form.dart';
 import '../../forms/domain/form_submission.dart';
@@ -51,6 +53,14 @@ class FormsAdminScreen extends ConsumerWidget {
           ].join(' · '),
           deleteLabel: 'the form "${form.title}"',
           actions: [
+            Badge(
+              isLabelVisible: count > 0,
+              label: Text('$count'),
+              child: TextButton(
+                onPressed: () => context.go('/admin/forms/${form.id}/responses'),
+                child: const Text('Responses'),
+              ),
+            ),
             if (form.published)
               TextButton(
                 onPressed: () => context.go('/forms/${form.slug}'),
@@ -364,6 +374,22 @@ class _Settings extends ConsumerWidget {
                   style: TextStyle(color: Colors.black54, fontSize: 12),
                 ),
               ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            const Text('Tell someone when a response arrives',
+                style: TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            _NotifyPicker(draft: draft, onChanged: onChanged),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: () => context.go('/admin/forms/${draft.id}/responses'),
+                icon: const Icon(Icons.inbox_outlined, size: 16),
+                label: const Text('See responses'),
+              ),
+            ),
           ],
         ),
       ),
@@ -628,6 +654,50 @@ class _FieldFormState extends State<_FieldForm> {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Which staff get an in-app notification per response.
+///
+/// Deliberately a pick from real accounts rather than a list of typed
+/// email addresses: this app can deliver to an inbox it owns, and cannot
+/// send mail. Offering an email box would promise something that never
+/// arrives.
+class _NotifyPicker extends ConsumerWidget {
+  final FormDefinition draft;
+  final void Function(FormDefinition Function(FormDefinition)) onChanged;
+
+  const _NotifyPicker({required this.draft, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final staff = (ref.watch(allMembersProvider).valueOrNull ?? const <AppUser>[])
+        .where((m) => m.isStaff)
+        .toList();
+
+    if (staff.isEmpty) {
+      return const Text(
+        'No staff accounts yet, so there is nobody to notify.',
+        style: TextStyle(color: Colors.black54, fontSize: 12),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        for (final member in staff)
+          FilterChip(
+            label: Text(member.displayName.isEmpty ? member.email : member.displayName),
+            selected: draft.notifyUids.contains(member.uid),
+            onSelected: (on) => onChanged((d) => d.copyWith(
+                  notifyUids: on
+                      ? [...d.notifyUids, member.uid]
+                      : d.notifyUids.where((uid) => uid != member.uid).toList(),
+                )),
+          ),
+      ],
     );
   }
 }

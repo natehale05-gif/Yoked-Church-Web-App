@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +9,9 @@ import 'package:yoked_church_app/features/auth/application/auth_providers.dart';
 import 'package:yoked_church_app/features/forms/application/form_providers.dart';
 import 'package:yoked_church_app/features/forms/data/form_repository.dart';
 import 'package:yoked_church_app/features/forms/domain/church_form.dart';
+import 'package:yoked_church_app/features/forms/domain/form_submission.dart';
+import 'package:yoked_church_app/features/forms/domain/submission_csv.dart';
+import 'package:yoked_church_app/features/notifications/application/notification_providers.dart';
 
 import '../fakes/fake_repositories.dart';
 
@@ -400,4 +405,162 @@ void main() {
     expect(newFieldId(const ['f1', 'f2']), isNot(anyOf('f1', 'f2')));
     expect(newFieldId(const ['f1', 'f2', 'f3']), isNot(anyOf('f1', 'f2', 'f3')));
   });
+
+  group('CSV export', () {
+    FormSubmission row(Map<String, String> answers, {String name = 'Hannah Brooks'}) => FormSubmission(
+          id: 'x',
+          formId: 'camp',
+          formTitle: 'Camp',
+          submitterName: name,
+          submitterEmail: 'hannah@example.org',
+          answers: answers,
+          submittedAt: DateTime(2026, 7, 26, 9, 30),
+        );
+
+    test('columns follow the form, not whatever keys the data happens to have', () {
+      final csv = submissionsToCsv(camp, [row({'f1': 'Yes', 'f2': 'Week 1'})]);
+      final header = csv.split('\r\n').first;
+      expect(header, 'Submitted,Name,Email,Are you coming?,Which week?,Cabin preference');
+    });
+
+    test('quotes a comma so later columns do not shift', () {
+      final csv = submissionsToCsv(camp, [row({'f1': 'Yes', 'f3': 'Peanut, tree nut'})]);
+      expect(csv, contains('"Peanut, tree nut"'));
+      // Three schema columns plus the three fixed ones, on both rows.
+      for (final line in csv.split('\r\n')) {
+        expect(_columns(line), 6, reason: 'a stray comma must not add a column');
+      }
+    });
+
+    test('doubles an embedded quote rather than ending the field early', () {
+      final csv = submissionsToCsv(camp, [row({'f1': 'Yes', 'f3': 'She said "no nuts"'})]);
+      expect(csv, contains('"She said ""no nuts"""'));
+    });
+
+    test('a pasted line break stays inside its cell', () {
+      final csv = submissionsToCsv(camp, [row({'f1': 'Yes', 'f3': 'line one\nline two'})]);
+      expect(csv, contains('"line one\nline two"'));
+    });
+
+    test('an answer whose question was deleted is carried, not dropped', () {
+      final csv = submissionsToCsv(camp, [row({'f1': 'Yes', 'gone': 'Something typed last year'})]);
+      expect(csv.split('\r\n').first, endsWith('Other answers'));
+      expect(csv, contains('gone: Something typed last year'));
+    });
+
+    test('no orphaned answers means no spare column', () {
+      final csv = submissionsToCsv(camp, [row({'f1': 'Yes'})]);
+      expect(csv.split('\r\n').first, isNot(contains('Other answers')));
+    });
+
+    test('the filename says which form and which day', () {
+      expect(csvFileName(camp, DateTime(2026, 7, 4)), 'camp-2026-07-04.csv');
+    });
+  });
+
+  group('notification routing', () {
+    test('a submission notifies exactly the staff the form names', () async {
+      final container = ProviderContainer(
+        overrides: fakeOverrides(
+          forms: [camp.copyWith(notifyUids: ['staff-1', 'staff-2'])],
+        ),
+      );
+      addTearDown(container.dispose);
+      await container.read(authStateProvider.future);
+
+      await container.read(formControllerProvider).submit(
+            form: camp.copyWith(notifyUids: ['staff-1', 'staff-2']),
+            answers: {'f1': 'No'},
+          );
+
+      final sent = await container.read(notificationRepositoryProvider).fetchAll();
+      expect(sent.map((n) => n.uid).toSet(), {'staff-1', 'staff-2'});
+      expect(sent.first.title, 'New response: Camp');
+      expect(sent.first.linkPath, '/admin/forms/camp/responses');
+    });
+
+    test('a form with nobody to notify sends nothing', () async {
+      final container = ProviderContainer(overrides: fakeOverrides(forms: const [camp]));
+      addTearDown(container.dispose);
+      await container.read(authStateProvider.future);
+
+      await container.read(formControllerProvider).submit(form: camp, answers: {'f1': 'No'});
+      expect(await container.read(notificationRepositoryProvider).fetchAll(), isEmpty);
+    });
+
+    test('a refused submission notifies nobody', () async {
+      final withStaff = camp.copyWith(notifyUids: ['staff-1']);
+      final container = ProviderContainer(overrides: fakeOverrides(forms: [withStaff]));
+      addTearDown(container.dispose);
+      await container.read(authStateProvider.future);
+
+      // Missing the required "which week" behind the open branch.
+      await container.read(formControllerProvider).submit(form: withStaff, answers: {'f1': 'Yes'});
+      expect(await container.read(notificationRepositoryProvider).fetchAll(), isEmpty);
+    });
+  });
+
+  group('file answers', () {
+    test('two uploads of the same filename do not overwrite each other', () async {
+      final storage = FakeFileStorage();
+      final container = ProviderContainer(overrides: fakeOverrides(storage: storage));
+      addTearDown(container.dispose);
+
+      final controller = container.read(formControllerProvider);
+      for (var i = 0; i < 2; i++) {
+        await controller.uploadAnswerFile(
+          formId: 'camp',
+          fileName: 'photo.jpg',
+          bytes: Uint8List.fromList([1, 2, 3]),
+          contentType: 'image/jpeg',
+        );
+      }
+      expect(storage.stored.keys, hasLength(2));
+    });
+
+    test('a crafted filename cannot escape the form prefix', () async {
+      final storage = FakeFileStorage();
+      final container = ProviderContainer(overrides: fakeOverrides(storage: storage));
+      addTearDown(container.dispose);
+
+      await container.read(formControllerProvider).uploadAnswerFile(
+            formId: '../../secrets',
+            fileName: '../../../etc/passwd',
+            bytes: Uint8List.fromList([1]),
+            contentType: 'text/plain',
+          );
+
+      // Slashes are what a traversal needs, and the sanitiser removes
+      // them - so `..` can never become a path segment of its own.
+      final path = storage.stored.keys.single;
+      final segments = path.split('/');
+      expect(segments.first, 'formUploads');
+      expect(segments, hasLength(3));
+      expect(segments, isNot(contains('..')));
+    });
+
+    test('a church with no storage says so rather than offering a broken button', () {
+      final container = ProviderContainer(
+        overrides: fakeOverrides(storage: FakeFileStorage(uploadsSupported: false)),
+      );
+      addTearDown(container.dispose);
+      expect(container.read(formControllerProvider).canUploadAnswers, isFalse);
+    });
+  });
+
+}
+
+/// Counts top-level columns, respecting RFC 4180 quoting.
+int _columns(String line) {
+  var count = 1;
+  var inQuotes = false;
+  for (var i = 0; i < line.length; i++) {
+    final ch = line[i];
+    if (ch == '"') {
+      inQuotes = !inQuotes;
+    } else if (ch == ',' && !inQuotes) {
+      count++;
+    }
+  }
+  return count;
 }

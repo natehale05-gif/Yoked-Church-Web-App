@@ -1,9 +1,11 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/config/settings_providers.dart';
+import '../../../core/storage/file_storage.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/section_container.dart';
@@ -216,6 +218,7 @@ class _FormRunnerState extends ConsumerState<_FormRunner> {
                     // next page - and the text controller carries the
                     // previous answer across with it.
                     key: ValueKey(field.id),
+                    formId: form.id,
                     field: field,
                     value: _answers[field.id] ?? '',
                     flagged: _flagged.contains(field.id),
@@ -291,6 +294,7 @@ class _FormRunnerState extends ConsumerState<_FormRunner> {
 /// answers are one map, and validation lives in the domain where the
 /// conditional rules already are.
 class _FieldInput extends StatefulWidget {
+  final String formId;
   final FormFieldDef field;
   final String value;
   final bool flagged;
@@ -298,6 +302,7 @@ class _FieldInput extends StatefulWidget {
 
   const _FieldInput({
     super.key,
+    required this.formId,
     required this.field,
     required this.value,
     required this.flagged,
@@ -404,13 +409,10 @@ class _FieldInputState extends State<_FieldInput> {
           ),
         );
       case FormFieldType.file:
-        // Uploads land in the next slice; until then the question is
-        // still asked, as a link, rather than silently dropped from a
-        // form a church already built.
-        return TextField(
-          decoration: decoration.copyWith(
-            helperText: field.helpText.isEmpty ? 'Paste a link to your file' : field.helpText,
-          ),
+        return _FileAnswer(
+          formId: widget.formId,
+          decoration: decoration,
+          value: value,
           controller: _text,
           onChanged: onChanged,
         );
@@ -432,3 +434,129 @@ class _FieldInputState extends State<_FieldInput> {
     }
   }
 }
+
+/// A file question. Uploads through the [FileStorage] seam when the
+/// church has one, and falls back to a pasted link when it does not -
+/// the same "say so up front" contract the resource library uses, rather
+/// than a button that fails at the tap.
+class _FileAnswer extends ConsumerStatefulWidget {
+  final String formId;
+  final InputDecoration decoration;
+  final String value;
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
+  const _FileAnswer({
+    required this.formId,
+    required this.decoration,
+    required this.value,
+    required this.controller,
+    required this.onChanged,
+  });
+
+  @override
+  ConsumerState<_FileAnswer> createState() => _FileAnswerState();
+}
+
+class _FileAnswerState extends ConsumerState<_FileAnswer> {
+  bool _uploading = false;
+  String? _error;
+  String _fileName = '';
+
+  Future<void> _pick() async {
+    // withData, because on web there is no path to read from later.
+    final picked = await FilePicker.pickFiles(withData: true);
+    final file = picked?.files.singleOrNull;
+    final bytes = file?.bytes;
+    if (file == null || bytes == null) return;
+
+    setState(() {
+      _uploading = true;
+      _error = null;
+    });
+    try {
+      final url = await ref.read(formControllerProvider).uploadAnswerFile(
+            formId: widget.formId,
+            fileName: file.name,
+            bytes: bytes,
+            contentType: contentTypeFor(file.extension),
+          );
+      if (!mounted) return;
+      setState(() {
+        _uploading = false;
+        _fileName = file.name;
+      });
+      widget.onChanged(url);
+    } on UploadFailure catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _uploading = false;
+        _error = error.message;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final canUpload = ref.read(formControllerProvider).canUploadAnswers;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          decoration: widget.decoration.copyWith(
+            helperText: widget.decoration.helperText ??
+                (canUpload ? 'Attach a file, or paste a link to one' : 'Paste a link to your file'),
+          ),
+          controller: widget.controller,
+          onChanged: widget.onChanged,
+        ),
+        if (canUpload)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _uploading ? null : _pick,
+                  icon: const Icon(Icons.attach_file, size: 16),
+                  label: Text(_uploading ? 'Uploading…' : 'Choose a file'),
+                ),
+                if (_fileName.isNotEmpty) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Attached $_fileName',
+                      style: const TextStyle(color: Colors.black54, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              _error!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Enough of a mapping for what a church actually attaches. Anything
+/// else is stored as a generic download rather than guessed at.
+String contentTypeFor(String? extension) => switch ((extension ?? '').toLowerCase()) {
+      'pdf' => 'application/pdf',
+      'png' => 'image/png',
+      'jpg' || 'jpeg' => 'image/jpeg',
+      'gif' => 'image/gif',
+      'doc' => 'application/msword',
+      'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'xls' => 'application/vnd.ms-excel',
+      'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'txt' => 'text/plain',
+      _ => 'application/octet-stream',
+    };

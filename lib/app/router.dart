@@ -26,6 +26,7 @@ import '../features/admin/presentation/audit_admin_screen.dart';
 import '../features/admin/presentation/connect_admin_screen.dart';
 import '../features/admin/presentation/devotionals_admin_screen.dart';
 import '../features/admin/presentation/events_admin_screen.dart';
+import '../features/admin/presentation/form_responses_screen.dart';
 import '../features/admin/presentation/forms_admin_screen.dart';
 import '../features/admin/presentation/groups_admin_screen.dart';
 import '../features/admin/presentation/kids_admin_screen.dart';
@@ -185,6 +186,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/admin/forms/:id',
             builder: (_, state) => FormBuilderScreen(formId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: '/admin/forms/:id/responses',
+            builder: (_, state) => FormResponsesScreen(formId: state.pathParameters['id']!),
           ),
           GoRoute(path: '/admin/members', builder: (_, _) => const MembersAdminScreen()),
           GoRoute(path: '/admin/settings', builder: (_, _) => const SettingsAdminScreen()),

@@ -1,6 +1,11 @@
+import 'dart:math';
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/storage/file_storage.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../notifications/application/notification_providers.dart';
 import '../data/form_repository.dart';
 import '../domain/church_form.dart';
 import '../domain/form_submission.dart';
@@ -71,6 +76,7 @@ final formControllerProvider = Provider<FormController>((ref) => FormController(
 
 class FormController {
   final Ref _ref;
+  final Random _random = Random();
 
   FormController(this._ref);
 
@@ -92,17 +98,61 @@ class FormController {
     if (missing.isNotEmpty) return MissingAnswers(missing);
 
     final user = _ref.read(currentUserProvider);
-    await _ref.read(submissionRepositoryProvider).create(FormSubmission(
-          formId: form.id,
-          formTitle: form.title,
-          uid: user?.uid ?? '',
-          submitterName: submitterName.trim().isEmpty ? (user?.displayName ?? '') : submitterName.trim(),
-          submitterEmail: submitterEmail.trim().isEmpty ? (user?.email ?? '') : submitterEmail.trim(),
-          answers: form.prune(answers),
-          submittedAt: DateTime.now(),
-        ));
+    final submission = FormSubmission(
+      formId: form.id,
+      formTitle: form.title,
+      uid: user?.uid ?? '',
+      submitterName: submitterName.trim().isEmpty ? (user?.displayName ?? '') : submitterName.trim(),
+      submitterEmail: submitterEmail.trim().isEmpty ? (user?.email ?? '') : submitterEmail.trim(),
+      answers: form.prune(answers),
+      submittedAt: DateTime.now(),
+    );
+    await _ref.read(submissionRepositoryProvider).create(submission);
+
+    // Routed after the write, and deliberately not awaited into the
+    // failure path: a notification that doesn't send must never look to
+    // the member like a registration that didn't save.
+    if (form.notifyUids.isNotEmpty) {
+      await _ref.read(notificationSenderProvider).sendToMany(
+            uids: form.notifyUids,
+            title: 'New response: ${form.title}',
+            message: '${submission.who} submitted "${form.title}".',
+            linkPath: '/admin/forms/${form.id}/responses',
+            category: 'announcements',
+          );
+    }
+
     _ref.read(submissionRefreshProvider.notifier).state++;
     return null;
+  }
+
+  bool get canUploadAnswers => _ref.read(fileStorageProvider).supportsUpload;
+
+  /// Store an answer's file and return its URL.
+  ///
+  /// Prefixed uniquely and sanitised, like the resource library: two
+  /// people uploading `photo.jpg` must not overwrite each other, and a
+  /// crafted name must not escape the prefix. The random component
+  /// matters - a timestamp alone collides inside one millisecond.
+  Future<String> uploadAnswerFile({
+    required String formId,
+    required String fileName,
+    required Uint8List bytes,
+    required String contentType,
+  }) {
+    final safe = fileName.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+    final unique = '${DateTime.now().millisecondsSinceEpoch}${_random.nextInt(1 << 20)}';
+    final safeForm = formId.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+    return _ref.read(fileStorageProvider).upload(
+          path: 'formUploads/$safeForm/${unique}_$safe',
+          bytes: bytes,
+          contentType: contentType,
+        );
+  }
+
+  Future<void> deleteSubmission(String id) async {
+    await _ref.read(submissionRepositoryProvider).delete(id);
+    _ref.read(submissionRefreshProvider.notifier).state++;
   }
 
   Future<void> save(FormDefinition form) async {
