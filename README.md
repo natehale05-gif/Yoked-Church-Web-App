@@ -233,6 +233,38 @@ your own fork, or the buttons will hand your members somebody else's
 builds. Leave it blank and the page, its route and its links all
 disappear.
 
+### Sign the Android build before your second release
+
+Android refuses to install an APK over one signed with a different key —
+the member sees "App not installed" and has to uninstall first. Without
+an upload key configured, the build falls back to Gradle's debug
+keystore, and CI generates a fresh one on every run, so **no release
+would ever install as an update over the previous one**.
+
+Fixing it is a one-time setup. Generate a key and keep it somewhere
+safe — losing it means never being able to update the app again:
+
+```bash
+keytool -genkey -v -keystore upload-keystore.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+base64 -w0 upload-keystore.jks    # macOS: base64 -i upload-keystore.jks
+```
+
+Add three repository secrets (**Settings → Secrets and variables →
+Actions**):
+
+| Secret | Value |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | the base64 output above |
+| `ANDROID_KEYSTORE_PASSWORD` | the password you chose |
+| `ANDROID_KEY_ALIAS` | `upload` |
+
+The release workflow picks them up automatically. With none set it still
+builds, and logs a warning saying the APK cannot be installed as an
+update. To build a signed release locally instead, put the same values
+in `android/key.properties` (`storeFile`, `storePassword`, `keyAlias`,
+`keyPassword`) — that file and `*.jks` are both gitignored.
+
 ### Nothing here is code-signed
 
 Signing needs an Apple Developer account (~$99/yr) and a Windows

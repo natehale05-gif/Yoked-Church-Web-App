@@ -4,6 +4,25 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Optional upload key, read from android/key.properties.
+//
+// Android will not install an APK over one signed with a different key -
+// the member gets "App not installed" and has to uninstall first, losing
+// their local state. Flutter's template signs release builds with the
+// *debug* keystore, and CI generates a fresh debug keystore on every
+// run, so consecutive releases would each be signed by a different key
+// and no update would ever install cleanly.
+//
+// So: if a real keystore is configured, use it. If not, fall back to the
+// debug key as before, because a template has to build for someone who
+// has just cloned it and set nothing up. The release workflow writes
+// this file from repository secrets when they exist; README says how.
+val keystoreProperties = java.util.Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+val hasUploadKey = keystoreProperties.getProperty("storeFile") != null
+
 android {
     namespace = "com.yokedchurch.yoked_church_app"
     compileSdk = flutter.compileSdkVersion
@@ -25,11 +44,29 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (hasUploadKey) {
+            create("upload") {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // See the note at the top of this file: the debug key is the
+            // fallback for an unconfigured clone, not the intended way to
+            // ship. Every release built without an upload key is signed by
+            // a different key, and Android refuses to install one over
+            // another.
+            signingConfig = if (hasUploadKey) {
+                signingConfigs.getByName("upload")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }

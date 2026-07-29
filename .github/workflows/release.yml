@@ -67,6 +67,40 @@ jobs:
 
       - run: flutter pub get
 
+      # Sign the APK with a stable upload key when one is configured.
+      #
+      # Without this the build falls back to Gradle's debug keystore,
+      # which the runner generates fresh every time - so each release
+      # would be signed by a different key, and Android refuses to
+      # install an update signed by a different key than the installed
+      # app. Members would have to uninstall and lose local state on
+      # every release. See the README for generating the keystore and
+      # setting these three secrets.
+      # The emptiness check is in the script, not in `if:` - a step
+      # cannot read its own `env` from its `if`, and that mistake fails
+      # open, silently shipping debug-signed APKs.
+      - name: Configure Android signing
+        if: matrix.target == 'android'
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE" ]; then
+            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret set. This APK will be"
+            echo "::warning::signed with a throwaway debug key, so members will not be"
+            echo "::warning::able to install it as an update over an earlier release."
+            exit 0
+          fi
+          echo "$KEYSTORE" | base64 --decode > android/upload-keystore.jks
+          cat > android/key.properties <<PROPS
+          storeFile=$PWD/android/upload-keystore.jks
+          storePassword=$STORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$STORE_PASSWORD
+          PROPS
+          echo "Signing with the configured upload key."
+
       - name: Build
         run: flutter build ${{ matrix.target == 'android' && 'apk' || matrix.target }} --release
 
