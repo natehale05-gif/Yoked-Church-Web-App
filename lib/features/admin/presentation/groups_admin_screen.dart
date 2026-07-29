@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../audit_log/application/audit_providers.dart';
+import '../../auth/application/auth_providers.dart';
+import '../../auth/domain/app_user.dart';
 import '../../groups/application/group_providers.dart';
 import '../../groups/domain/group.dart';
 import 'admin_header.dart';
@@ -163,24 +165,26 @@ class _RosterDialog extends ConsumerWidget {
   }
 }
 
-class _GroupForm extends StatefulWidget {
+class _GroupForm extends ConsumerStatefulWidget {
   final ChurchGroup? existing;
 
   const _GroupForm({this.existing});
 
   @override
-  State<_GroupForm> createState() => _GroupFormState();
+  ConsumerState<_GroupForm> createState() => _GroupFormState();
 }
 
-class _GroupFormState extends State<_GroupForm> {
+class _GroupFormState extends ConsumerState<_GroupForm> {
   final _formKey = GlobalKey<FormState>();
   late final Map<String, TextEditingController> _c;
   late bool _openToJoin;
+  String _leaderUid = '';
 
   @override
   void initState() {
     super.initState();
     final e = widget.existing;
+    _leaderUid = e?.leaderUid ?? '';
     _c = {
       'name': TextEditingController(text: e?.name ?? ''),
       'category': TextEditingController(text: e?.category ?? ''),
@@ -205,6 +209,12 @@ class _GroupFormState extends State<_GroupForm> {
 
   @override
   Widget build(BuildContext context) {
+    final members = ref.watch(allMembersProvider).valueOrNull ?? const <AppUser>[];
+    // A leader who was set before their account was linked - or whose
+    // account was since deleted - must not silently vanish from the
+    // dropdown, or saving the form would quietly unassign them.
+    final knownLeader = _leaderUid.isEmpty || members.any((m) => m.uid == _leaderUid);
+
     return AdminFormDialog(
       title: widget.existing == null ? 'New Group' : 'Edit Group',
       onSave: () {
@@ -216,6 +226,7 @@ class _GroupFormState extends State<_GroupForm> {
             name: _t('name'),
             category: _t('category'),
             leaderName: _t('leaderName'),
+            leaderUid: _leaderUid,
             meetingDay: _t('meetingDay'),
             meetingTime: _t('meetingTime'),
             location: _t('location'),
@@ -237,6 +248,25 @@ class _GroupFormState extends State<_GroupForm> {
             ),
             TextFormField(controller: _c['category'], decoration: const InputDecoration(labelText: 'Category')),
             TextFormField(controller: _c['leaderName'], decoration: const InputDecoration(labelText: 'Leader')),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              initialValue: knownLeader ? _leaderUid : '',
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: "Leader's account",
+                helperText: 'Lets them see this group\'s attendance history.',
+                helperMaxLines: 2,
+              ),
+              items: [
+                const DropdownMenuItem(value: '', child: Text('Not linked')),
+                for (final m in members)
+                  DropdownMenuItem(
+                    value: m.uid,
+                    child: Text(m.displayName.isEmpty ? m.email : m.displayName),
+                  ),
+              ],
+              onChanged: (value) => setState(() => _leaderUid = value ?? ''),
+            ),
             TextFormField(
               controller: _c['meetingDay'],
               decoration: const InputDecoration(labelText: 'Meeting day'),

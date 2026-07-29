@@ -206,6 +206,23 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Attendance. Staff record and read everything; a group's leader can
+    // read their own group's records, because "who has stopped coming" is
+    // the one question attendance actually answers for them.
+    //
+    // No member-wide read: a list of who was and wasn't in the room is
+    // pastoral information, not a directory.
+    function leadsGroup(groupId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/groups/$(groupId)).data.leaderUid == request.auth.uid;
+    }
+
+    match /attendanceRecords/{id} {
+      allow read: if isStaff() ||
+        (resource.data.gatheringType == 'group' && leadsGroup(resource.data.gatheringId));
+      allow write: if isStaff();
+    }
+
     // The audit trail. Append-only by design: staff append by acting, and
     // nobody - not even an admin - can rewrite or erase history, which is
     // the entire point of keeping it. Reading is admin-only.

@@ -44,13 +44,16 @@ void main() {
     'readingPlans': ['/reading-plans', '/reading-plans/p1', '/admin/reading-plans', '/account/reading'],
     'resources': ['/resources', '/admin/resources'],
     'prayerWall': ['/account/prayer', '/admin/prayer'],
+    'kidsCheckIn': ['/account/kids', '/admin/kids'],
+    'roomBooking': ['/account/bookings', '/admin/rooms'],
+    'attendance': ['/admin/attendance'],
   };
 
   test('every flag in the settings screen is covered by this test', () {
-    // groups, volunteering and kidsCheckIn/roomBooking gate tabs and
-    // sections rather than whole routes; they are asserted separately
-    // below and in their own feature tests.
-    const gatedElsewhere = {'groups', 'volunteering', 'kidsCheckIn', 'roomBooking'};
+    // groups and volunteering gate tabs and sections rather than whole
+    // routes; they are asserted separately below and in their own
+    // feature tests.
+    const gatedElsewhere = {'groups', 'volunteering'};
     final allKeys = const FeatureFlags().toMap().keys.toSet();
 
     expect(

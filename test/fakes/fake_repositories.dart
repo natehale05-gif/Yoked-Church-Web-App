@@ -9,6 +9,9 @@ import 'package:yoked_church_app/core/firestore/crud_repository.dart';
 import 'package:yoked_church_app/features/announcements/application/announcement_providers.dart';
 import 'package:yoked_church_app/features/announcements/data/announcement_repository.dart';
 import 'package:yoked_church_app/features/announcements/domain/announcement.dart';
+import 'package:yoked_church_app/features/attendance/application/attendance_providers.dart';
+import 'package:yoked_church_app/features/attendance/data/attendance_repository.dart';
+import 'package:yoked_church_app/features/attendance/domain/attendance_record.dart';
 import 'package:yoked_church_app/features/audit_log/application/audit_providers.dart';
 import 'package:yoked_church_app/features/audit_log/data/audit_repository.dart';
 import 'package:yoked_church_app/features/audit_log/domain/audit_entry.dart';
@@ -491,6 +494,33 @@ class FakeCheckInRepository extends LocalCrudRepository<CheckInSession> implemen
   Future<List<CheckInSession>> forRoom(String roomId) => fetchWhere((s) => s.roomId == roomId);
 }
 
+class FakeAttendanceRepository extends LocalCrudRepository<AttendanceRecord>
+    implements AttendanceRepository {
+  @override
+  AttendanceRecord fromMap(String id, Map<String, dynamic> map) => AttendanceRecord.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(AttendanceRecord entity) => entity.toMap();
+  @override
+  String idOf(AttendanceRecord entity) => entity.id;
+  @override
+  int Function(AttendanceRecord, AttendanceRecord)? get sorter => (a, b) => b.date.compareTo(a.date);
+  @override
+  Future<List<AttendanceRecord>> forGathering(String gatheringId) =>
+      fetchWhere((r) => r.gatheringId == gatheringId);
+  @override
+  Future<void> setRecord(AttendanceRecord record) => update(AttendanceRecord(
+        id: attendanceId(record.gatheringType, record.gatheringId, record.date),
+        gatheringType: record.gatheringType,
+        gatheringId: record.gatheringId,
+        gatheringName: record.gatheringName,
+        date: record.date,
+        headcount: record.headcount,
+        presentUids: record.presentUids,
+        note: record.note,
+        recordedBy: record.recordedBy,
+      ));
+}
+
 class FakeAuditRepository extends LocalCrudRepository<AuditEntry> implements AuditRepository {
   @override
   AuditEntry fromMap(String id, Map<String, dynamic> map) => AuditEntry.fromMap(id, map);
@@ -532,6 +562,7 @@ List<Override> fakeOverrides({
   List<Room> rooms = const [],
   List<RoomBooking> bookings = const [],
   List<CheckInSession> checkIns = const [],
+  List<AttendanceRecord> attendance = const [],
   FakeFileStorage? storage,
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
@@ -580,6 +611,7 @@ List<Override> fakeOverrides({
     roomRepositoryProvider.overrideWithValue(FakeRoomRepository()..seedInMemory(rooms)),
     bookingRepositoryProvider.overrideWithValue(FakeBookingRepository()..seedInMemory(bookings)),
     checkInRepositoryProvider.overrideWithValue(FakeCheckInRepository()..seedInMemory(checkIns)),
+    attendanceRepositoryProvider.overrideWithValue(FakeAttendanceRepository()..seedInMemory(attendance)),
   ];
 }
 

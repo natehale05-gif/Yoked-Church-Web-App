@@ -11,7 +11,7 @@
     "category": "Fellowship",
     "description": "Twenties and thirties gathering for dinner, discussion, and a lot of board games.",
     "meetingDay": "Thursday", "meetingTime": "7:00 PM", "location": "Fellowship Hall",
-    "leaderName": "Marcus Reed", "openToJoin": true
+    "leaderName": "Demo Member", "leaderUid": "demo-member", "openToJoin": true
   },
   {
     "name": "Men's Breakfast",

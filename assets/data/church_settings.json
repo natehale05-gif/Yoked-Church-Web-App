@@ -42,6 +42,7 @@
     "devotionals": true,
     "resources": true,
     "kidsCheckIn": true,
-    "roomBooking": true
+    "roomBooking": true,
+    "attendance": true
   }
 }

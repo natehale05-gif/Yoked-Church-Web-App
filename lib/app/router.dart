@@ -21,6 +21,7 @@ import '../features/account/presentation/prayer_wall_screen.dart';
 import '../features/account/presentation/profile_screen.dart';
 import '../features/admin/presentation/admin_home_screen.dart';
 import '../features/admin/presentation/announcements_admin_screen.dart';
+import '../features/admin/presentation/attendance_admin_screen.dart';
 import '../features/admin/presentation/audit_admin_screen.dart';
 import '../features/admin/presentation/connect_admin_screen.dart';
 import '../features/admin/presentation/devotionals_admin_screen.dart';
@@ -75,6 +76,7 @@ bool _flagAllows(FeatureFlags flags, String path) {
   if (owns('/account/prayer') || owns('/admin/prayer')) return flags.prayerWall;
   if (owns('/account/bookings') || owns('/admin/rooms')) return flags.roomBooking;
   if (owns('/account/kids') || owns('/admin/kids')) return flags.kidsCheckIn;
+  if (owns('/admin/attendance')) return flags.attendance;
   return true;
 }
 
@@ -169,6 +171,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/prayer', builder: (_, _) => const PrayerAdminScreen()),
           GoRoute(path: '/admin/rooms', builder: (_, _) => const RoomsAdminScreen()),
           GoRoute(path: '/admin/kids', builder: (_, _) => const KidsAdminScreen()),
+          GoRoute(path: '/admin/attendance', builder: (_, _) => const AttendanceAdminScreen()),
           GoRoute(path: '/admin/members', builder: (_, _) => const MembersAdminScreen()),
           GoRoute(path: '/admin/settings', builder: (_, _) => const SettingsAdminScreen()),
           GoRoute(path: '/admin/audit', builder: (_, _) => const AuditAdminScreen()),

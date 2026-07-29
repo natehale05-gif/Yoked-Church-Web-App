@@ -303,6 +303,7 @@ const _featureLabels = {
   'resources': 'Resource library',
   'kidsCheckIn': 'Kids check-in',
   'roomBooking': 'Room booking',
+  'attendance': 'Attendance tracking',
 };
 
 class _Section extends StatelessWidget {

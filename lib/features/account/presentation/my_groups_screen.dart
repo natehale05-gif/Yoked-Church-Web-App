@@ -5,6 +5,8 @@ import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/section_container.dart';
+import '../../attendance/application/attendance_providers.dart';
+import '../../attendance/presentation/group_attendance_panel.dart';
 import '../../groups/application/group_providers.dart';
 import '../../groups/domain/group.dart';
 import 'account_header.dart';
@@ -16,22 +18,41 @@ class MyGroupsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final memberships = ref.watch(myMembershipsProvider).valueOrNull ?? const [];
     final byGroupId = {for (final m in memberships) m.groupId: m};
+    final led = ref.watch(featureFlagsProvider).attendance
+        ? ref.watch(myLedGroupsProvider)
+        : const <ChurchGroup>[];
 
     return PageBody(
       children: [
         const AccountHeader(title: 'Groups', subtitle: 'Find a small group or ministry team to join.'),
         SectionContainer(
           maxWidth: 820,
-          child: AsyncListWidget<ChurchGroup>(
-            value: ref.watch(groupsProvider),
-            errorContext: 'groups',
-            emptyMessage: 'No groups have been posted yet - check back soon.',
-            data: (groups) => Column(
-              children: [
-                for (final group in groups)
-                  _GroupTile(group: group, membership: byGroupId[group.id]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Only leaders ever see this, so it hides entirely rather
+              // than showing an empty panel to the other ninety-nine
+              // per cent.
+              if (led.isNotEmpty) ...[
+                Text('Groups you lead', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 12),
+                for (final group in led) GroupAttendancePanel(group: group),
+                const SizedBox(height: 24),
+                Text('All groups', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 12),
               ],
-            ),
+              AsyncListWidget<ChurchGroup>(
+                value: ref.watch(groupsProvider),
+                errorContext: 'groups',
+                emptyMessage: 'No groups have been posted yet - check back soon.',
+                data: (groups) => Column(
+                  children: [
+                    for (final group in groups)
+                      _GroupTile(group: group, membership: byGroupId[group.id]),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ],

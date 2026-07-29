@@ -5,6 +5,8 @@ import '../core/config/settings_repository.dart';
 import '../core/storage/file_storage.dart';
 import '../features/announcements/application/announcement_providers.dart';
 import '../features/announcements/data/announcement_repository.dart';
+import '../features/attendance/application/attendance_providers.dart';
+import '../features/attendance/data/attendance_repository.dart';
 import '../features/audit_log/application/audit_providers.dart';
 import '../features/audit_log/data/audit_repository.dart';
 import '../features/auth/application/auth_providers.dart';
@@ -92,6 +94,7 @@ List<Override> localOverrides() {
       bookingRepositoryProvider.overrideWithValue(LocalBookingRepository()),
       prayerPostRepositoryProvider.overrideWithValue(LocalPrayerPostRepository()),
       intercessionRepositoryProvider.overrideWithValue(LocalIntercessionRepository()),
+      attendanceRepositoryProvider.overrideWithValue(LocalAttendanceRepository()),
     ];
 }
 
@@ -127,6 +130,7 @@ List<Override> firestoreOverrides() => [
       bookingRepositoryProvider.overrideWithValue(FirestoreBookingRepository()),
       prayerPostRepositoryProvider.overrideWithValue(FirestorePrayerPostRepository()),
       intercessionRepositoryProvider.overrideWithValue(FirestoreIntercessionRepository()),
+      attendanceRepositoryProvider.overrideWithValue(FirestoreAttendanceRepository()),
     ];
 
 List<Override> overridesFor(Backend backend) =>

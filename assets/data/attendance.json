@@ -1,0 +1,50 @@
+[
+  {
+    "gatheringType": "service", "gatheringId": "Sunday 9:00 AM",
+    "gatheringName": "Traditional Service (Sunday 9:00 AM)",
+    "date": "2026-07-26T00:00:00", "headcount": 118, "presentUids": [],
+    "note": "", "recordedBy": "John Miller"
+  },
+  {
+    "gatheringType": "service", "gatheringId": "Sunday 9:00 AM",
+    "gatheringName": "Traditional Service (Sunday 9:00 AM)",
+    "date": "2026-07-19T00:00:00", "headcount": 104, "presentUids": [],
+    "note": "", "recordedBy": "John Miller"
+  },
+  {
+    "gatheringType": "service", "gatheringId": "Sunday 9:00 AM",
+    "gatheringName": "Traditional Service (Sunday 9:00 AM)",
+    "date": "2026-07-12T00:00:00", "headcount": 96, "presentUids": [],
+    "note": "Storms overnight", "recordedBy": "John Miller"
+  },
+  {
+    "gatheringType": "service", "gatheringId": "Sunday 11:00 AM",
+    "gatheringName": "Contemporary Service (Sunday 11:00 AM)",
+    "date": "2026-07-26T00:00:00", "headcount": 187, "presentUids": [],
+    "note": "", "recordedBy": "John Miller"
+  },
+  {
+    "gatheringType": "service", "gatheringId": "Sunday 11:00 AM",
+    "gatheringName": "Contemporary Service (Sunday 11:00 AM)",
+    "date": "2026-07-19T00:00:00", "headcount": 172, "presentUids": [],
+    "note": "", "recordedBy": "John Miller"
+  },
+  {
+    "gatheringType": "group", "gatheringId": "local-1", "gatheringName": "Young Adults",
+    "date": "2026-07-23T00:00:00", "headcount": 0,
+    "presentUids": ["demo-member", "local-1"],
+    "note": "", "recordedBy": "Demo Member"
+  },
+  {
+    "gatheringType": "group", "gatheringId": "local-1", "gatheringName": "Young Adults",
+    "date": "2026-07-16T00:00:00", "headcount": 0,
+    "presentUids": ["demo-member", "local-0", "local-1"],
+    "note": "", "recordedBy": "Demo Member"
+  },
+  {
+    "gatheringType": "group", "gatheringId": "local-1", "gatheringName": "Young Adults",
+    "date": "2026-07-09T00:00:00", "headcount": 0,
+    "presentUids": ["demo-member", "local-1"],
+    "note": "Cookout at the Patels'", "recordedBy": "Demo Member"
+  }
+]

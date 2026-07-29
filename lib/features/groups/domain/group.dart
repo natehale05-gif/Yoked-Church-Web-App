@@ -10,6 +10,11 @@ class ChurchGroup {
   final String meetingTime;
   final String location;
   final String leaderName;
+
+  /// The leader's account, when they have one. Distinct from
+  /// [leaderName]: the name is display copy a church types in, this is
+  /// the identity that grants them their own group's attendance history.
+  final String leaderUid;
   final String imageUrl;
   final bool openToJoin;
 
@@ -22,6 +27,7 @@ class ChurchGroup {
     this.meetingTime = '',
     this.location = '',
     this.leaderName = '',
+    this.leaderUid = '',
     this.imageUrl = '',
     this.openToJoin = true,
   });
@@ -35,6 +41,7 @@ class ChurchGroup {
         meetingTime: map['meetingTime'] as String? ?? '',
         location: map['location'] as String? ?? '',
         leaderName: map['leaderName'] as String? ?? '',
+        leaderUid: map['leaderUid'] as String? ?? '',
         imageUrl: map['imageUrl'] as String? ?? '',
         openToJoin: map['openToJoin'] as bool? ?? true,
       );
@@ -47,6 +54,7 @@ class ChurchGroup {
         'meetingTime': meetingTime,
         'location': location,
         'leaderName': leaderName,
+        'leaderUid': leaderUid,
         'imageUrl': imageUrl,
         'openToJoin': openToJoin,
       };
@@ -63,6 +71,7 @@ class ChurchGroup {
     String? meetingTime,
     String? location,
     String? leaderName,
+    String? leaderUid,
     String? imageUrl,
     bool? openToJoin,
   }) =>
@@ -75,6 +84,7 @@ class ChurchGroup {
         meetingTime: meetingTime ?? this.meetingTime,
         location: location ?? this.location,
         leaderName: leaderName ?? this.leaderName,
+        leaderUid: leaderUid ?? this.leaderUid,
         imageUrl: imageUrl ?? this.imageUrl,
         openToJoin: openToJoin ?? this.openToJoin,
       );

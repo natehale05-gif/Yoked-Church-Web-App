@@ -59,6 +59,9 @@ class LocalMembershipRepository extends LocalCrudRepository<GroupMembership>
     with _MembershipCodec
     implements MembershipRepository {
   @override
+  String? get seedAsset => 'assets/data/group_memberships.json';
+
+  @override
   Future<List<GroupMembership>> forMember(String uid) => fetchWhere((m) => m.uid == uid);
 
   @override
