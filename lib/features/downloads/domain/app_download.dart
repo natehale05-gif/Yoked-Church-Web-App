@@ -95,8 +95,10 @@ const List<AppDownload> appBuilds = [
     label: 'Linux',
     asset: 'yoked-church-linux.tar.gz',
     fileHint: 'tar.gz archive · 64-bit, GTK 3',
+    // No backticks: this is rendered as plain text, not markdown, and
+    // they show up literally on the page.
     install: 'Extract it and run the executable inside: '
-        '`tar -xzf yoked-church-linux.tar.gz && ./yoked_church_app`.',
+        'tar -xzf yoked-church-linux.tar.gz, then ./yoked_church_app',
     warning: 'Nothing to get past here - Linux does not gatekeep unsigned '
         'applications.',
     // Firebase publishes no Linux plugin: firebase_core, cloud_firestore,

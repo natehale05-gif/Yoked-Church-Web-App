@@ -197,15 +197,89 @@ Pages.
 One-time setup: **Settings → Pages → Source: GitHub Actions**. The site
 lands at `https://<user>.github.io/<repo>/`.
 
-## iOS and Android
+## Download the app
 
-`android/` and `ios/` scaffolds are present and the code is
-platform-clean: the only web-specific API in the app (the CSV download in
-`lib/core/export/`) sits behind a conditional import, so mobile builds
-get a clipboard fallback instead of a compile error.
+The same app also installs on a desktop or an Android phone. Every
+release publishes four artifacts, and the in-app `/download` page links
+straight to the newest one:
 
-Beyond that, the mobile targets are **unverified** — no build has been
-run on a device or simulator, and neither store's signing, icons, or
-permissions have been set up. CI builds a debug APK on every push, so a
-break is caught, but treat "runs on a phone" as work still to do rather
-than a claim this template makes.
+| Platform | File | Link |
+|---|---|---|
+| Windows | `yoked-church-windows.zip` | [Download](https://github.com/natehale05-gif/yoked-church-web-app/releases/latest/download/yoked-church-windows.zip) |
+| macOS | `yoked-church-macos.zip` | [Download](https://github.com/natehale05-gif/yoked-church-web-app/releases/latest/download/yoked-church-macos.zip) |
+| Android | `yoked-church-android.apk` | [Download](https://github.com/natehale05-gif/yoked-church-web-app/releases/latest/download/yoked-church-android.apk) |
+| Linux | `yoked-church-linux.tar.gz` | [Download](https://github.com/natehale05-gif/yoked-church-web-app/releases/latest/download/yoked-church-linux.tar.gz) |
+
+These are `releases/latest/download/...` URLs, so they keep working
+across every future release without editing anything.
+
+### Cutting a release
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+That runs [`.github/workflows/release.yml`](.github/workflows/release.yml),
+which builds all four and attaches them to a GitHub release.
+`workflow_dispatch` runs the same builds without publishing, if you want
+to exercise the pipeline without spending a version number.
+
+### For your own fork
+
+The download page reads the repository from **church settings →
+Releases repository** (`releasesRepo`, as `owner/repo`). Point it at
+your own fork, or the buttons will hand your members somebody else's
+builds. Leave it blank and the page, its route and its links all
+disappear.
+
+### Nothing here is code-signed
+
+Signing needs an Apple Developer account (~$99/yr) and a Windows
+certificate (~$200/yr), so these builds carry neither, and every
+platform says so on first launch:
+
+- **macOS** — "cannot be opened because the developer cannot be
+  verified". Right-click the app → Open → Open.
+- **Windows** — SmartScreen: "Windows protected your PC" → More info →
+  Run anyway.
+- **Android** — asks permission to install from an unknown source.
+
+The `/download` page carries each of these next to its button, so a
+member is warned before they click rather than alarmed after. Adding
+signing later means adding secrets to the workflow, not restructuring
+it.
+
+### Two limits worth knowing
+
+- **The Linux build cannot sign in.** No Firebase plugin supports Linux
+  desktop — `firebase_core`, `cloud_firestore`, `firebase_auth` and
+  `firebase_storage` all declare android, iOS, macOS, web and Windows
+  only. `main.dart` falls back to the bundled content instead of
+  crashing, so the Linux app is a working demo, not a live client.
+- **There is no iOS download.** Apple has no sideloading; an iOS build
+  can only reach a phone through the App Store or TestFlight, both of
+  which need a paid account and a review. iPhone visitors are pointed at
+  "Add to Home Screen" instead.
+
+## What is and isn't verified per platform
+
+`android/`, `ios/`, `linux/`, `macos/`, `web/` and `windows/` scaffolds
+are all present, and the code is platform-clean: the only web-specific
+API in the app (the CSV download in `lib/core/export/`) sits behind a
+conditional import, so non-web builds get a clipboard fallback instead
+of a compile error.
+
+- **Web** — deployed and exercised in a browser.
+- **Linux** — `flutter build linux --release` built and the resulting
+  binary launched; it renders the demo.
+- **Android, Windows, macOS** — built by CI, not run on a device. Icons
+  and store metadata are still default, and nothing is signed.
+
+Two release-only defects were fixed while wiring this up, both worth
+knowing about if you re-scaffold: Flutter's template declares the
+Android `INTERNET` permission and the macOS `network.client` entitlement
+in the *debug* configuration only, so a release build works while you
+develop it and cannot reach its backend once shipped. Both now live in
+`android/app/src/main/AndroidManifest.xml` and
+`macos/Runner/Release.entitlements`.
