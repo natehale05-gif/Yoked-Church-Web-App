@@ -280,8 +280,10 @@ Actions**):
 The release workflow picks them up automatically. With none set it still
 builds, and logs a warning saying the APK cannot be installed as an
 update. To build a signed release locally instead, put the same values
-in `android/key.properties` (`storeFile`, `storePassword`, `keyAlias`,
-`keyPassword`) — that file and `*.jks` are both gitignored.
+in `android/key.properties` — `storeFile` (an **absolute** path to the
+`.jks`, since a relative one resolves against `android/app`),
+`storePassword`, `keyAlias`, `keyPassword`. That file and `*.jks` are
+both gitignored.
 
 ### Nothing here is code-signed
 
