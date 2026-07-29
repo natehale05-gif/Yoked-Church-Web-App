@@ -34,8 +34,16 @@ jobs:
           - target: android
             os: ubuntu-latest
             asset: yoked-church-android.apk
+          # Pinned, not `ubuntu-latest`: a Linux binary runs on any glibc
+          # at least as new as the one it was built against, and never on
+          # an older one. Building on the newest runner would produce
+          # "GLIBC_2.xx not found" for anyone on a distro a year behind -
+          # which is most people. 22.04 ships glibc 2.35, so the binary
+          # runs on 22.04, Debian 12, and everything since.
+          #
+          # Move this forward deliberately, knowing who it drops.
           - target: linux
-            os: ubuntu-latest
+            os: ubuntu-22.04
             asset: yoked-church-linux.tar.gz
           - target: windows
             os: windows-latest
