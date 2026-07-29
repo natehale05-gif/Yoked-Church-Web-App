@@ -35,15 +35,33 @@ The shape of all of it is
 
 ### Feature flags
 
-Fourteen switches on the settings screen: `sermons`, `events`, `giving`,
+Fifteen switches on the settings screen: `sermons`, `events`, `giving`,
 `connect`, `groups`, `volunteering`, `prayerWall`, `readingPlans`,
 `devotionals`, `resources`, `kidsCheckIn`, `roomBooking`, `attendance`,
-`forms`.
+`forms`, `appDownloads`.
 
 Turning one off **closes its routes**, not just its nav link — the page
 stops answering for anyone holding the URL, and for search engines that
 already indexed it. `test/features/feature_flags_test.dart` fails if a
 new flag is ever added without a route guard behind it.
+
+### App icons
+
+The launcher icons for Android, macOS, Windows and the web are generated
+from the same mark the site's wordmark uses — `Icons.church` in the
+church's own primary and accent colours — so they cannot drift from the
+app when a brand colour changes:
+
+```bash
+flutter test tool/generate_app_icons.dart
+```
+
+That rewrites the icon files in `android/`, `macos/`, `windows/` and
+`web/`, including Android adaptive icons and a multi-size Windows `.ico`.
+The output is committed, so nobody has to run it to build the app — only
+after changing the colours in
+[`lib/core/config/church_settings.dart`](lib/core/config/church_settings.dart),
+or swapping the glyph in the generator for a church's own artwork.
 
 ### Sample content
 
