@@ -25,8 +25,15 @@ jobs:
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
 
-    # One platform failing should not hide whether the others work - a
-    # release missing one download is better than a release missing four.
+    # One platform failing should not cancel the others: you want to
+    # learn about all four failures in one run, not discover them one
+    # release at a time.
+    #
+    # This does *not* mean a partial release gets published. `publish`
+    # needs this job, so a single failed platform skips it entirely -
+    # which is the right trade. A release missing one asset is a download
+    # button that 404s for whoever owns that platform, and they have no
+    # way to tell that from the app being broken.
     strategy:
       fail-fast: false
       matrix:
