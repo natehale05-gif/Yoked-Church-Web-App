@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../app/theme.dart';
+import '../../../core/widgets/responsive.dart';
 import '../../audit_log/application/audit_providers.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../auth/domain/app_user.dart';
@@ -297,68 +298,77 @@ class _Settings extends ConsumerWidget {
               onChanged: (_) => onTouched(),
             ),
             const SizedBox(height: 8),
-            Row(
+            // Two switches with subtitles need more width than half a
+            // phone: side by side, the labels wrap to four lines each.
+            ResponsiveRow(
+              spacing: 8,
               children: [
-                Expanded(
-                  child: SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    title: const Text('Published'),
-                    subtitle: Text(
-                      draft.published ? '/forms/${draft.slug}' : 'Nobody can open it yet',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    value: draft.published,
-                    onChanged: (v) => onChanged((d) => d.copyWith(published: v)),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: const Text('Published'),
+                  subtitle: Text(
+                    draft.published ? '/forms/${draft.slug}' : 'Nobody can open it yet',
+                    style: const TextStyle(fontSize: 12),
                   ),
+                  value: draft.published,
+                  onChanged: (v) => onChanged((d) => d.copyWith(published: v)),
                 ),
-                Expanded(
-                  child: SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    title: const Text('Members only'),
-                    subtitle: const Text('Requires a sign-in', style: TextStyle(fontSize: 12)),
-                    value: draft.membersOnly,
-                    onChanged: (v) => onChanged((d) => d.copyWith(membersOnly: v)),
-                  ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: const Text('Members only'),
+                  subtitle: const Text('Requires a sign-in', style: TextStyle(fontSize: 12)),
+                  value: draft.membersOnly,
+                  onChanged: (v) => onChanged((d) => d.copyWith(membersOnly: v)),
                 ),
               ],
             ),
-            Row(
+            // The deadline picker and the save button get a line each on
+            // a phone; the clear button stays beside the date it clears.
+            ResponsiveRow(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              flex: const [3, 2],
               children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: draft.closesAt ?? DateTime.now().add(const Duration(days: 14)),
-                        firstDate: DateTime(DateTime.now().year - 1),
-                        lastDate: DateTime(DateTime.now().year + 5),
-                      );
-                      if (picked != null) {
-                        // End of the chosen day: a form that "closes on
-                        // the 14th" is open all of the 14th, which is
-                        // what anyone reading that sentence expects.
-                        onChanged((d) => d.copyWith(
-                              closesAt: DateTime(picked.year, picked.month, picked.day, 23, 59, 59),
-                            ));
-                      }
-                    },
-                    child: InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Closes'),
-                      child: Text(
-                        draft.closesAt == null ? 'No deadline' : DateFormat.yMMMd().format(draft.closesAt!),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: draft.closesAt ?? DateTime.now().add(const Duration(days: 14)),
+                            firstDate: DateTime(DateTime.now().year - 1),
+                            lastDate: DateTime(DateTime.now().year + 5),
+                          );
+                          if (picked != null) {
+                            // End of the chosen day: a form that "closes
+                            // on the 14th" is open all of the 14th, which
+                            // is what anyone reading that sentence expects.
+                            onChanged((d) => d.copyWith(
+                                  closesAt:
+                                      DateTime(picked.year, picked.month, picked.day, 23, 59, 59),
+                                ));
+                          }
+                        },
+                        child: InputDecorator(
+                          decoration: const InputDecoration(labelText: 'Closes'),
+                          child: Text(
+                            draft.closesAt == null
+                                ? 'No deadline'
+                                : DateFormat.yMMMd().format(draft.closesAt!),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    if (draft.closesAt != null)
+                      IconButton(
+                        tooltip: 'Remove the deadline',
+                        icon: const Icon(Icons.clear, size: 18),
+                        onPressed: () => onChanged((d) => d.copyWith(clearClosesAt: true)),
+                      ),
+                  ],
                 ),
-                if (draft.closesAt != null)
-                  IconButton(
-                    tooltip: 'Remove the deadline',
-                    icon: const Icon(Icons.clear, size: 18),
-                    onPressed: () => onChanged((d) => d.copyWith(clearClosesAt: true)),
-                  ),
-                const SizedBox(width: 16),
                 ElevatedButton.icon(
                   onPressed: saving ? null : onSave,
                   icon: const Icon(Icons.save_outlined, size: 18),

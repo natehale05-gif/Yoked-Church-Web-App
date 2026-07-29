@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_shell.dart';
+import '../../../core/widgets/responsive.dart';
 import '../../../core/widgets/section_container.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../auth/domain/app_user.dart';
@@ -195,25 +196,25 @@ class _Household extends StatelessWidget {
         for (var i = 0; i < rows.length; i++)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
+            // Name, relationship and date of birth are three fields, not
+            // a table: on a phone they stack, with the remove button
+            // staying beside the date it belongs to.
+            child: ResponsiveRow(
+              spacing: 12,
+              flex: const [2, 1, 1],
               children: [
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: rows[i].name,
-                    decoration: const InputDecoration(labelText: 'Name'),
-                  ),
+                TextField(
+                  controller: rows[i].name,
+                  decoration: const InputDecoration(labelText: 'Name'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: rows[i].relationship,
-                    decoration: const InputDecoration(labelText: 'Relationship'),
-                  ),
+                TextField(
+                  controller: rows[i].relationship,
+                  decoration: const InputDecoration(labelText: 'Relationship'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: InkWell(
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
                     onTap: () async {
                       final existing = rows[i].birthDate;
                       final picked = await showDatePicker(
@@ -248,12 +249,14 @@ class _Household extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => onRemove(i),
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: 'Remove',
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => onRemove(i),
+                      icon: const Icon(Icons.delete_outline),
+                      tooltip: 'Remove',
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/church_settings.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
+import '../../../core/widgets/responsive.dart';
 import '../../../core/widgets/section_container.dart';
 import '../application/settings_controller.dart';
 import 'admin_header.dart';
@@ -198,33 +199,34 @@ class _SettingsAdminScreenState extends ConsumerState<SettingsAdminScreen> {
                   for (var i = 0; i < _serviceTimes.length; i++)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: Row(
+                      // Day, time and label share about ninety pixels each
+                      // on a phone. Stacked, they are just three fields.
+                      child: ResponsiveRow(
+                        spacing: 12,
+                        flex: const [1, 1, 2],
                         children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _serviceTimes[i].day,
-                              decoration: const InputDecoration(labelText: 'Day'),
-                            ),
+                          TextField(
+                            controller: _serviceTimes[i].day,
+                            decoration: const InputDecoration(labelText: 'Day'),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: _serviceTimes[i].time,
-                              decoration: const InputDecoration(labelText: 'Time'),
-                            ),
+                          TextField(
+                            controller: _serviceTimes[i].time,
+                            decoration: const InputDecoration(labelText: 'Time'),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            flex: 2,
-                            child: TextField(
-                              controller: _serviceTimes[i].label,
-                              decoration: const InputDecoration(labelText: 'Label'),
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: 'Remove',
-                            icon: const Icon(Icons.delete_outline),
-                            onPressed: () => setState(() => _serviceTimes.removeAt(i).dispose()),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _serviceTimes[i].label,
+                                  decoration: const InputDecoration(labelText: 'Label'),
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: 'Remove',
+                                icon: const Icon(Icons.delete_outline),
+                                onPressed: () => setState(() => _serviceTimes.removeAt(i).dispose()),
+                              ),
+                            ],
                           ),
                         ],
                       ),
