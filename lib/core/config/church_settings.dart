@@ -18,6 +18,16 @@ class ChurchSettings {
   final String beliefs;
   final String visitInfo;
 
+  /// The `owner/repo` whose GitHub releases hold the installable apps,
+  /// e.g. `natehale05-gif/yoked-church-web-app`.
+  ///
+  /// A setting rather than a constant because this is sold as a template:
+  /// a church forks the repo and publishes its own releases, and a
+  /// hardcoded slug would point every fork's download buttons at somebody
+  /// else's builds. Blank hides the download page entirely, which is the
+  /// right default for a church that has never cut a release.
+  final String releasesRepo;
+
   final BrandColors colors;
   final ContactInfo contact;
   final SocialLinks social;
@@ -32,6 +42,7 @@ class ChurchSettings {
     this.aboutBody = '',
     this.beliefs = '',
     this.visitInfo = '',
+    this.releasesRepo = '',
     required this.colors,
     required this.contact,
     required this.social,
@@ -48,6 +59,7 @@ class ChurchSettings {
       aboutBody: map['aboutBody'] as String? ?? '',
       beliefs: map['beliefs'] as String? ?? '',
       visitInfo: map['visitInfo'] as String? ?? '',
+      releasesRepo: map['releasesRepo'] as String? ?? '',
       colors: BrandColors.fromMap(_sub(map['colors'])),
       contact: ContactInfo.fromMap(_sub(map['contact'])),
       social: SocialLinks.fromMap(_sub(map['social'])),
@@ -67,6 +79,7 @@ class ChurchSettings {
         'aboutBody': aboutBody,
         'beliefs': beliefs,
         'visitInfo': visitInfo,
+        'releasesRepo': releasesRepo,
         'colors': colors.toMap(),
         'contact': contact.toMap(),
         'social': social.toMap(),
@@ -82,6 +95,7 @@ class ChurchSettings {
     String? aboutBody,
     String? beliefs,
     String? visitInfo,
+    String? releasesRepo,
     BrandColors? colors,
     ContactInfo? contact,
     SocialLinks? social,
@@ -96,6 +110,7 @@ class ChurchSettings {
       aboutBody: aboutBody ?? this.aboutBody,
       beliefs: beliefs ?? this.beliefs,
       visitInfo: visitInfo ?? this.visitInfo,
+      releasesRepo: releasesRepo ?? this.releasesRepo,
       colors: colors ?? this.colors,
       contact: contact ?? this.contact,
       social: social ?? this.social,
@@ -265,6 +280,10 @@ class FeatureFlags {
   final bool attendance;
   final bool forms;
 
+  /// The download page for the installable macOS, Windows, Linux and
+  /// Android builds. Off for a church that only ever wants the website.
+  final bool appDownloads;
+
   const FeatureFlags({
     this.sermons = true,
     this.events = true,
@@ -280,6 +299,7 @@ class FeatureFlags {
     this.roomBooking = true,
     this.attendance = true,
     this.forms = true,
+    this.appDownloads = true,
   });
 
   factory FeatureFlags.fromMap(Map<String, dynamic> map) => FeatureFlags(
@@ -297,6 +317,7 @@ class FeatureFlags {
         roomBooking: map['roomBooking'] as bool? ?? true,
         attendance: map['attendance'] as bool? ?? true,
         forms: map['forms'] as bool? ?? true,
+        appDownloads: map['appDownloads'] as bool? ?? true,
       );
 
   Map<String, dynamic> toMap() => {
@@ -314,6 +335,7 @@ class FeatureFlags {
         'roomBooking': roomBooking,
         'attendance': attendance,
         'forms': forms,
+        'appDownloads': appDownloads,
       };
 
   FeatureFlags copyWithEntry(String key, bool value) {

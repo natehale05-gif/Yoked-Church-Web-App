@@ -5,6 +5,7 @@
   "aboutHeadline": "Welcome Home",
   "aboutBody": "Whoever you are and wherever you are on your journey, there's a place for you here. We're a community learning to walk yoked with Christ - together, unhurried, and free.",
   "beliefs": "We believe the Bible is God's word to us, that Jesus is the Son of God who died and rose again, and that new life is a gift received by grace through faith. We gather weekly to worship, to learn, and to care for one another and our neighbors.",
+  "releasesRepo": "natehale05-gif/yoked-church-web-app",
   "visitInfo": "Come as you are. Park anywhere in the main lot - look for a greeter in a blue lanyard near the front doors, and they'll help you find the sanctuary, kids check-in, or just a good seat. Services run about 70 minutes.",
   "colors": {
     "primary": "#1B3A4B",
@@ -44,6 +45,7 @@
     "kidsCheckIn": true,
     "roomBooking": true,
     "attendance": true,
-    "forms": true
+    "forms": true,
+    "appDownloads": true
   }
 }

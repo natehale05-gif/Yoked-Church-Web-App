@@ -247,6 +247,7 @@ void main() {
     '/reading-plans/p1',
     '/forms',
     '/forms/summer-camp',
+    '/download',
     '/sign-in',
     '/sign-up',
     '/forgot-password',

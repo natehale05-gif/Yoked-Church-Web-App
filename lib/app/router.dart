@@ -48,6 +48,7 @@ import '../features/church_info/presentation/visit_screen.dart';
 import '../features/connect/presentation/connect_screen.dart';
 import '../features/devotionals/presentation/devotional_detail_screen.dart';
 import '../features/devotionals/presentation/devotionals_screen.dart';
+import '../features/downloads/presentation/download_screen.dart';
 import '../features/events/presentation/events_screen.dart';
 import '../features/forms/presentation/form_detail_screen.dart';
 import '../features/forms/presentation/forms_screen.dart';
@@ -83,6 +84,7 @@ bool _flagAllows(FeatureFlags flags, String path) {
   if (owns('/account/kids') || owns('/admin/kids')) return flags.kidsCheckIn;
   if (owns('/admin/attendance')) return flags.attendance;
   if (owns('/forms') || owns('/admin/forms')) return flags.forms;
+  if (owns('/download')) return flags.appDownloads;
   return true;
 }
 
@@ -106,6 +108,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (loading) return null;
 
       if (!_flagAllows(ref.read(featureFlagsProvider), path)) return '/';
+
+      // The download buttons point at a specific repo's GitHub releases.
+      // With no repo configured there is nothing to link to, so the page
+      // closes rather than rendering four buttons that 404.
+      if (path == '/download' && ref.read(settingsProvider).releasesRepo.trim().isEmpty) {
+        return '/';
+      }
 
       if (path.startsWith('/account') && !signedIn) return '/sign-in';
       if (path.startsWith('/admin')) {
@@ -138,6 +147,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/connect', builder: (_, _) => const ConnectScreen()),
           GoRoute(path: '/about', builder: (_, _) => const AboutScreen()),
           GoRoute(path: '/visit', builder: (_, _) => const VisitScreen()),
+          GoRoute(path: '/download', builder: (_, _) => const DownloadScreen()),
           GoRoute(path: '/devotionals', builder: (_, _) => const DevotionalsScreen()),
           GoRoute(
             path: '/devotionals/:id',

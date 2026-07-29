@@ -161,8 +161,17 @@ class FakeFaqRepository extends LocalCrudRepository<Faq> implements FaqRepositor
   String idOf(Faq entity) => entity.id;
 }
 
-ChurchSettings testSettings({String churchName = 'Test Church', FeatureFlags? features}) => ChurchSettings(
+ChurchSettings testSettings({
+  String churchName = 'Test Church',
+  FeatureFlags? features,
+  // Non-empty by default so the /download route is open unless a test
+  // deliberately clears it - otherwise the feature-flag test would pass
+  // for the wrong reason, the route being shut either way.
+  String releasesRepo = 'test-church/test-app',
+}) =>
+    ChurchSettings(
       churchName: churchName,
+      releasesRepo: releasesRepo,
       tagline: 'A tagline',
       aboutHeadline: 'Welcome Home',
       aboutBody: 'About body copy.',

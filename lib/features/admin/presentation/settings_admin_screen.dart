@@ -50,6 +50,7 @@ class _SettingsAdminScreenState extends ConsumerState<SettingsAdminScreen> {
     _field('givingUrl', s.social.givingUrl);
     _field('liveStreamUrl', s.social.liveStreamUrl);
     _field('podcastUrl', s.social.podcastUrl);
+    _field('releasesRepo', s.releasesRepo);
     _colors = s.colors;
     _flags = s.features;
     for (final service in s.serviceTimes) {
@@ -78,6 +79,7 @@ class _SettingsAdminScreenState extends ConsumerState<SettingsAdminScreen> {
         aboutBody: _text('aboutBody'),
         beliefs: _text('beliefs'),
         visitInfo: _text('visitInfo'),
+        releasesRepo: _text('releasesRepo'),
         colors: _colors,
         contact: ContactInfo(
           address: _text('address'),
@@ -250,6 +252,15 @@ class _SettingsAdminScreenState extends ConsumerState<SettingsAdminScreen> {
                 ],
               ),
               _Section(
+                title: 'App downloads',
+                description: 'The GitHub repository whose releases hold the '
+                    'installable apps, as owner/repo. Leave it blank and the '
+                    'download page stays hidden.',
+                children: [
+                  _text_('Releases repository', 'releasesRepo'),
+                ],
+              ),
+              _Section(
                 title: 'Features',
                 description: 'Turn off anything your church does not use. Disabled '
                     'features disappear from navigation entirely.',
@@ -307,6 +318,7 @@ const _featureLabels = {
   'roomBooking': 'Room booking',
   'attendance': 'Attendance tracking',
   'forms': 'Forms & sign-ups',
+  'appDownloads': 'App download page',
 };
 
 class _Section extends StatelessWidget {

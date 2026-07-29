@@ -31,7 +31,8 @@ class NavDestination {
 /// The discipleship sections are grouped under one menu rather than laid
 /// out flat: a church running all of them would otherwise push the bar
 /// to eight top-level links, and they read as one area anyway.
-List<NavDestination> primaryNav(FeatureFlags flags) {
+List<NavDestination> primaryNav(ChurchSettings settings) {
+  final flags = settings.features;
   final grow = <NavDestination>[
     if (flags.devotionals) const NavDestination('Devotionals', '/devotionals'),
     if (flags.readingPlans) const NavDestination('Reading Plans', '/reading-plans'),
@@ -49,6 +50,14 @@ List<NavDestination> primaryNav(FeatureFlags flags) {
     if (flags.forms) const NavDestination('Forms', '/forms'),
   ];
 }
+
+/// True when the installable-app downloads have somewhere to point.
+///
+/// Both conditions, matching the route guard: the feature has to be on
+/// *and* an admin has to have named the repository whose releases hold
+/// the builds. Either missing and the links would 404.
+bool hasAppDownloads(ChurchSettings settings) =>
+    settings.features.appDownloads && settings.releasesRepo.trim().isNotEmpty;
 
 /// Wraps every public page with the shared nav bar.
 ///
@@ -110,7 +119,7 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
     // Collapse to a menu below desktop width so the link row never has to
     // squeeze into a narrow (e.g. tablet) viewport.
     final collapsed = !Breakpoints.isDesktop(context);
-    final destinations = primaryNav(settings.features);
+    final destinations = primaryNav(settings);
 
     return AppBar(
       toolbarHeight: preferredSize.height,
@@ -188,6 +197,12 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
                         ListTile(title: Text(child.label), onTap: () => go(child.path))
                     else
                       ListTile(title: Text(destination.label), onTap: () => go(destination.path)),
+                  if (hasAppDownloads(settings))
+                    ListTile(
+                      leading: const Icon(Icons.download),
+                      title: const Text('Get the App'),
+                      onTap: () => go('/download'),
+                    ),
                   const Divider(height: 1),
                   if (user == null)
                     ListTile(
@@ -410,6 +425,16 @@ class AppFooter extends ConsumerWidget {
               if (social.podcastUrl.isNotEmpty) _SocialLink(icon: Icons.podcasts, url: social.podcastUrl),
             ],
           ),
+          if (hasAppDownloads(settings)) ...[
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: () => context.go('/download'),
+              icon: const Icon(Icons.download, color: Colors.white, size: 18),
+              label: const Text('Get the app for your phone or computer',
+                  style: TextStyle(color: Colors.white)),
+              style: TextButton.styleFrom(padding: EdgeInsets.zero),
+            ),
+          ],
           const SizedBox(height: 20),
           const Divider(color: Colors.white24),
           const SizedBox(height: 12),

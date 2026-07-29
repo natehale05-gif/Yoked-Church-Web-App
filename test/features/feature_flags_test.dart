@@ -48,6 +48,7 @@ void main() {
     'roomBooking': ['/account/bookings', '/admin/rooms'],
     'attendance': ['/admin/attendance'],
     'forms': ['/forms', '/forms/summer-camp', '/admin/forms'],
+    'appDownloads': ['/download'],
   };
 
   test('every flag in the settings screen is covered by this test', () {
