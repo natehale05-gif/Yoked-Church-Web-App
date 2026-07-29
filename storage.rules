@@ -1,0 +1,76 @@
+rules_version = '2';
+
+// Firebase Storage holds two things: files staff attach to the resource
+// library, and files members attach to a form. Without this file
+// deployed, a bucket is either fully locked (uploads silently fail) or
+// fully open (anyone can read what a parent attached to a camp form) -
+// neither of which a church would discover until it mattered.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Storage rules can read Firestore. It costs a document read per
+    // request, which is the right trade here: role lives in exactly one
+    // place, and duplicating it into custom claims is how the two drift
+    // apart.
+    function myRole() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isStaff() {
+      return isSignedIn() && myRole() in ['staff', 'admin'];
+    }
+
+    // 25 MB. A church uploads bulletins and photos; anything larger is a
+    // mistake, and an unbounded write path is a bill waiting to happen.
+    function isReasonableSize() {
+      return request.resource.size < 25 * 1024 * 1024;
+    }
+
+    // The resource library (lib/features/resources/).
+    //
+    // Public read, and that is a deliberate, stated limit rather than an
+    // oversight. A resource's `membersOnly` flag lives on its Firestore
+    // document, and a Storage rule cannot map a blob back to the document
+    // that points at it. What protects a members-only *upload* is the
+    // unguessable download token in its URL - the same property as a
+    // "anyone with the link" share, not true access control. The
+    // Firestore rule on `resources/{id}` still keeps the document (title,
+    // description, and the URL itself) away from signed-out visitors, so
+    // the link is not discoverable through the app.
+    //
+    // If a church needs a document that is genuinely members-only, link
+    // it from a service that enforces access rather than uploading it
+    // here. The README says so too.
+    match /resources/{file} {
+      allow read: if true;
+      allow write: if isStaff() && isReasonableSize();
+    }
+
+    // Files attached to a form response (lib/features/forms/).
+    //
+    // This is the prefix that matters. Anyone may create - a visitor
+    // registering a child has no account, by design, and requiring one
+    // would lose them - but only staff can read. The answers here include
+    // whatever a parent attached to a camp registration.
+    //
+    // Create-only, never update or delete: a submitted attachment is part
+    // of a record, and letting the uploader overwrite it later would let
+    // them rewrite what they submitted after the fact.
+    match /formUploads/{formId}/{file} {
+      allow read: if isStaff();
+      allow create: if isReasonableSize();
+      allow update, delete: if isStaff();
+    }
+
+    // Anything else is denied. Rules do not inherit downward past an
+    // unmatched path, but being explicit means a future prefix has to be
+    // added deliberately rather than inheriting someone's assumption.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

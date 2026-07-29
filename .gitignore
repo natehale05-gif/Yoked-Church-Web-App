@@ -24,6 +24,12 @@ doc/api/
 *.js.map
 # ...except our hand-written web bootstrap script (not dart2js output):
 !web/flutter_bootstrap.js
+# ...and the security-rules test suite, which is genuinely written in
+# JavaScript because Firebase's rules-unit-testing library only exists
+# there. Without this negation the whole suite is silently untracked.
+!test_rules/*.js
+
+node_modules/
 
 .flutter-plugins
 .flutter-plugins-dependencies
