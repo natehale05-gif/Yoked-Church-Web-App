@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import 'sample_data.dart';
+
 /// The read/write surface every content collection shares.
 ///
 /// Features declare a narrow interface extending this (adding only their
@@ -142,7 +144,12 @@ abstract class LocalCrudRepository<T> with EntityCodec<T> implements CrudReposit
     if (asset == null) return;
     try {
       final raw = await rootBundle.loadString(asset);
-      final decoded = jsonDecode(raw) as List<dynamic>;
+      // Read as relative to the day it was authored, not as absolute
+      // dates. Without this the demo expires: the sign-up form closes,
+      // the events page empties, and the reports fall to zero as real
+      // time passes the hand-written dates by. See sample_data.dart.
+      final decoded =
+          rollSampleDates(jsonDecode(raw), sampleDataShift()) as List<dynamic>;
       for (final entry in decoded.whereType<Map<dynamic, dynamic>>()) {
         final id = 'local-${_nextId++}';
         _items[id] = fromMap(id, entry.cast<String, dynamic>());
