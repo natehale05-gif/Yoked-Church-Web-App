@@ -304,6 +304,7 @@ const _featureLabels = {
   'kidsCheckIn': 'Kids check-in',
   'roomBooking': 'Room booking',
   'attendance': 'Attendance tracking',
+  'forms': 'Forms & sign-ups',
 };
 
 class _Section extends StatelessWidget {

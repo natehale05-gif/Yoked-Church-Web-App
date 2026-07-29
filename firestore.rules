@@ -206,6 +206,26 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Form definitions. A published public form is readable by anyone -
+    // that is the point of a sign-up link in a bulletin. Drafts and
+    // members-only forms are not, and that is enforced here rather than
+    // only by the route guard, or the schema of an unpublished form
+    // could be read straight out of the collection.
+    match /formDefinitions/{id} {
+      allow read: if isStaff() ||
+        (resource.data.published == true && (isSignedIn() || resource.data.membersOnly == false));
+      allow write: if isStaff();
+    }
+
+    // Submissions. Anyone may create one, because a visitor filling in a
+    // camp registration has no account and requiring one would lose
+    // them. Only staff can read the inbox - the answers include phone
+    // numbers and medical notes.
+    match /formSubmissions/{id} {
+      allow create: if true;
+      allow read, update, delete: if isStaff();
+    }
+
     // Attendance. Staff record and read everything; a group's leader can
     // read their own group's records, because "who has stopped coming" is
     // the one question attendance actually answers for them.

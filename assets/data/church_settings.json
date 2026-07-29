@@ -43,6 +43,7 @@
     "resources": true,
     "kidsCheckIn": true,
     "roomBooking": true,
-    "attendance": true
+    "attendance": true,
+    "forms": true
   }
 }

@@ -22,6 +22,8 @@ import '../features/events/application/event_providers.dart';
 import '../features/events/application/rsvp_providers.dart';
 import '../features/events/data/event_repository.dart';
 import '../features/events/data/rsvp_repository.dart';
+import '../features/forms/application/form_providers.dart';
+import '../features/forms/data/form_repository.dart';
 import '../features/giving/application/giving_providers.dart';
 import '../features/giving/data/giving_repository.dart';
 import '../features/groups/application/group_providers.dart';
@@ -95,6 +97,8 @@ List<Override> localOverrides() {
       prayerPostRepositoryProvider.overrideWithValue(LocalPrayerPostRepository()),
       intercessionRepositoryProvider.overrideWithValue(LocalIntercessionRepository()),
       attendanceRepositoryProvider.overrideWithValue(LocalAttendanceRepository()),
+      formRepositoryProvider.overrideWithValue(LocalFormRepository()),
+      submissionRepositoryProvider.overrideWithValue(LocalSubmissionRepository()),
     ];
 }
 
@@ -131,6 +135,8 @@ List<Override> firestoreOverrides() => [
       prayerPostRepositoryProvider.overrideWithValue(FirestorePrayerPostRepository()),
       intercessionRepositoryProvider.overrideWithValue(FirestoreIntercessionRepository()),
       attendanceRepositoryProvider.overrideWithValue(FirestoreAttendanceRepository()),
+      formRepositoryProvider.overrideWithValue(FirestoreFormRepository()),
+      submissionRepositoryProvider.overrideWithValue(FirestoreSubmissionRepository()),
     ];
 
 List<Override> overridesFor(Backend backend) =>

@@ -47,6 +47,7 @@ void main() {
     'kidsCheckIn': ['/account/kids', '/admin/kids'],
     'roomBooking': ['/account/bookings', '/admin/rooms'],
     'attendance': ['/admin/attendance'],
+    'forms': ['/forms', '/forms/summer-camp', '/admin/forms'],
   };
 
   test('every flag in the settings screen is covered by this test', () {

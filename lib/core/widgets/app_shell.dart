@@ -46,6 +46,7 @@ List<NavDestination> primaryNav(FeatureFlags flags) {
     const NavDestination('About', '/about'),
     const NavDestination('Visit', '/visit'),
     if (flags.connect) const NavDestination('Connect', '/connect'),
+    if (flags.forms) const NavDestination('Forms', '/forms'),
   ];
 }
 

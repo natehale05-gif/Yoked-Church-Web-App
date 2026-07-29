@@ -113,7 +113,15 @@ abstract class LocalCrudRepository<T> with EntityCodec<T> implements CrudReposit
   /// frozen at app launch.
   final StreamController<void> _changes = StreamController<void>.broadcast();
 
-  bool _seeded = false;
+  /// The in-flight (or finished) seed load.
+  ///
+  /// Held as a future rather than a bool so concurrent first reads await
+  /// the *same* load. A flag flipped before the `await` lets whichever
+  /// read arrives second sail past an empty map - which is how a screen
+  /// that watches a collection and looks one document up at the same
+  /// time ends up reporting that the document does not exist.
+  Future<void>? _seeding;
+
   int _nextId = 0;
 
   void _notifyChanged() {
@@ -127,9 +135,9 @@ abstract class LocalCrudRepository<T> with EntityCodec<T> implements CrudReposit
     yield* _changes.stream.asyncMap((_) => read());
   }
 
-  Future<void> _ensureSeeded() async {
-    if (_seeded) return;
-    _seeded = true;
+  Future<void> _ensureSeeded() => _seeding ??= _seed();
+
+  Future<void> _seed() async {
     final asset = seedAsset;
     if (asset == null) return;
     try {
@@ -197,7 +205,7 @@ abstract class LocalCrudRepository<T> with EntityCodec<T> implements CrudReposit
 
   /// Lets tests seed deterministic data without touching asset bundles.
   void seedInMemory(Iterable<T> entities) {
-    _seeded = true;
+    _seeding = Future.value();
     for (final entity in entities) {
       final id = idOf(entity).isEmpty ? 'local-${_nextId++}' : idOf(entity);
       _items[id] = entity;

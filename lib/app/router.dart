@@ -26,6 +26,7 @@ import '../features/admin/presentation/audit_admin_screen.dart';
 import '../features/admin/presentation/connect_admin_screen.dart';
 import '../features/admin/presentation/devotionals_admin_screen.dart';
 import '../features/admin/presentation/events_admin_screen.dart';
+import '../features/admin/presentation/forms_admin_screen.dart';
 import '../features/admin/presentation/groups_admin_screen.dart';
 import '../features/admin/presentation/kids_admin_screen.dart';
 import '../features/admin/presentation/members_admin_screen.dart';
@@ -46,6 +47,8 @@ import '../features/connect/presentation/connect_screen.dart';
 import '../features/devotionals/presentation/devotional_detail_screen.dart';
 import '../features/devotionals/presentation/devotionals_screen.dart';
 import '../features/events/presentation/events_screen.dart';
+import '../features/forms/presentation/form_detail_screen.dart';
+import '../features/forms/presentation/forms_screen.dart';
 import '../features/giving/presentation/giving_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/reading_plans/presentation/reading_plan_detail_screen.dart';
@@ -77,6 +80,7 @@ bool _flagAllows(FeatureFlags flags, String path) {
   if (owns('/account/bookings') || owns('/admin/rooms')) return flags.roomBooking;
   if (owns('/account/kids') || owns('/admin/kids')) return flags.kidsCheckIn;
   if (owns('/admin/attendance')) return flags.attendance;
+  if (owns('/forms') || owns('/admin/forms')) return flags.forms;
   return true;
 }
 
@@ -138,6 +142,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, state) => DevotionalDetailScreen(devotionalId: state.pathParameters['id']!),
           ),
           GoRoute(path: '/resources', builder: (_, _) => const ResourcesScreen()),
+          GoRoute(path: '/forms', builder: (_, _) => const FormsScreen()),
+          GoRoute(
+            path: '/forms/:slug',
+            builder: (_, state) => FormDetailScreen(slug: state.pathParameters['slug']!),
+          ),
           GoRoute(path: '/reading-plans', builder: (_, _) => const ReadingPlansScreen()),
           GoRoute(
             path: '/reading-plans/:id',
@@ -172,6 +181,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/rooms', builder: (_, _) => const RoomsAdminScreen()),
           GoRoute(path: '/admin/kids', builder: (_, _) => const KidsAdminScreen()),
           GoRoute(path: '/admin/attendance', builder: (_, _) => const AttendanceAdminScreen()),
+          GoRoute(path: '/admin/forms', builder: (_, _) => const FormsAdminScreen()),
+          GoRoute(
+            path: '/admin/forms/:id',
+            builder: (_, state) => FormBuilderScreen(formId: state.pathParameters['id']!),
+          ),
           GoRoute(path: '/admin/members', builder: (_, _) => const MembersAdminScreen()),
           GoRoute(path: '/admin/settings', builder: (_, _) => const SettingsAdminScreen()),
           GoRoute(path: '/admin/audit', builder: (_, _) => const AuditAdminScreen()),

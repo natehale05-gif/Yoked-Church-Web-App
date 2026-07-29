@@ -55,6 +55,8 @@ List<AdminTab> adminTabs(FeatureFlags flags) => [
         (label: 'Kids', path: '/admin/kids', icon: Icons.child_care_outlined, adminOnly: false),
       if (flags.attendance)
         (label: 'Attendance', path: '/admin/attendance', icon: Icons.how_to_reg_outlined, adminOnly: false),
+      if (flags.forms)
+        (label: 'Forms', path: '/admin/forms', icon: Icons.assignment_outlined, adminOnly: false),
       if (flags.connect) (label: 'Inbox', path: '/admin/connect', icon: Icons.inbox_outlined, adminOnly: false),
       (label: 'Announcements', path: '/admin/announcements', icon: Icons.campaign_outlined, adminOnly: false),
       (label: 'Members', path: '/admin/members', icon: Icons.people_alt_outlined, adminOnly: true),

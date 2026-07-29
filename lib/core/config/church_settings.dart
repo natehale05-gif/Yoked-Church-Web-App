@@ -263,6 +263,7 @@ class FeatureFlags {
   final bool kidsCheckIn;
   final bool roomBooking;
   final bool attendance;
+  final bool forms;
 
   const FeatureFlags({
     this.sermons = true,
@@ -278,6 +279,7 @@ class FeatureFlags {
     this.kidsCheckIn = true,
     this.roomBooking = true,
     this.attendance = true,
+    this.forms = true,
   });
 
   factory FeatureFlags.fromMap(Map<String, dynamic> map) => FeatureFlags(
@@ -294,6 +296,7 @@ class FeatureFlags {
         kidsCheckIn: map['kidsCheckIn'] as bool? ?? true,
         roomBooking: map['roomBooking'] as bool? ?? true,
         attendance: map['attendance'] as bool? ?? true,
+        forms: map['forms'] as bool? ?? true,
       );
 
   Map<String, dynamic> toMap() => {
@@ -310,6 +313,7 @@ class FeatureFlags {
         'kidsCheckIn': kidsCheckIn,
         'roomBooking': roomBooking,
         'attendance': attendance,
+        'forms': forms,
       };
 
   FeatureFlags copyWithEntry(String key, bool value) {

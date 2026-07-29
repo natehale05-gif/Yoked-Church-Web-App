@@ -34,6 +34,10 @@ import 'package:yoked_church_app/features/events/data/event_repository.dart';
 import 'package:yoked_church_app/features/events/data/rsvp_repository.dart';
 import 'package:yoked_church_app/features/events/domain/church_event.dart';
 import 'package:yoked_church_app/features/events/domain/event_rsvp.dart';
+import 'package:yoked_church_app/features/forms/application/form_providers.dart';
+import 'package:yoked_church_app/features/forms/data/form_repository.dart';
+import 'package:yoked_church_app/features/forms/domain/church_form.dart';
+import 'package:yoked_church_app/features/forms/domain/form_submission.dart';
 import 'package:yoked_church_app/features/giving/application/giving_providers.dart';
 import 'package:yoked_church_app/features/giving/data/giving_repository.dart';
 import 'package:yoked_church_app/features/giving/domain/giving_record.dart';
@@ -521,6 +525,37 @@ class FakeAttendanceRepository extends LocalCrudRepository<AttendanceRecord>
       ));
 }
 
+class FakeFormRepository extends LocalCrudRepository<FormDefinition> implements FormRepository {
+  @override
+  FormDefinition fromMap(String id, Map<String, dynamic> map) => FormDefinition.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(FormDefinition entity) => entity.toMap();
+  @override
+  String idOf(FormDefinition entity) => entity.id;
+  @override
+  int Function(FormDefinition, FormDefinition)? get sorter => (a, b) => a.title.compareTo(b.title);
+  @override
+  Future<FormDefinition?> bySlug(String slug) async {
+    final matches = await fetchWhere((f) => f.slug == slug);
+    return matches.isEmpty ? null : matches.first;
+  }
+}
+
+class FakeSubmissionRepository extends LocalCrudRepository<FormSubmission>
+    implements SubmissionRepository {
+  @override
+  FormSubmission fromMap(String id, Map<String, dynamic> map) => FormSubmission.fromMap(id, map);
+  @override
+  Map<String, dynamic> toMap(FormSubmission entity) => entity.toMap();
+  @override
+  String idOf(FormSubmission entity) => entity.id;
+  @override
+  int Function(FormSubmission, FormSubmission)? get sorter =>
+      (a, b) => b.submittedAt.compareTo(a.submittedAt);
+  @override
+  Future<List<FormSubmission>> forForm(String formId) => fetchWhere((s) => s.formId == formId);
+}
+
 class FakeAuditRepository extends LocalCrudRepository<AuditEntry> implements AuditRepository {
   @override
   AuditEntry fromMap(String id, Map<String, dynamic> map) => AuditEntry.fromMap(id, map);
@@ -563,6 +598,8 @@ List<Override> fakeOverrides({
   List<RoomBooking> bookings = const [],
   List<CheckInSession> checkIns = const [],
   List<AttendanceRecord> attendance = const [],
+  List<FormDefinition> forms = const [],
+  List<FormSubmission> submissions = const [],
   FakeFileStorage? storage,
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
@@ -612,6 +649,8 @@ List<Override> fakeOverrides({
     bookingRepositoryProvider.overrideWithValue(FakeBookingRepository()..seedInMemory(bookings)),
     checkInRepositoryProvider.overrideWithValue(FakeCheckInRepository()..seedInMemory(checkIns)),
     attendanceRepositoryProvider.overrideWithValue(FakeAttendanceRepository()..seedInMemory(attendance)),
+    formRepositoryProvider.overrideWithValue(FakeFormRepository()..seedInMemory(forms)),
+    submissionRepositoryProvider.overrideWithValue(FakeSubmissionRepository()..seedInMemory(submissions)),
   ];
 }
 
