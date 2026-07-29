@@ -8,7 +8,12 @@ cd "$(dirname "$0")"
 
 if [ ! -d node_modules ]; then
   echo "Installing test dependencies..."
-  npm install --no-audit --no-fund
+  # `ci` when there's a lockfile, so CI installs exactly what was tested.
+  if [ -f package-lock.json ]; then
+    npm ci --no-audit --no-fund
+  else
+    npm install --no-audit --no-fund
+  fi
 fi
 
 # `--project demo-*` keeps the emulator from asking for credentials or
