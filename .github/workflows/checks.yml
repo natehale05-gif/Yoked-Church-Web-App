@@ -34,11 +34,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # The Firestore emulator is a Java process.
+      # The Firestore emulator is a Java process, and firebase-tools
+      # refuses to start one on anything below JDK 21.
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - uses: actions/setup-node@v4
         with:
