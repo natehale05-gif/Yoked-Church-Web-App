@@ -49,6 +49,32 @@ wrote to the bucket), 104 security-rule assertions against the emulator
 covering every collection, a README that matches the code, and CI that
 runs analyze, tests, the rules suite, and an Android build.
 
+**M7 — Phones.** One of roughly forty feature screens referenced a
+breakpoint before this; the rest were desktop layouts that a phone
+rendered at desktop proportions. Admin list rows, dialogs and detail
+pages now branch on width, and `test/features/responsive_test.dart`
+walks every route at phone and tablet size and reports every offender
+rather than dying on the first.
+
+**M8 — A demo that does not expire.** Every date in `assets/data/` was
+hand-written, so the zero-backend build had a hard shelf life: the
+sign-up form was three days from closing, the events page three weeks
+from empty, the reports three months from zero. Sample dates are now
+read as relative to the day they were authored and rolled forward in
+whole weeks on load - whole weeks because the Sunday service has to stay
+on a Sunday. Thirteen empty collections were filled in at the same time,
+because "0 responses" reads as broken rather than unconfigured.
+
+**M9 — Installable apps.** macOS, Windows and Linux scaffolds, a release
+workflow that builds all four platforms on a version tag and attaches
+them to a GitHub release, and a `/download` page whose buttons point at
+`releases/latest/download/...` so they keep working across releases. Two
+release-only defects fixed on the way: the Android release build had no
+`INTERNET` permission and the macOS release build had no network
+entitlement, both because Flutter's template declares them for debug
+only. A third had been breaking every Android build outright - see
+`android/build.gradle.kts`.
+
 ## Not built
 
 Listed because a buyer should know what they are not getting, not as a
@@ -76,10 +102,16 @@ commitment to build them.
   form responses only. A member cannot delete their own account from the
   app, which matters for GDPR/CCPA compliance if a church is subject to
   either.
-- **Verified mobile builds.** `android/` and `ios/` are present and the
-  code is platform-clean, but nothing has run on a device: no signing,
-  icons, permissions, or store setup. CI builds a debug APK so a
-  compile break is caught; that is the whole of the claim.
+- **Signed builds, and iOS at all.** The desktop and Android artifacts
+  are real and installable, but none are code-signed - macOS, Windows
+  and Android each warn on first launch, and the download page says so.
+  Signing needs an Apple Developer account and a Windows certificate.
+  iOS has no download at all and cannot: Apple allows no sideloading, so
+  it would take an App Store listing. Icons and store metadata are still
+  the Flutter defaults everywhere.
+- **Live data on Linux.** No Firebase plugin supports Linux desktop, so
+  that build runs on the bundled demo content and cannot sign in. The
+  app falls back rather than crashing, and the download page states it.
 - **Multi-tenant SaaS.** This is one deploy per church. Managing many
   churches' subscriptions and billing from one instance is a different
   product.
