@@ -33,6 +33,7 @@ import '../features/admin/presentation/kids_admin_screen.dart';
 import '../features/admin/presentation/members_admin_screen.dart';
 import '../features/admin/presentation/reading_plans_admin_screen.dart';
 import '../features/admin/presentation/prayer_admin_screen.dart';
+import '../features/admin/presentation/reports_admin_screen.dart';
 import '../features/admin/presentation/resources_admin_screen.dart';
 import '../features/admin/presentation/rooms_admin_screen.dart';
 import '../features/admin/presentation/sermons_admin_screen.dart';
@@ -59,7 +60,7 @@ import '../features/sermons/presentation/sermon_detail_screen.dart';
 import '../features/sermons/presentation/sermons_screen.dart';
 
 const _authPaths = {'/sign-in', '/sign-up', '/forgot-password'};
-const _adminOnlyPaths = {'/admin/members', '/admin/settings', '/admin/audit'};
+const _adminOnlyPaths = {'/admin/members', '/admin/settings', '/admin/audit', '/admin/reports'};
 
 /// Route prefixes owned by a feature flag. Turning a feature off has to
 /// close the route as well as hide the nav link, or the page stays live
@@ -191,6 +192,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/admin/forms/:id/responses',
             builder: (_, state) => FormResponsesScreen(formId: state.pathParameters['id']!),
           ),
+          GoRoute(path: '/admin/reports', builder: (_, _) => const ReportsAdminScreen()),
           GoRoute(path: '/admin/members', builder: (_, _) => const MembersAdminScreen()),
           GoRoute(path: '/admin/settings', builder: (_, _) => const SettingsAdminScreen()),
           GoRoute(path: '/admin/audit', builder: (_, _) => const AuditAdminScreen()),

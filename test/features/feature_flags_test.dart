@@ -100,7 +100,14 @@ void main() {
 
       expect(
         tabs.map((t) => t.path),
-        ['/admin', '/admin/announcements', '/admin/members', '/admin/settings', '/admin/audit'],
+        [
+          '/admin',
+          '/admin/announcements',
+          '/admin/reports',
+          '/admin/members',
+          '/admin/settings',
+          '/admin/audit',
+        ],
       );
     });
 
@@ -117,6 +124,7 @@ void main() {
       expect(staffTabs, isNot(contains('/admin/settings')));
       expect(staffTabs, isNot(contains('/admin/members')));
       expect(staffTabs, isNot(contains('/admin/audit')));
+      expect(staffTabs, isNot(contains('/admin/reports')));
       expect(staffTabs, contains('/admin/prayer'));
     });
   });

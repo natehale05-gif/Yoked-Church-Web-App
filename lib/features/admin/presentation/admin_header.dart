@@ -59,6 +59,7 @@ List<AdminTab> adminTabs(FeatureFlags flags) => [
         (label: 'Forms', path: '/admin/forms', icon: Icons.assignment_outlined, adminOnly: false),
       if (flags.connect) (label: 'Inbox', path: '/admin/connect', icon: Icons.inbox_outlined, adminOnly: false),
       (label: 'Announcements', path: '/admin/announcements', icon: Icons.campaign_outlined, adminOnly: false),
+      (label: 'Reports', path: '/admin/reports', icon: Icons.bar_chart_outlined, adminOnly: true),
       (label: 'Members', path: '/admin/members', icon: Icons.people_alt_outlined, adminOnly: true),
       (label: 'Settings', path: '/admin/settings', icon: Icons.tune, adminOnly: true),
       (label: 'Audit Log', path: '/admin/audit', icon: Icons.history, adminOnly: true),
