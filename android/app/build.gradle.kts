@@ -1,3 +1,9 @@
+// Imported rather than written as `java.util.Properties`: inside an
+// application build script `java` resolves to Gradle's own `java`
+// extension accessor, which shadows the package and fails with
+// "Unresolved reference 'util'".
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -17,7 +23,7 @@ plugins {
 // debug key as before, because a template has to build for someone who
 // has just cloned it and set nothing up. The release workflow writes
 // this file from repository secrets when they exist; README says how.
-val keystoreProperties = java.util.Properties().apply {
+val keystoreProperties = Properties().apply {
     val file = rootProject.file("key.properties")
     if (file.exists()) file.inputStream().use { load(it) }
 }
