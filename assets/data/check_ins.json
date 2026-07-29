@@ -1,0 +1,23 @@
+[
+  {
+    "childName": "Sam Demo", "childBirthDate": "2019-04-11", "guardianUid": "demo-member",
+    "guardianName": "Demo Member", "guardianPhone": "(555) 100-2000",
+    "roomId": "local-4", "roomName": "Nursery", "allergyNote": "",
+    "checkedInAt": "2026-07-26T08:52:00", "pickupCode": "H7QK", "codeUsedAt": null,
+    "releasedTo": "", "status": "checkedIn"
+  },
+  {
+    "childName": "Eli Brooks", "childBirthDate": "2015-09-02", "guardianUid": "local-0",
+    "guardianName": "Hannah Brooks", "guardianPhone": "(555) 234-1122",
+    "roomId": "local-5", "roomName": "Kids Room A", "allergyNote": "Peanut allergy - epipen in bag",
+    "checkedInAt": "2026-07-26T08:55:00", "pickupCode": "R3XN", "codeUsedAt": null,
+    "releasedTo": "", "status": "checkedIn"
+  },
+  {
+    "childName": "Ada Patel", "childBirthDate": "2017-01-23", "guardianUid": "local-1",
+    "guardianName": "Dev Patel", "guardianPhone": "(555) 234-3344",
+    "roomId": "local-5", "roomName": "Kids Room A", "allergyNote": "",
+    "checkedInAt": "2026-07-26T09:01:00", "pickupCode": "T9BM", "codeUsedAt": "2026-07-26T10:35:00",
+    "releasedTo": "Dev Patel", "status": "collected"
+  }
+]

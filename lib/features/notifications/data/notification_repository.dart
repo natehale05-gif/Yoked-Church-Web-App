@@ -42,6 +42,9 @@ class LocalNotificationRepository extends LocalCrudRepository<AppNotification>
     with _NotificationCodec
     implements NotificationRepository {
   @override
+  String? get seedAsset => 'assets/data/notifications.json';
+
+  @override
   int Function(AppNotification, AppNotification)? get sorter => (a, b) => b.createdAt.compareTo(a.createdAt);
 
   @override

@@ -75,6 +75,9 @@ class LocalIntercessionRepository extends LocalCrudRepository<PrayerIntercession
     with _IntercessionCodec
     implements IntercessionRepository {
   @override
+  String? get seedAsset => 'assets/data/prayer_intercessions.json';
+
+  @override
   Future<List<PrayerIntercession>> forMember(String uid) => fetchWhere((i) => i.uid == uid);
 
   @override

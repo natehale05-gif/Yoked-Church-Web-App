@@ -42,6 +42,9 @@ class FirestoreRsvpRepository extends FirestoreCrudRepository<EventRsvp> with _R
 
 class LocalRsvpRepository extends LocalCrudRepository<EventRsvp> with _RsvpCodec implements RsvpRepository {
   @override
+  String? get seedAsset => 'assets/data/event_rsvps.json';
+
+  @override
   Future<List<EventRsvp>> forMember(String uid) => fetchWhere((r) => r.uid == uid);
 
   @override

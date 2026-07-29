@@ -30,6 +30,9 @@ class LocalConnectRepository extends LocalCrudRepository<ConnectSubmission>
     with _ConnectCodec
     implements ConnectRepository {
   @override
+  String? get seedAsset => 'assets/data/connect_submissions.json';
+
+  @override
   int Function(ConnectSubmission, ConnectSubmission)? get sorter =>
       (a, b) => b.submittedAt.compareTo(a.submittedAt);
 }

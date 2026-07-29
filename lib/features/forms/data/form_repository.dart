@@ -76,6 +76,9 @@ class LocalSubmissionRepository extends LocalCrudRepository<FormSubmission>
     with _SubmissionCodec
     implements SubmissionRepository {
   @override
+  String? get seedAsset => 'assets/data/form_submissions.json';
+
+  @override
   int Function(FormSubmission, FormSubmission)? get sorter =>
       (a, b) => b.submittedAt.compareTo(a.submittedAt);
 

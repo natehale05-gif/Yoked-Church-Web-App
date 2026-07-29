@@ -1,0 +1,10 @@
+[
+  {
+    "uid": "demo-member", "planId": "local-0", "completedDays": [1, 2, 3, 4],
+    "startedAt": "2026-07-20T07:15:00", "lastReadAt": "2026-07-27T07:02:00"
+  },
+  {
+    "uid": "demo-member", "planId": "local-1", "completedDays": [1, 2],
+    "startedAt": "2026-07-06T06:50:00", "lastReadAt": "2026-07-13T06:58:00"
+  }
+]

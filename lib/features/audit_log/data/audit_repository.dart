@@ -25,5 +25,8 @@ class FirestoreAuditRepository extends FirestoreCrudRepository<AuditEntry>
 
 class LocalAuditRepository extends LocalCrudRepository<AuditEntry> with _AuditCodec implements AuditRepository {
   @override
+  String? get seedAsset => 'assets/data/audit_log.json';
+
+  @override
   int Function(AuditEntry, AuditEntry)? get sorter => (a, b) => b.at.compareTo(a.at);
 }

@@ -1,0 +1,20 @@
+[
+  {
+    "formId": "local-0", "formTitle": "Summer Camp Registration", "uid": "",
+    "submitterName": "Maria Alvarez", "submitterEmail": "maria.alvarez@example.org",
+    "answers": { "f1": "Ruth Alvarez", "f2": "8th", "f3": "(555) 010-2233", "f4": "Yes", "f5": "412 Oak Street", "f6": "Peanut allergy - epipen in her bag", "f7": "true" },
+    "submittedAt": "2026-07-27T21:04:00"
+  },
+  {
+    "formId": "local-0", "formTitle": "Summer Camp Registration", "uid": "local-0",
+    "submitterName": "Hannah Brooks", "submitterEmail": "hannah.brooks@example.org",
+    "answers": { "f1": "Eli Brooks", "f2": "6th", "f3": "(555) 234-1122", "f4": "No", "f7": "true" },
+    "submittedAt": "2026-07-25T08:47:00"
+  },
+  {
+    "formId": "local-1", "formTitle": "Serve Team Application", "uid": "local-1",
+    "submitterName": "Dev Patel", "submitterEmail": "dev.patel@example.org",
+    "answers": { "f1": "Tech", "f3": "No", "f4": "I have run sound at a previous church and would be glad to learn the video desk." },
+    "submittedAt": "2026-07-23T19:12:00"
+  }
+]

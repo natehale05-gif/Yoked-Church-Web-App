@@ -1,30 +1,72 @@
 [
   {
-    "groupId": "local-0", "uid": "local-2", "memberName": "Sarah Lee",
-    "status": "approved", "joinedAt": "2025-09-02T09:30:00"
+    "groupId": "local-0",
+    "uid": "local-2",
+    "memberName": "Sarah Lee",
+    "status": "approved",
+    "joinedAt": "2025-09-02T09:30:00"
   },
   {
-    "groupId": "local-0", "uid": "local-0", "memberName": "Hannah Brooks",
-    "status": "approved", "joinedAt": "2026-01-13T09:30:00"
+    "groupId": "local-0",
+    "uid": "local-0",
+    "memberName": "Hannah Brooks",
+    "status": "approved",
+    "joinedAt": "2026-01-13T09:30:00"
   },
   {
-    "groupId": "local-1", "uid": "demo-member", "memberName": "Demo Member",
-    "status": "approved", "joinedAt": "2025-08-07T19:00:00"
+    "groupId": "local-1",
+    "uid": "demo-member",
+    "memberName": "Demo Member",
+    "status": "approved",
+    "joinedAt": "2025-08-07T19:00:00"
   },
   {
-    "groupId": "local-1", "uid": "local-0", "memberName": "Hannah Brooks",
-    "status": "approved", "joinedAt": "2025-10-16T19:00:00"
+    "groupId": "local-1",
+    "uid": "local-0",
+    "memberName": "Hannah Brooks",
+    "status": "approved",
+    "joinedAt": "2025-10-16T19:00:00"
   },
   {
-    "groupId": "local-1", "uid": "local-1", "memberName": "Dev Patel",
-    "status": "approved", "joinedAt": "2026-02-05T19:00:00"
+    "groupId": "local-1",
+    "uid": "local-1",
+    "memberName": "Dev Patel",
+    "status": "approved",
+    "joinedAt": "2026-02-05T19:00:00"
   },
   {
-    "groupId": "local-2", "uid": "local-3", "memberName": "John Miller",
-    "status": "approved", "joinedAt": "2024-05-04T07:00:00"
+    "groupId": "local-2",
+    "uid": "local-3",
+    "memberName": "John Miller",
+    "status": "approved",
+    "joinedAt": "2024-05-04T07:00:00"
   },
   {
-    "groupId": "local-2", "uid": "local-1", "memberName": "Dev Patel",
-    "status": "pending", "joinedAt": "2026-07-18T07:00:00"
+    "groupId": "local-2",
+    "uid": "local-1",
+    "memberName": "Dev Patel",
+    "status": "pending",
+    "joinedAt": "2026-07-18T07:00:00"
+  },
+  {
+    "groupId": "local-2",
+    "uid": "local-4",
+    "memberName": "Marcus Reed",
+    "status": "approved",
+    "joinedAt": "2025-11-15T07:00:00"
+  },
+  {
+    "groupId": "local-3",
+    "uid": "local-4",
+    "memberName": "Marcus Reed",
+    "status": "approved",
+    "joinedAt": "2025-11-15T19:00:00"
+  },
+  {
+    "groupId": "local-0",
+    "uid": "local-5",
+    "memberName": "Grace Okafor",
+    "status": "pending",
+    "joinedAt": "2026-07-21T09:30:00"
   }
 ]

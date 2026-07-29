@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Priya Raman", "email": "priya.raman@example.org", "phone": "(555) 244-9080",
+    "message": "My husband and I visited on Sunday and would love to know more about the Tuesday morning group. Is childcare provided?",
+    "type": "connectCard", "submittedAt": "2026-07-27T14:20:00", "status": "open", "staffNote": "", "assignedTo": ""
+  },
+  {
+    "name": "Tom Whitfield", "email": "twhitfield@example.org", "phone": "",
+    "message": "Please pray for my mother - she goes in for surgery on Thursday and we are anxious about the recovery.",
+    "type": "prayerRequest", "submittedAt": "2026-07-26T09:05:00", "status": "open", "staffNote": "", "assignedTo": ""
+  },
+  {
+    "name": "Alicia Gomez", "email": "alicia.g@example.org", "phone": "(555) 771-3312",
+    "message": "I'd like to help with the food drive but I can only lift light boxes. Is there something else I could do?",
+    "type": "connectCard", "submittedAt": "2026-07-24T18:40:00", "status": "followedUp",
+    "staffNote": "Called Thursday - putting her on the welcome table instead.", "assignedTo": "Sarah Lee"
+  },
+  {
+    "name": "Anonymous", "email": "", "phone": "",
+    "message": "Praying about a job decision. Would value the church praying with me, but I'd rather not share details.",
+    "type": "prayerRequest", "submittedAt": "2026-07-20T21:15:00", "status": "followedUp", "staffNote": "", "assignedTo": ""
+  }
+]

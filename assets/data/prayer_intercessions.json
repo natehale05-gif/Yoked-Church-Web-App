@@ -1,0 +1,9 @@
+[
+  { "postId": "local-0", "uid": "demo-member", "prayedAt": "2026-07-27T07:30:00" },
+  { "postId": "local-2", "uid": "demo-member", "prayedAt": "2026-07-26T22:10:00" },
+  { "postId": "local-0", "uid": "local-0", "prayedAt": "2026-07-27T08:00:00" },
+  { "postId": "local-0", "uid": "local-1", "prayedAt": "2026-07-26T18:20:00" },
+  { "postId": "local-1", "uid": "local-0", "prayedAt": "2026-07-25T21:00:00" },
+  { "postId": "local-2", "uid": "local-1", "prayedAt": "2026-07-26T09:15:00" },
+  { "postId": "local-2", "uid": "local-2", "prayedAt": "2026-07-26T12:40:00" }
+]

@@ -35,6 +35,9 @@ class LocalSermonNoteRepository extends LocalCrudRepository<SermonNote>
     with _NoteCodec
     implements SermonNoteRepository {
   @override
+  String? get seedAsset => 'assets/data/sermon_notes.json';
+
+  @override
   int Function(SermonNote, SermonNote)? get sorter => (a, b) => b.updatedAt.compareTo(a.updatedAt);
 
   @override

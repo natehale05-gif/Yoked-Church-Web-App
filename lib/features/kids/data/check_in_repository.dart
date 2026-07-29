@@ -36,6 +36,9 @@ class LocalCheckInRepository extends LocalCrudRepository<CheckInSession>
     with _CheckInCodec
     implements CheckInRepository {
   @override
+  String? get seedAsset => 'assets/data/check_ins.json';
+
+  @override
   int Function(CheckInSession, CheckInSession)? get sorter =>
       (a, b) => b.checkedInAt.compareTo(a.checkedInAt);
 

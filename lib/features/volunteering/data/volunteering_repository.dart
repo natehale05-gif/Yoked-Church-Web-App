@@ -69,6 +69,9 @@ class LocalVolunteerAssignmentRepository extends LocalCrudRepository<VolunteerAs
     with _AssignmentCodec
     implements VolunteerAssignmentRepository {
   @override
+  String? get seedAsset => 'assets/data/volunteer_assignments.json';
+
+  @override
   Future<List<VolunteerAssignment>> forMember(String uid) => fetchWhere((a) => a.uid == uid);
 
   @override

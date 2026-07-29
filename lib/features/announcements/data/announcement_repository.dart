@@ -27,5 +27,8 @@ class LocalAnnouncementRepository extends LocalCrudRepository<Announcement>
     with _AnnouncementCodec
     implements AnnouncementRepository {
   @override
+  String? get seedAsset => 'assets/data/announcements.json';
+
+  @override
   int Function(Announcement, Announcement)? get sorter => (a, b) => b.sentAt.compareTo(a.sentAt);
 }

@@ -1,0 +1,50 @@
+[
+  {
+    "positionId": "local-0",
+    "uid": "local-0",
+    "memberName": "Hannah Brooks",
+    "status": "approved",
+    "assignedBy": "local-2",
+    "assignedAt": "2026-07-20T10:00:00"
+  },
+  {
+    "positionId": "local-0",
+    "uid": "demo-member",
+    "memberName": "Demo Member",
+    "status": "pending",
+    "assignedBy": "self",
+    "assignedAt": "2026-07-27T19:22:00"
+  },
+  {
+    "positionId": "local-1",
+    "uid": "local-1",
+    "memberName": "Dev Patel",
+    "status": "approved",
+    "assignedBy": "local-2",
+    "assignedAt": "2026-07-21T08:15:00"
+  },
+  {
+    "positionId": "local-2",
+    "uid": "local-0",
+    "memberName": "Hannah Brooks",
+    "status": "pending",
+    "assignedBy": "self",
+    "assignedAt": "2026-07-26T20:40:00"
+  },
+  {
+    "positionId": "local-3",
+    "uid": "local-3",
+    "memberName": "John Miller",
+    "status": "approved",
+    "assignedBy": "local-3",
+    "assignedAt": "2026-07-19T12:00:00"
+  },
+  {
+    "positionId": "local-1",
+    "uid": "local-4",
+    "memberName": "Marcus Reed",
+    "status": "approved",
+    "assignedBy": "local-2",
+    "assignedAt": "2026-07-22T08:00:00"
+  }
+]

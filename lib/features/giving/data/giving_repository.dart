@@ -32,6 +32,9 @@ class LocalGivingRepository extends LocalCrudRepository<GivingRecord>
     with _GivingCodec
     implements GivingRepository {
   @override
+  String? get seedAsset => 'assets/data/giving.json';
+
+  @override
   int Function(GivingRecord, GivingRecord)? get sorter => (a, b) => b.date.compareTo(a.date);
 
   @override

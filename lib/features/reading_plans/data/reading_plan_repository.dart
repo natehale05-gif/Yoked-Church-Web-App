@@ -65,6 +65,9 @@ class LocalPlanProgressRepository extends LocalCrudRepository<PlanProgress>
     with _ProgressCodec
     implements PlanProgressRepository {
   @override
+  String? get seedAsset => 'assets/data/plan_progress.json';
+
+  @override
   Future<List<PlanProgress>> forMember(String uid) => fetchWhere((p) => p.uid == uid);
 
   @override
