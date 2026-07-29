@@ -1,6 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required for Firebase, and for anything else the app fetches over the
+         network. Flutter's template declares this in the debug and profile
+         manifests only, so a release APK built without it runs fine on the
+         developer's machine and silently cannot reach its backend on a
+         member's phone. Declare it here so the shipped build has it too. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- `android:label` is what appears under the icon on a member's home
+         screen. Rebranding a fork means changing it alongside `churchName`
+         in assets/config/church_settings.json. -->
     <application
-        android:label="yoked_church_app"
+        android:label="Yoked Church"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
