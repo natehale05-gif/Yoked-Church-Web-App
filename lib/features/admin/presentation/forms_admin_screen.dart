@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../app/theme.dart';
 import '../../audit_log/application/audit_providers.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../auth/domain/app_user.dart';
@@ -419,13 +420,41 @@ class _FieldRow extends StatelessWidget {
         ? null
         : form.fields.where((f) => f.id == condition.fieldId).firstOrNull;
 
+    // Four controls in a `ListTile.trailing` do not fit a phone, so below
+    // the breakpoint they move under the question text - same shape as
+    // `AdminListTile`.
+    final controls = <Widget>[
+      IconButton(
+        icon: const Icon(Icons.arrow_upward, size: 18),
+        tooltip: 'Move up',
+        onPressed: () => onMove(-1),
+      ),
+      IconButton(
+        icon: const Icon(Icons.arrow_downward, size: 18),
+        tooltip: 'Move down',
+        onPressed: () => onMove(1),
+      ),
+      IconButton(icon: const Icon(Icons.edit_outlined), tooltip: 'Edit', onPressed: onEdit),
+      IconButton(
+        icon: const Icon(Icons.delete_outline),
+        tooltip: 'Delete',
+        onPressed: () async {
+          if (await confirmDelete(context, 'the question "${field.label}"')) onDelete();
+        },
+      ),
+    ];
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
+        isThreeLine: Breakpoints.isMobile(context),
         title: Text(
           field.label.isEmpty ? '(untitled question)' : field.label,
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
+        trailing: Breakpoints.isMobile(context)
+            ? null
+            : Row(mainAxisSize: MainAxisSize.min, children: controls),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -446,29 +475,11 @@ class _FieldRow extends StatelessWidget {
                   color: controller == null ? Theme.of(context).colorScheme.error : Colors.black54,
                 ),
               ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_upward, size: 18),
-              tooltip: 'Move up',
-              onPressed: () => onMove(-1),
-            ),
-            IconButton(
-              icon: const Icon(Icons.arrow_downward, size: 18),
-              tooltip: 'Move down',
-              onPressed: () => onMove(1),
-            ),
-            IconButton(icon: const Icon(Icons.edit_outlined), tooltip: 'Edit', onPressed: onEdit),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: 'Delete',
-              onPressed: () async {
-                if (await confirmDelete(context, 'the question "${field.label}"')) onDelete();
-              },
-            ),
+            if (Breakpoints.isMobile(context))
+              Align(
+                alignment: Alignment.centerRight,
+                child: Wrap(alignment: WrapAlignment.end, children: controls),
+              ),
           ],
         ),
       ),

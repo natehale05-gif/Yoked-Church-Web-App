@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/responsive.dart';
 import '../../../core/widgets/section_container.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../auth/domain/app_user.dart';
@@ -131,39 +132,37 @@ class _ReleasePanelState extends ConsumerState<_ReleasePanel> {
               children: [
                 Icon(Icons.how_to_reg_outlined, color: brand.primary),
                 const SizedBox(width: 10),
-                Text('Pick up a child', style: Theme.of(context).textTheme.titleLarge),
+                // Expanded, not bare: "Pick up a child" plus the icon is
+                // wider than a phone once the card padding is taken off.
+                Expanded(
+                  child: Text('Pick up a child', style: Theme.of(context).textTheme.titleLarge),
+                ),
               ],
             ),
             const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            // The desk might be a tablet or a phone, so this stacks.
+            ResponsiveRow(
+              flex: const [2, 3],
               children: [
-                SizedBox(
-                  width: 160,
-                  child: TextField(
-                    controller: _code,
-                    textCapitalization: TextCapitalization.characters,
-                    style: const TextStyle(fontSize: 22, letterSpacing: 4, fontWeight: FontWeight.w700),
-                    decoration: const InputDecoration(
-                      labelText: 'Pickup code',
-                      border: OutlineInputBorder(),
-                    ),
-                    onSubmitted: (_) => _release(),
+                TextField(
+                  controller: _code,
+                  textCapitalization: TextCapitalization.characters,
+                  style: const TextStyle(fontSize: 22, letterSpacing: 4, fontWeight: FontWeight.w700),
+                  decoration: const InputDecoration(
+                    labelText: 'Pickup code',
+                    border: OutlineInputBorder(),
                   ),
+                  onSubmitted: (_) => _release(),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: _releasedTo,
-                    decoration: const InputDecoration(
-                      labelText: 'Released to (optional)',
-                      hintText: 'Name of the adult collecting',
-                      border: OutlineInputBorder(),
-                    ),
-                    onSubmitted: (_) => _release(),
+                TextField(
+                  controller: _releasedTo,
+                  decoration: const InputDecoration(
+                    labelText: 'Released to (optional)',
+                    hintText: 'Name of the adult collecting',
+                    border: OutlineInputBorder(),
                   ),
+                  onSubmitted: (_) => _release(),
                 ),
-                const SizedBox(width: 16),
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: ElevatedButton(onPressed: _release, child: const Text('Release')),
@@ -281,81 +280,66 @@ class _CheckInPanelState extends ConsumerState<_CheckInPanel> {
           children: [
             Text('Check a child in', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
-            Row(
+            ResponsiveRow(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _childName,
-                    decoration: const InputDecoration(labelText: "Child's name"),
-                  ),
+                TextField(
+                  controller: _childName,
+                  decoration: const InputDecoration(labelText: "Child's name"),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField<Room>(
-                    initialValue: _room,
-                    decoration: const InputDecoration(labelText: 'Room'),
-                    items: [for (final r in rooms) DropdownMenuItem(value: r, child: Text(r.name))],
-                    onChanged: (value) => setState(() => _room = value),
-                  ),
+                DropdownButtonFormField<Room>(
+                  initialValue: _room,
+                  decoration: const InputDecoration(labelText: 'Room'),
+                  items: [for (final r in rooms) DropdownMenuItem(value: r, child: Text(r.name))],
+                  onChanged: (value) => setState(() => _room = value),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            Row(
+            ResponsiveRow(
               children: [
-                Expanded(
-                  child: DropdownButtonFormField<AppUser>(
-                    initialValue: _guardian,
-                    isExpanded: true,
-                    decoration: const InputDecoration(labelText: 'Guardian'),
-                    items: [
-                      for (final m in members)
-                        DropdownMenuItem(value: m, child: Text(m.displayName.isEmpty ? m.email : m.displayName)),
-                    ],
-                    onChanged: (value) => setState(() {
-                      _guardian = value;
-                      _guardianPhone.text = value?.phone ?? '';
-                    }),
-                  ),
+                DropdownButtonFormField<AppUser>(
+                  initialValue: _guardian,
+                  isExpanded: true,
+                  decoration: const InputDecoration(labelText: 'Guardian'),
+                  items: [
+                    for (final m in members)
+                      DropdownMenuItem(value: m, child: Text(m.displayName.isEmpty ? m.email : m.displayName)),
+                  ],
+                  onChanged: (value) => setState(() {
+                    _guardian = value;
+                    _guardianPhone.text = value?.phone ?? '';
+                  }),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: _guardianPhone,
-                    decoration: const InputDecoration(labelText: 'Phone'),
-                  ),
+                TextField(
+                  controller: _guardianPhone,
+                  decoration: const InputDecoration(labelText: 'Phone'),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            Row(
+            ResponsiveRow(
+              flex: const [1, 2],
               children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _birthDate ?? DateTime(DateTime.now().year - 6),
-                        firstDate: DateTime(1990),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null) setState(() => _birthDate = picked);
-                    },
-                    child: InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Date of birth (optional)'),
-                      child: Text(_birthDate == null ? '—' : DateFormat.yMMMd().format(_birthDate!)),
-                    ),
+                InkWell(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _birthDate ?? DateTime(DateTime.now().year - 6),
+                      firstDate: DateTime(1990),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) setState(() => _birthDate = picked);
+                  },
+                  child: InputDecorator(
+                    decoration: const InputDecoration(labelText: 'Date of birth (optional)'),
+                    child: Text(_birthDate == null ? '—' : DateFormat.yMMMd().format(_birthDate!)),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: _allergy,
-                    decoration: const InputDecoration(
-                      labelText: 'Allergies / medical notes',
-                      hintText: 'Peanut allergy - epipen in bag',
-                    ),
+                TextField(
+                  controller: _allergy,
+                  decoration: const InputDecoration(
+                    labelText: 'Allergies / medical notes',
+                    hintText: 'Peanut allergy - epipen in bag',
                   ),
                 ),
               ],

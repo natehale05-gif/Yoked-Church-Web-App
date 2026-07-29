@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/theme.dart';
 import '../../../core/config/church_settings.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
@@ -206,28 +207,62 @@ class AdminListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controls = <Widget>[
+      ...actions,
+      if (onEdit != null)
+        IconButton(icon: const Icon(Icons.edit_outlined), tooltip: 'Edit', onPressed: onEdit),
+      if (onDelete != null)
+        IconButton(
+          icon: const Icon(Icons.delete_outline),
+          tooltip: 'Delete',
+          onPressed: () async {
+            final confirmed = await confirmDelete(context, deleteLabel);
+            if (confirmed) await onDelete!();
+          },
+        ),
+    ];
+
+    final titleText = Text(title, style: const TextStyle(fontWeight: FontWeight.w700));
+    final subtitleText = subtitle.isEmpty ? null : Text(subtitle);
+
+    // `ListTile.trailing` gets no say in its width, so a row of four or
+    // five controls simply overflows a phone. This was the single most
+    // common layout failure in the app - every admin list screen builds
+    // its rows here - and the fix is to stop using `trailing` below the
+    // breakpoint and let the controls wrap under the text instead.
+    if (Breakpoints.isMobile(context)) {
+      return Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              titleText,
+              if (subtitleText != null) ...[
+                const SizedBox(height: 4),
+                DefaultTextStyle.merge(
+                  style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color),
+                  child: subtitleText,
+                ),
+              ],
+              if (controls.isNotEmpty)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Wrap(alignment: WrapAlignment.end, children: controls),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-        subtitle: subtitle.isEmpty ? null : Text(subtitle),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ...actions,
-            if (onEdit != null)
-              IconButton(icon: const Icon(Icons.edit_outlined), tooltip: 'Edit', onPressed: onEdit),
-            if (onDelete != null)
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                tooltip: 'Delete',
-                onPressed: () async {
-                  final confirmed = await confirmDelete(context, deleteLabel);
-                  if (confirmed) await onDelete!();
-                },
-              ),
-          ],
-        ),
+        title: titleText,
+        subtitle: subtitleText,
+        trailing: Row(mainAxisSize: MainAxisSize.min, children: controls),
       ),
     );
   }
@@ -265,8 +300,11 @@ class AdminFormDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(title),
-      content: SizedBox(
-        width: 480,
+      // A max rather than a fixed width: the dialog itself is narrower
+      // than this on a phone, and a fixed 480 would be clamped anyway -
+      // saying "at most" keeps the intent readable.
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
         child: SingleChildScrollView(child: child),
       ),
       actions: [

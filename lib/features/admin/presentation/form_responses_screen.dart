@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/export/file_download.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/responsive.dart';
 import '../../../core/widgets/section_container.dart';
 import '../../forms/application/form_providers.dart';
 import '../../forms/domain/church_form.dart';
@@ -52,14 +53,16 @@ class FormResponsesScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                alignment: WrapAlignment.spaceBetween,
                 children: [
                   OutlinedButton.icon(
                     onPressed: () => context.go('/admin/forms/$formId'),
                     icon: const Icon(Icons.edit_outlined, size: 16),
                     label: const Text('Edit questions'),
                   ),
-                  const Spacer(),
                   ElevatedButton.icon(
                     onPressed: rows.isEmpty ? null : () => _export(context, form, rows),
                     icon: const Icon(Icons.download_outlined, size: 18),
@@ -130,9 +133,12 @@ class _SubmissionCard extends ConsumerWidget {
                 Expanded(
                   child: Text(submission.who, style: Theme.of(context).textTheme.titleMedium),
                 ),
-                Text(
-                  DateFormat.yMMMd().add_jm().format(submission.submittedAt),
-                  style: const TextStyle(color: Colors.black54, fontSize: 12),
+                Flexible(
+                  child: Text(
+                    DateFormat.yMMMd().add_jm().format(submission.submittedAt),
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(color: Colors.black54, fontSize: 12),
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, size: 18),
@@ -178,26 +184,19 @@ class _AnswerRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 220,
-            child: Text(label, style: const TextStyle(color: Colors.black54, fontSize: 13)),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: isLink
-                ? InkWell(
-                    onTap: () => launchUrl(Uri.parse(value), mode: LaunchMode.externalApplication),
-                    child: Text(
-                      display,
-                      style: const TextStyle(decoration: TextDecoration.underline),
-                    ),
-                  )
-                : Text(display),
-          ),
-        ],
+      // A 220px label column leaves about a hundred pixels for the answer
+      // on a phone, so below the breakpoint the question moves above it.
+      child: LabelledValue(
+        label: Text(label, style: const TextStyle(color: Colors.black54, fontSize: 13)),
+        value: isLink
+            ? InkWell(
+                onTap: () => launchUrl(Uri.parse(value), mode: LaunchMode.externalApplication),
+                child: Text(
+                  display,
+                  style: const TextStyle(decoration: TextDecoration.underline),
+                ),
+              )
+            : Text(display),
       ),
     );
   }

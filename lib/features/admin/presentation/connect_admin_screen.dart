@@ -87,15 +87,19 @@ class _SubmissionCardState extends ConsumerState<_SubmissionCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            // A chip, a name and a date are each unwilling to shrink. On a
+            // phone they wrap onto a second line rather than overflow.
+            Wrap(
+              spacing: 10,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Chip(
                   avatar: Icon(isPrayer ? Icons.favorite_outline : Icons.person_outline, size: 16),
                   label: Text(isPrayer ? 'Prayer' : 'Connect'),
                   backgroundColor: brand.primary.withValues(alpha: 0.08),
                 ),
-                const SizedBox(width: 10),
-                Expanded(child: Text(s.name, style: const TextStyle(fontWeight: FontWeight.w700))),
+                Text(s.name, style: const TextStyle(fontWeight: FontWeight.w700)),
                 Text(
                   DateFormat.yMMMd().format(s.submittedAt),
                   style: const TextStyle(color: Colors.black54, fontSize: 12),
@@ -159,15 +163,19 @@ class _SubmissionCardState extends ConsumerState<_SubmissionCard> {
                 child: Text('Note: ${s.staffNote}', style: const TextStyle(fontSize: 13)),
               ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            // "Add note" and "Mark followed up" are both wider than they
+            // look once the icon and button padding are counted; side by
+            // side they are wider than a phone.
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 TextButton.icon(
                   onPressed: () => setState(() => _editingNote = !_editingNote),
                   icon: const Icon(Icons.edit_note, size: 16),
                   label: Text(s.staffNote.isEmpty ? 'Add note' : 'Edit note'),
                 ),
-                const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: () => _update(
                     s.copyWith(
