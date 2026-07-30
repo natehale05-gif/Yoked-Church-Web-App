@@ -223,10 +223,10 @@ straight to the newest one:
 
 | Platform | File | Link |
 |---|---|---|
-| Windows | `yoked-church-windows.zip` | [Download](https://github.com/natehale05-gif/yoked-church-web-app/releases/latest/download/yoked-church-windows.zip) |
-| macOS | `yoked-church-macos.zip` | [Download](https://github.com/natehale05-gif/yoked-church-web-app/releases/latest/download/yoked-church-macos.zip) |
-| Android | `yoked-church-android.apk` | [Download](https://github.com/natehale05-gif/yoked-church-web-app/releases/latest/download/yoked-church-android.apk) |
-| Linux | `yoked-church-linux.tar.gz` | [Download](https://github.com/natehale05-gif/yoked-church-web-app/releases/latest/download/yoked-church-linux.tar.gz) |
+| Windows | `yoked-church-windows.zip` | [Download](https://github.com/natehale05-gif/Yoked-Church-Web-App/releases/latest/download/yoked-church-windows.zip) |
+| macOS | `yoked-church-macos.zip` | [Download](https://github.com/natehale05-gif/Yoked-Church-Web-App/releases/latest/download/yoked-church-macos.zip) |
+| Android | `yoked-church-android.apk` | [Download](https://github.com/natehale05-gif/Yoked-Church-Web-App/releases/latest/download/yoked-church-android.apk) |
+| Linux | `yoked-church-linux.tar.gz` | [Download](https://github.com/natehale05-gif/Yoked-Church-Web-App/releases/latest/download/yoked-church-linux.tar.gz) |
 
 These are `releases/latest/download/...` URLs, so they keep working
 across every future release without editing anything.
