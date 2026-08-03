@@ -18,6 +18,8 @@ mixin _CheckInCodec implements EntityCodec<CheckInSession> {
 class FirestoreCheckInRepository extends FirestoreCrudRepository<CheckInSession>
     with _CheckInCodec
     implements CheckInRepository {
+  FirestoreCheckInRepository(super.churchId);
+
   @override
   String get collectionPath => 'checkIns';
   @override

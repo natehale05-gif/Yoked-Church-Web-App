@@ -27,6 +27,8 @@ mixin _BookingCodec implements EntityCodec<RoomBooking> {
 }
 
 class FirestoreRoomRepository extends FirestoreCrudRepository<Room> with _RoomCodec implements RoomRepository {
+  FirestoreRoomRepository(super.churchId);
+
   @override
   String get collectionPath => 'rooms';
   @override
@@ -43,6 +45,8 @@ class LocalRoomRepository extends LocalCrudRepository<Room> with _RoomCodec impl
 class FirestoreBookingRepository extends FirestoreCrudRepository<RoomBooking>
     with _BookingCodec
     implements BookingRepository {
+  FirestoreBookingRepository(super.churchId);
+
   @override
   String get collectionPath => 'roomBookings';
   @override

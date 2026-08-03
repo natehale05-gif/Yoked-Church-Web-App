@@ -40,8 +40,20 @@ abstract interface class AuthRepository {
 }
 
 class FirebaseAuthRepository implements AuthRepository {
+  FirebaseAuthRepository(this.churchId);
+
+  /// Which church this person is being signed in *to*.
+  ///
+  /// Their account is global - one Firebase Auth identity, one password,
+  /// one email - but their membership and role belong to a church. The
+  /// same person can be a member at one church and staff at another, and
+  /// a single global profile document could not express that.
+  final String churchId;
+
   fb.FirebaseAuth get _auth => fb.FirebaseAuth.instance;
-  CollectionReference<Map<String, dynamic>> get _users => FirebaseFirestore.instance.collection('users');
+
+  CollectionReference<Map<String, dynamic>> get _users =>
+      FirebaseFirestore.instance.collection('churches/$churchId/users');
 
   @override
   bool get supportsSocialSignIn => true;

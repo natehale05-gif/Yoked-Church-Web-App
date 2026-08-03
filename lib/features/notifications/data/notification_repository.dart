@@ -18,6 +18,8 @@ mixin _NotificationCodec implements EntityCodec<AppNotification> {
 class FirestoreNotificationRepository extends FirestoreCrudRepository<AppNotification>
     with _NotificationCodec
     implements NotificationRepository {
+  FirestoreNotificationRepository(super.churchId);
+
   @override
   String get collectionPath => 'notifications';
   @override

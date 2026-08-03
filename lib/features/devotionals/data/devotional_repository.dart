@@ -15,6 +15,8 @@ mixin _DevotionalCodec implements EntityCodec<Devotional> {
 class FirestoreDevotionalRepository extends FirestoreCrudRepository<Devotional>
     with _DevotionalCodec
     implements DevotionalRepository {
+  FirestoreDevotionalRepository(super.churchId);
+
   @override
   String get collectionPath => 'devotionals';
   @override

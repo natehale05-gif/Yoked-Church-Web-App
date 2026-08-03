@@ -31,6 +31,8 @@ mixin _SubmissionCodec implements EntityCodec<FormSubmission> {
 class FirestoreFormRepository extends FirestoreCrudRepository<FormDefinition>
     with _FormCodec
     implements FormRepository {
+  FirestoreFormRepository(super.churchId);
+
   @override
   String get collectionPath => 'formDefinitions';
   @override
@@ -61,6 +63,8 @@ class LocalFormRepository extends LocalCrudRepository<FormDefinition>
 class FirestoreSubmissionRepository extends FirestoreCrudRepository<FormSubmission>
     with _SubmissionCodec
     implements SubmissionRepository {
+  FirestoreSubmissionRepository(super.churchId);
+
   @override
   String get collectionPath => 'formSubmissions';
   @override

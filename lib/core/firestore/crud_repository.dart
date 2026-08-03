@@ -31,14 +31,32 @@ abstract mixin class EntityCodec<T> {
 /// Firestore-backed CRUD. Subclasses supply the collection path, the
 /// codec, and optionally a default ordering.
 abstract class FirestoreCrudRepository<T> with EntityCodec<T> implements CrudRepository<T> {
+  FirestoreCrudRepository(this.churchId);
+
+  /// Which church's data this repository reads and writes.
+  ///
+  /// Passed in rather than read from a global, so that nothing can
+  /// accidentally operate on whichever church happened to be selected
+  /// last - and so tests can hold two churches open at once, which is
+  /// the only way to prove one cannot see the other.
+  final String churchId;
+
   String get collectionPath;
 
   /// Field to order list reads by, if any.
   String? get orderByField => null;
   bool get descending => false;
 
+  /// Every collection in the app lives under its church.
+  ///
+  /// This one getter is the whole of multi-tenancy on the read/write
+  /// side: the thirty-odd repositories below declare a bare
+  /// `collectionPath` like `sermons` and are otherwise unaware there is
+  /// more than one church. Scoping here rather than in each of them is
+  /// what stops a missed prefix leaking one church's data into another's
+  /// screens.
   CollectionReference<Map<String, dynamic>> get collection =>
-      FirebaseFirestore.instance.collection(collectionPath);
+      FirebaseFirestore.instance.collection('churches/$churchId/$collectionPath');
 
   Query<Map<String, dynamic>> get _ordered {
     final field = orderByField;

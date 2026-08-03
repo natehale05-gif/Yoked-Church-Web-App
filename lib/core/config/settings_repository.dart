@@ -55,9 +55,21 @@ class LocalSettingsRepository implements SettingsRepository {
 }
 
 class FirestoreSettingsRepository implements SettingsRepository {
-  static const _docPath = 'churchSettings/main';
+  FirestoreSettingsRepository(this.churchId);
 
-  DocumentReference<Map<String, dynamic>> get _doc => FirebaseFirestore.instance.doc(_docPath);
+  /// Which church's settings these are.
+  final String churchId;
+
+  /// The church document does double duty: it is both this church's
+  /// settings and its entry in the public directory the picker lists.
+  /// One document, one read - a member choosing a church has already
+  /// fetched everything needed to theme the app as that church.
+  ///
+  /// This replaced a hardcoded `churchSettings/main`, which was the
+  /// clearest statement that the old app could only ever serve one
+  /// church.
+  DocumentReference<Map<String, dynamic>> get _doc =>
+      FirebaseFirestore.instance.doc('churches/$churchId');
 
   /// Falls back to the bundled asset when the settings doc has not been
   /// created yet, so a freshly-configured Firebase project still renders

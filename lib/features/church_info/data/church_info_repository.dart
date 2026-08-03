@@ -37,6 +37,8 @@ mixin _FaqCodec implements EntityCodec<Faq> {
 class FirestoreStaffRepository extends FirestoreCrudRepository<StaffMember>
     with _StaffCodec
     implements StaffRepository {
+  FirestoreStaffRepository(super.churchId);
+
   @override
   String get collectionPath => 'staffMembers';
   @override
@@ -53,6 +55,8 @@ class LocalStaffRepository extends LocalCrudRepository<StaffMember> with _StaffC
 class FirestoreLocationRepository extends FirestoreCrudRepository<ChurchLocation>
     with _LocationCodec
     implements LocationRepository {
+  FirestoreLocationRepository(super.churchId);
+
   @override
   String get collectionPath => 'locations';
   @override
@@ -69,6 +73,8 @@ class LocalLocationRepository extends LocalCrudRepository<ChurchLocation>
 }
 
 class FirestoreFaqRepository extends FirestoreCrudRepository<Faq> with _FaqCodec implements FaqRepository {
+  FirestoreFaqRepository(super.churchId);
+
   @override
   String get collectionPath => 'faqs';
   @override

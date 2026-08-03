@@ -21,6 +21,8 @@ mixin _AttendanceCodec implements EntityCodec<AttendanceRecord> {
 class FirestoreAttendanceRepository extends FirestoreCrudRepository<AttendanceRecord>
     with _AttendanceCodec
     implements AttendanceRepository {
+  FirestoreAttendanceRepository(super.churchId);
+
   @override
   String get collectionPath => 'attendanceRecords';
   @override

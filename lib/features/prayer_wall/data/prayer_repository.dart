@@ -33,6 +33,8 @@ mixin _IntercessionCodec implements EntityCodec<PrayerIntercession> {
 class FirestorePrayerPostRepository extends FirestoreCrudRepository<PrayerPost>
     with _PostCodec
     implements PrayerPostRepository {
+  FirestorePrayerPostRepository(super.churchId);
+
   @override
   String get collectionPath => 'prayerPosts';
   @override
@@ -53,6 +55,8 @@ class LocalPrayerPostRepository extends LocalCrudRepository<PrayerPost>
 class FirestoreIntercessionRepository extends FirestoreCrudRepository<PrayerIntercession>
     with _IntercessionCodec
     implements IntercessionRepository {
+  FirestoreIntercessionRepository(super.churchId);
+
   @override
   String get collectionPath => 'prayerIntercessions';
 

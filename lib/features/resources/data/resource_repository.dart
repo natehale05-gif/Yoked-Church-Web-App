@@ -15,6 +15,8 @@ mixin _ResourceCodec implements EntityCodec<Resource> {
 class FirestoreResourceRepository extends FirestoreCrudRepository<Resource>
     with _ResourceCodec
     implements ResourceRepository {
+  FirestoreResourceRepository(super.churchId);
+
   @override
   String get collectionPath => 'resources';
   @override

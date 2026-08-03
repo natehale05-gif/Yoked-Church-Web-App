@@ -22,6 +22,8 @@ mixin _RsvpCodec implements EntityCodec<EventRsvp> {
 }
 
 class FirestoreRsvpRepository extends FirestoreCrudRepository<EventRsvp> with _RsvpCodec implements RsvpRepository {
+  FirestoreRsvpRepository(super.churchId);
+
   @override
   String get collectionPath => 'eventRsvps';
 

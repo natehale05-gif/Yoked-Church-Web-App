@@ -15,6 +15,8 @@ mixin _AuditCodec implements EntityCodec<AuditEntry> {
 class FirestoreAuditRepository extends FirestoreCrudRepository<AuditEntry>
     with _AuditCodec
     implements AuditRepository {
+  FirestoreAuditRepository(super.churchId);
+
   @override
   String get collectionPath => 'auditLog';
   @override
