@@ -72,7 +72,88 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(appBar: const AppNavBar(), body: child);
+    // A phone gets app navigation, not website navigation. The top bar
+    // keeps only the church's name and the notification bell; getting
+    // anywhere happens through the bar at the bottom, where a thumb
+    // actually reaches. Above mobile width the top bar is unchanged -
+    // a mouse has no reach problem and a wide window has room for links.
+    final isMobile = Breakpoints.isMobile(context);
+
+    return Scaffold(
+      appBar: const AppNavBar(),
+      body: child,
+      bottomNavigationBar: isMobile ? const AppBottomNav() : null,
+    );
+  }
+}
+
+/// The five destinations a phone shows along the bottom.
+///
+/// Four from the church's own feature flags plus **More**, which is
+/// where everything that did not fit goes - including the account and
+/// the church switcher. Five is the ceiling because Material's
+/// [NavigationBar] stops being tappable past it, and because a person
+/// scanning a bar cannot hold more than that anyway.
+List<NavDestination> bottomNav(ChurchSettings settings) {
+  final flags = settings.features;
+  return [
+    const NavDestination('Home', '/'),
+    if (flags.sermons) const NavDestination('Watch', '/sermons'),
+    if (flags.events) const NavDestination('Events', '/events'),
+    if (flags.giving) const NavDestination('Give', '/give'),
+    const NavDestination('More', ''),
+  ].take(5).toList();
+}
+
+IconData _iconFor(String path) => switch (path) {
+      '/' => Icons.home_outlined,
+      '/sermons' => Icons.play_circle_outline,
+      '/events' => Icons.event_outlined,
+      '/give' => Icons.favorite_outline,
+      _ => Icons.menu,
+    };
+
+class AppBottomNav extends ConsumerWidget {
+  const AppBottomNav({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Same reason the top bar listens: this is built const, so without a
+    // listener the highlight sticks on whichever page opened first.
+    return ListenableBuilder(
+      listenable: GoRouter.of(context).routerDelegate,
+      builder: (context, _) => _build(context, ref),
+    );
+  }
+
+  Widget _build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final destinations = bottomNav(settings);
+    final currentPath = GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+
+    // Anything reached from More - a devotional, the account, a form -
+    // keeps More lit rather than falsely highlighting Home.
+    var selected = destinations.indexWhere((d) => d.path == currentPath);
+    if (selected < 0) selected = destinations.length - 1;
+
+    return NavigationBar(
+      selectedIndex: selected,
+      onDestinationSelected: (index) {
+        final destination = destinations[index];
+        if (destination.path.isEmpty) {
+          openMoreMenu(context, primaryNav(settings), settings);
+        } else {
+          context.go(destination.path);
+        }
+      },
+      destinations: [
+        for (final destination in destinations)
+          NavigationDestination(
+            icon: Icon(_iconFor(destination.path)),
+            label: destination.label,
+          ),
+      ],
+    );
   }
 }
 
@@ -159,11 +240,13 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
               const SizedBox(width: 12),
               ElevatedButton(onPressed: () => context.go('/give'), child: const Text('Give')),
             ],
-            if (collapsed)
+            // Only tablets keep the hamburger: they are collapsed but
+            // have no bottom bar, which is reserved for phone widths.
+            if (collapsed && !Breakpoints.isMobile(context))
               IconButton(
                 icon: const Icon(Icons.menu),
                 tooltip: 'Menu',
-                onPressed: () => _openMenu(context, destinations, settings),
+                onPressed: () => openMoreMenu(context, destinations, settings),
               ),
           ],
         ),
@@ -171,7 +254,15 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
     );
   }
 
-  void _openMenu(BuildContext context, List<NavDestination> destinations, ChurchSettings settings) {
+}
+
+/// The sheet behind **More** on a phone, and behind the hamburger on a
+/// tablet. Everything that did not earn a permanent place.
+void openMoreMenu(
+  BuildContext context,
+  List<NavDestination> destinations,
+  ChurchSettings settings,
+) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -203,6 +294,17 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
                       title: const Text('Get the App'),
                       onTap: () => go('/download'),
                     ),
+                  const Divider(height: 1),
+                  // Which church this is, and the way out of it. Shown to
+                  // everyone, signed in or not: a visitor who picked the
+                  // wrong church needs this more than a member does.
+                  ListTile(
+                    leading: const Icon(Icons.church_outlined),
+                    title: Text(settings.churchName),
+                    subtitle: const Text('Switch church'),
+                    trailing: const Icon(Icons.swap_horiz),
+                    onTap: () => go('/choose-church?switch=1'),
+                  ),
                   const Divider(height: 1),
                   if (user == null)
                     ListTile(
@@ -245,7 +347,6 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
         ),
       ),
     );
-  }
 }
 
 /// Sign-in link when signed out; avatar menu when signed in.
