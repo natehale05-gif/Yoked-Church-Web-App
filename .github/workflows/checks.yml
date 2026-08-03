@@ -1,0 +1,72 @@
+name: Checks
+
+# Runs on every branch, not just main. The deploy workflow only fires on
+# main, which meant a branch could go green in review and break on merge.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  flutter:
+    name: Analyze, test, build web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+
+      # Every commit in this repo is held to a clean analyze; CI should
+      # hold the same line rather than trusting it happened locally.
+      - run: flutter analyze
+
+      - run: flutter test
+
+      - run: flutter build web --release
+
+  rules:
+    name: Firestore security rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The Firestore emulator is a Java process, and firebase-tools
+      # refuses to start one on anything below JDK 21.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - run: ./run.sh
+        working-directory: test_rules
+
+  android:
+    name: Android build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+
+      # The mobile targets are otherwise unverified - no device, no
+      # simulator, no signing. What this catches is the failure that would
+      # actually happen: a web-only import (dart:js_interop, package:web)
+      # leaking out of lib/core/export/ and breaking every non-web build.
+      - run: flutter build apk --debug

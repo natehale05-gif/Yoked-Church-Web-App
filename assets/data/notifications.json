@@ -1,0 +1,32 @@
+[
+  {
+    "uid": "demo-member", "title": "You're on the greeter list",
+    "message": "Sarah Lee added you to Sunday Greeter. See you at the doors.",
+    "linkPath": "/account/volunteering", "category": "volunteering",
+    "createdAt": "2026-07-27T19:25:00", "read": false
+  },
+  {
+    "uid": "demo-member", "title": "Camp registration closes soon",
+    "message": "Summer camp sign-ups close at the end of next week.",
+    "linkPath": "/forms/summer-camp", "category": "announcements",
+    "createdAt": "2026-07-22T17:30:00", "read": false
+  },
+  {
+    "uid": "demo-member", "title": "Your room booking is confirmed",
+    "message": "\"Yoked small group\" in the Upper Room is booked.",
+    "linkPath": "/account/bookings", "category": "events",
+    "createdAt": "2026-07-21T09:10:00", "read": true
+  },
+  {
+    "uid": "demo-staff", "title": "New response: Summer Camp Registration",
+    "message": "Maria Alvarez submitted \"Summer Camp Registration\".",
+    "linkPath": "/admin/forms/local-0/responses", "category": "announcements",
+    "createdAt": "2026-07-27T21:04:00", "read": false
+  },
+  {
+    "uid": "demo-admin", "title": "A room booking needs review",
+    "message": "Hannah Brooks asked for the Upper Room on Tuesday.",
+    "linkPath": "/admin/rooms", "category": "events",
+    "createdAt": "2026-07-26T20:45:00", "read": false
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Main Campus",
+    "address": "123 Faith Ave, Hometown, ST 00000",
+    "description": "Our original campus. Parking is free in the main lot; accessible entrances are on the north side.",
+    "mapUrl": "https://maps.google.com/?q=123+Faith+Ave",
+    "serviceTimes": ["Sunday 9:00 AM", "Sunday 11:00 AM"],
+    "sortOrder": 1
+  },
+  {
+    "name": "Eastside",
+    "address": "88 River Rd, Hometown, ST 00000",
+    "description": "Our newer east-side gathering, meeting in the Riverside School auditorium.",
+    "mapUrl": "https://maps.google.com/?q=88+River+Rd",
+    "serviceTimes": ["Sunday 10:00 AM"],
+    "sortOrder": 2
+  }
+]

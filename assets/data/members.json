@@ -1,0 +1,66 @@
+[
+  {
+    "email": "hannah.brooks@example.org",
+    "displayName": "Hannah Brooks",
+    "phone": "(555) 234-1122",
+    "role": "member",
+    "directoryOptIn": true,
+    "createdAt": "2025-03-14T10:00:00"
+  },
+  {
+    "email": "dev.patel@example.org",
+    "displayName": "Dev Patel",
+    "phone": "(555) 234-3344",
+    "role": "member",
+    "directoryOptIn": true,
+    "createdAt": "2025-06-02T10:00:00"
+  },
+  {
+    "email": "sarah@yokedchurch.org",
+    "displayName": "Sarah Lee",
+    "phone": "(555) 123-4567",
+    "role": "staff",
+    "directoryOptIn": true,
+    "createdAt": "2024-01-10T10:00:00"
+  },
+  {
+    "email": "john@yokedchurch.org",
+    "displayName": "John Miller",
+    "phone": "(555) 123-4567",
+    "role": "admin",
+    "directoryOptIn": false,
+    "createdAt": "2023-08-01T10:00:00"
+  },
+  {
+    "email": "marcus.reed@example.org",
+    "displayName": "Marcus Reed",
+    "phone": "(555) 234-5566",
+    "role": "member",
+    "directoryOptIn": true,
+    "createdAt": "2025-11-09T10:00:00"
+  },
+  {
+    "email": "grace.okafor@example.org",
+    "displayName": "Grace Okafor",
+    "phone": "(555) 234-7788",
+    "role": "member",
+    "directoryOptIn": true,
+    "createdAt": "2026-02-01T10:00:00"
+  },
+  {
+    "email": "tom.whitfield@example.org",
+    "displayName": "Tom Whitfield",
+    "phone": "",
+    "role": "member",
+    "directoryOptIn": false,
+    "createdAt": "2026-06-14T10:00:00"
+  },
+  {
+    "email": "priya.raman@example.org",
+    "displayName": "Priya Raman",
+    "phone": "(555) 244-9080",
+    "role": "member",
+    "directoryOptIn": false,
+    "createdAt": "2026-07-27T10:00:00"
+  }
+]

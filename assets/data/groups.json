@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Tuesday Morning Women",
+    "category": "Bible Study",
+    "description": "A study through the gospel of Luke, with coffee and childcare provided.",
+    "meetingDay": "Tuesday", "meetingTime": "9:30 AM", "location": "Room 202",
+    "leaderName": "Sarah Lee", "openToJoin": true
+  },
+  {
+    "name": "Young Adults",
+    "category": "Fellowship",
+    "description": "Twenties and thirties gathering for dinner, discussion, and a lot of board games.",
+    "meetingDay": "Thursday", "meetingTime": "7:00 PM", "location": "Fellowship Hall",
+    "leaderName": "Demo Member", "leaderUid": "demo-member", "openToJoin": true
+  },
+  {
+    "name": "Men's Breakfast",
+    "category": "Fellowship",
+    "description": "Early breakfast and honest conversation. Newcomers always welcome.",
+    "meetingDay": "Saturday", "meetingTime": "7:00 AM", "location": "The Diner on 3rd",
+    "leaderName": "John Miller", "openToJoin": true
+  },
+  {
+    "name": "Worship Team",
+    "category": "Ministry Team",
+    "description": "Musicians and vocalists serving on Sunday mornings. Audition required.",
+    "meetingDay": "Wednesday", "meetingTime": "7:00 PM", "location": "Sanctuary",
+    "leaderName": "Marcus Reed", "openToJoin": false
+  }
+]

@@ -1,0 +1,40 @@
+[
+  {
+    "title": "Sunday Worship Gathering",
+    "start": "2026-08-02T09:00:00",
+    "end": "2026-08-02T10:15:00",
+    "location": "Main Sanctuary",
+    "category": "Worship",
+    "description": "Join us for worship, teaching, and communion.",
+    "rsvpEnabled": false
+  },
+  {
+    "title": "Youth Group Night",
+    "start": "2026-08-05T18:30:00",
+    "end": "2026-08-05T20:30:00",
+    "location": "Fellowship Hall",
+    "category": "Youth",
+    "description": "Games, worship, and a message for grades 6-12.",
+    "rsvpEnabled": true
+  },
+  {
+    "title": "Community Food Drive",
+    "start": "2026-08-08T10:00:00",
+    "end": "2026-08-08T13:00:00",
+    "location": "Church Parking Lot",
+    "category": "Outreach",
+    "description": "Serving our neighbors together - volunteers needed.",
+    "rsvpEnabled": true,
+    "capacity": 40
+  },
+  {
+    "title": "Vacation Bible School",
+    "start": "2026-08-17T09:00:00",
+    "end": "2026-08-21T12:00:00",
+    "location": "Children's Wing",
+    "category": "Kids",
+    "description": "A week of games, songs, crafts, and Bible stories for kids ages 4-12.",
+    "rsvpEnabled": true,
+    "capacity": 120
+  }
+]

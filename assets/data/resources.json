@@ -1,0 +1,56 @@
+[
+  {
+    "title": "Yoked: Small Group Discussion Guide",
+    "description": "Six weeks of questions to go with the Yoked series. One page per week.",
+    "category": "Small Groups",
+    "url": "https://example.org/resources/yoked-discussion-guide.pdf",
+    "fileName": "yoked-discussion-guide.pdf",
+    "membersOnly": false,
+    "createdAt": "2026-07-20T09:00:00"
+  },
+  {
+    "title": "What We Believe",
+    "description": "Our statement of faith, in plain language.",
+    "category": "About Us",
+    "url": "https://example.org/resources/what-we-believe.pdf",
+    "fileName": "what-we-believe.pdf",
+    "membersOnly": false,
+    "createdAt": "2026-06-01T09:00:00"
+  },
+  {
+    "title": "Kids Ministry Curriculum - Summer",
+    "description": "Lesson plans and craft sheets for the summer quarter.",
+    "category": "Kids",
+    "url": "https://example.org/resources/kids-summer-curriculum.pdf",
+    "fileName": "kids-summer-curriculum.pdf",
+    "membersOnly": true,
+    "createdAt": "2026-05-15T09:00:00"
+  },
+  {
+    "title": "Facility Use Request Form",
+    "description": "Book a room for a meeting, class, or event.",
+    "category": "Forms",
+    "url": "https://example.org/resources/facility-use-request.docx",
+    "fileName": "facility-use-request.docx",
+    "membersOnly": true,
+    "createdAt": "2026-04-02T09:00:00"
+  },
+  {
+    "title": "Baptism: Frequently Asked Questions",
+    "description": "What baptism means here, and what to expect on the day.",
+    "category": "Next Steps",
+    "url": "https://example.org/resources/baptism-faq.pdf",
+    "fileName": "baptism-faq.pdf",
+    "membersOnly": false,
+    "createdAt": "2026-03-10T09:00:00"
+  },
+  {
+    "title": "Serving Team Handbook",
+    "description": "Expectations, schedules, and who to call.",
+    "category": "Volunteering",
+    "url": "https://example.org/resources/serving-handbook.pdf",
+    "fileName": "serving-handbook.pdf",
+    "membersOnly": true,
+    "createdAt": "2026-02-18T09:00:00"
+  }
+]

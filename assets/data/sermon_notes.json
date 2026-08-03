@@ -1,0 +1,14 @@
+[
+  {
+    "uid": "demo-member", "sermonId": "local-0", "sermonTitle": "Rest for the Weary",
+    "sermonDate": "2026-07-19",
+    "body": "\"Take my yoke upon you\" - a yoke is still work. The rest is in who it's shared with, not in having nothing to carry.\n\nWorth sitting with this week.",
+    "updatedAt": "2026-07-19T11:40:00"
+  },
+  {
+    "uid": "demo-member", "sermonId": "local-2", "sermonTitle": "Faith Over Fear",
+    "sermonDate": "2026-06-28",
+    "body": "Ask Dev about the reading he mentioned afterwards.",
+    "updatedAt": "2026-06-28T12:05:00"
+  }
+]

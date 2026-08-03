@@ -1,0 +1,6 @@
+[
+  { "actorUid": "local-3", "actorName": "John Miller", "action": "changed role", "entity": "member", "details": "Sarah Lee to staff", "at": "2026-07-27T10:12:00" },
+  { "actorUid": "local-2", "actorName": "Sarah Lee", "action": "deleted", "entity": "sermon", "details": "Duplicate upload of \"The Good Shepherd\"", "at": "2026-07-26T16:45:00" },
+  { "actorUid": "local-3", "actorName": "John Miller", "action": "updated", "entity": "church settings", "details": "Brand colors", "at": "2026-07-24T09:30:00" },
+  { "actorUid": "local-2", "actorName": "Sarah Lee", "action": "deleted", "entity": "group", "details": "Thursday Prayer (merged into Young Adults)", "at": "2026-07-18T13:05:00" }
+]

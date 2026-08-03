@@ -1,0 +1,6 @@
+[
+  { "eventId": "local-2", "uid": "demo-member", "memberName": "Demo Member", "partySize": 2, "respondedAt": "2026-07-27T20:10:00" },
+  { "eventId": "local-2", "uid": "local-0", "memberName": "Hannah Brooks", "partySize": 3, "respondedAt": "2026-07-25T11:30:00" },
+  { "eventId": "local-2", "uid": "local-1", "memberName": "Dev Patel", "partySize": 1, "respondedAt": "2026-07-24T09:02:00" },
+  { "eventId": "local-3", "uid": "local-0", "memberName": "Hannah Brooks", "partySize": 2, "respondedAt": "2026-07-26T14:00:00" }
+]

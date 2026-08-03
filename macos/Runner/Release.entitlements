@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<!-- Outbound network access. Flutter's template grants this in
+	     DebugProfile.entitlements only, so a release build talks to Firebase
+	     while you develop and is cut off the moment you ship it. Same defect
+	     as a missing Android INTERNET permission, in a different costume. -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>

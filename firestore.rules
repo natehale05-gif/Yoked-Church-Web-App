@@ -1,0 +1,255 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isStaff() {
+      return isSignedIn() && myRole() in ['staff', 'admin'];
+    }
+
+    function isAdmin() {
+      return isSignedIn() && myRole() == 'admin';
+    }
+
+    // Public content - visible to anyone, editable by staff/admin only.
+    match /sermons/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /events/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    // Drafts and future-dated entries are filtered client-side, not here:
+    // a rule cannot express "published and dated on or before today"
+    // without an index-backed query, and the list read is a single
+    // collection fetch. Treat publishDate as scheduling, not secrecy.
+    match /devotionals/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    match /readingPlans/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    // membersOnly is enforced here, not just in the UI filter: a
+    // signed-out visitor must not be able to read an internal document
+    // by querying the collection directly.
+    match /resources/{id} {
+      allow read: if isSignedIn() || resource.data.membersOnly == false;
+      allow write: if isStaff();
+    }
+
+    // A member's progress through a plan. Deliberately not readable by
+    // staff: how far someone got in their Bible reading is between them
+    // and God, and a church has no operational need for it.
+    match /planProgress/{id} {
+      allow read, update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+    }
+
+    // A member's own notes on a sermon - the most private data the app
+    // holds. Distinct from the church's published outline, which lives
+    // on the sermon document itself. No staff read here either.
+    match /sermonNotes/{id} {
+      allow read, update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+    }
+
+    // Connect page: prayer requests / connect cards. Anyone (including
+    // visitors, if this were ever opened up client-side) can submit;
+    // only staff can read/manage the inbox.
+    match /submissions/{id} {
+      allow create: if true;
+      allow read, update, delete: if isStaff();
+    }
+
+    // Member profiles. A member always sees/edits their own doc; staff
+    // see all; any signed-in member can see another member's doc *only*
+    // if that member opted into the directory.
+    match /users/{uid} {
+      allow read: if isSignedIn() &&
+        (request.auth.uid == uid || isStaff() || resource.data.directoryOptIn == true);
+      allow create: if isSignedIn() && request.auth.uid == uid && request.resource.data.role == 'member';
+      allow update: if isAdmin() ||
+        (isSignedIn() && request.auth.uid == uid && request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin();
+    }
+
+    match /groups/{id} {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+
+    // Members can request to join (create their own pending membership)
+    // and see their own membership records; staff manage/approve all.
+    match /groupMemberships/{id} {
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isStaff());
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid &&
+        request.resource.data.status == 'pending';
+      allow update, delete: if isStaff();
+    }
+
+    // Members RSVP/un-RSVP for themselves; staff can read all for
+    // check-in lists.
+    match /eventRsvps/{id} {
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isStaff());
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // Giving records: members can only ever read their own; entry is a
+    // staff-only (manual, for now) operation.
+    match /givingRecords/{id} {
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isStaff());
+      allow write: if isStaff();
+    }
+
+    match /volunteerPositions/{id} {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+
+    // A member can self-signup (create their own assignment, but only as
+    // `pending` - self-approval on create is impossible) and later
+    // decline it; only staff can create an already-`approved` assignment
+    // (direct admin-assign) or flip a pending one to `approved`.
+    match /volunteerAssignments/{id} {
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isStaff());
+      allow create: if isStaff() ||
+        (isSignedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.status == 'pending');
+      allow update: if isStaff() ||
+        (isSignedIn() && resource.data.uid == request.auth.uid && request.resource.data.status == 'declined');
+      allow delete: if isStaff() || (isSignedIn() && resource.data.uid == request.auth.uid);
+    }
+
+    // In-app notifications: only staff-initiated actions (assigning or
+    // approving a volunteer) create these; a member only ever sees,
+    // marks read, or deletes their own.
+    match /notifications/{id} {
+      allow create: if isStaff();
+      allow read, update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    match /rooms/{id} {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+
+    // Kids check-in. A guardian may read their own children's sessions,
+    // so the pickup code is on their phone - and nobody else's. Only
+    // staff at the desk create or release, because releasing is the act
+    // of handing over a child.
+    //
+    // Codes are short by necessity: a parent reads one aloud at a desk.
+    // The protection is this rule plus single use, not the code's
+    // entropy.
+    match /checkIns/{id} {
+      allow read: if isStaff() || (isSignedIn() && resource.data.guardianUid == request.auth.uid);
+      allow write: if isStaff();
+    }
+
+    // A member files their own request as `pending` and can withdraw it.
+    // Only staff can approve - approving is what actually holds the
+    // room, so self-approval would make the conflict check meaningless.
+    match /roomBookings/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.requestedByUid == request.auth.uid &&
+        request.resource.data.status == 'pending';
+      allow update: if isStaff() ||
+        (isSignedIn() && resource.data.requestedByUid == request.auth.uid &&
+         request.resource.data.status == 'cancelled');
+      allow delete: if isStaff();
+    }
+
+    // The prayer wall. Members-only to read at all: a request often
+    // names a person or a diagnosis, and that does not belong on a
+    // public page. A member creates their own as `pending` and can never
+    // self-approve; only staff move it to `approved`.
+    match /prayerPosts/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid &&
+        request.resource.data.status == 'pending';
+      allow update, delete: if isStaff();
+    }
+
+    // One record per member per post, under a deterministic id, so a
+    // second tap cannot double-count. A member may only ever create or
+    // remove their own.
+    match /prayerIntercessions/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // Announcements are archived so members can browse past ones; the
+    // fan-out to individual inboxes is the `notifications` rule above.
+    // Nothing is ever edited after sending - a sent announcement is a
+    // record of what people received.
+    match /announcements/{id} {
+      allow read: if isSignedIn();
+      allow create: if isStaff();
+      allow update, delete: if false;
+    }
+
+    // Form definitions. A published public form is readable by anyone -
+    // that is the point of a sign-up link in a bulletin. Drafts and
+    // members-only forms are not, and that is enforced here rather than
+    // only by the route guard, or the schema of an unpublished form
+    // could be read straight out of the collection.
+    match /formDefinitions/{id} {
+      allow read: if isStaff() ||
+        (resource.data.published == true && (isSignedIn() || resource.data.membersOnly == false));
+      allow write: if isStaff();
+    }
+
+    // Submissions. Anyone may create one, because a visitor filling in a
+    // camp registration has no account and requiring one would lose
+    // them. Only staff can read the inbox - the answers include phone
+    // numbers and medical notes.
+    match /formSubmissions/{id} {
+      allow create: if true;
+      allow read, update, delete: if isStaff();
+    }
+
+    // Attendance. Staff record and read everything; a group's leader can
+    // read their own group's records, because "who has stopped coming" is
+    // the one question attendance actually answers for them.
+    //
+    // No member-wide read: a list of who was and wasn't in the room is
+    // pastoral information, not a directory.
+    function leadsGroup(groupId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/groups/$(groupId)).data.leaderUid == request.auth.uid;
+    }
+
+    match /attendanceRecords/{id} {
+      allow read: if isStaff() ||
+        (resource.data.gatheringType == 'group' && leadsGroup(resource.data.gatheringId));
+      allow write: if isStaff();
+    }
+
+    // The audit trail. Append-only by design: staff append by acting, and
+    // nobody - not even an admin - can rewrite or erase history, which is
+    // the entire point of keeping it. Reading is admin-only.
+    match /auditLog/{id} {
+      allow read: if isAdmin();
+      allow create: if isStaff() && request.resource.data.actorUid == request.auth.uid;
+      allow update, delete: if false;
+    }
+  }
+}

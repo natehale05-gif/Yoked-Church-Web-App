@@ -1,0 +1,212 @@
+name: Release
+
+# Builds the installable apps and attaches them to a GitHub release.
+#
+# Cut one with:
+#
+#     git tag v1.0.0 && git push origin v1.0.0
+#
+# `workflow_dispatch` runs the same builds without publishing, so the
+# workflow can be exercised without burning a version number. Artifacts
+# from a manual run are downloadable from the run's summary page.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+# Needed by the publish job to create the release. Nothing else here
+# writes to the repo.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+
+    # One platform failing should not cancel the others: you want to
+    # learn about all four failures in one run, not discover them one
+    # release at a time.
+    #
+    # This does *not* mean a partial release gets published. `publish`
+    # needs this job, so a single failed platform skips it entirely -
+    # which is the right trade. A release missing one asset is a download
+    # button that 404s for whoever owns that platform, and they have no
+    # way to tell that from the app being broken.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: android
+            os: ubuntu-latest
+            asset: yoked-church-android.apk
+          # Pinned, not `ubuntu-latest`: a Linux binary runs on any glibc
+          # at least as new as the one it was built against, and never on
+          # an older one. Building on the newest runner would produce
+          # "GLIBC_2.xx not found" for anyone on a distro a year behind -
+          # which is most people. 22.04 ships glibc 2.35, so the binary
+          # runs on 22.04, Debian 12, and everything since.
+          #
+          # Move this forward deliberately, knowing who it drops.
+          - target: linux
+            os: ubuntu-22.04
+            asset: yoked-church-linux.tar.gz
+          - target: windows
+            os: windows-latest
+            asset: yoked-church-windows.zip
+          - target: macos
+            os: macos-latest
+            asset: yoked-church-macos.zip
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        if: matrix.target == 'android'
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # The Linux desktop embedder is a GTK app, and the toolchain is not
+      # on the runner image by default.
+      - name: Install Linux build dependencies
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev ninja-build
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+
+      # Sign the APK with a stable upload key when one is configured.
+      #
+      # Without this the build falls back to Gradle's debug keystore,
+      # which the runner generates fresh every time - so each release
+      # would be signed by a different key, and Android refuses to
+      # install an update signed by a different key than the installed
+      # app. Members would have to uninstall and lose local state on
+      # every release. See the README for generating the keystore and
+      # setting these three secrets.
+      # The emptiness check is in the script, not in `if:` - a step
+      # cannot read its own `env` from its `if`, and that mistake fails
+      # open, silently shipping debug-signed APKs.
+      - name: Configure Android signing
+        if: matrix.target == 'android'
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE" ]; then
+            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret set. This APK will be"
+            echo "::warning::signed with a throwaway debug key, so members will not be"
+            echo "::warning::able to install it as an update over an earlier release."
+            exit 0
+          fi
+          echo "$KEYSTORE" | base64 --decode > android/upload-keystore.jks
+          cat > android/key.properties <<PROPS
+          storeFile=$PWD/android/upload-keystore.jks
+          storePassword=$STORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$STORE_PASSWORD
+          PROPS
+          echo "Signing with the configured upload key."
+
+      - name: Build
+        run: flutter build ${{ matrix.target == 'android' && 'apk' || matrix.target }} --release
+
+      # Each platform's output is packaged under the exact name the
+      # download buttons link to. See the note on asset names below.
+      - name: Package (Android)
+        if: matrix.target == 'android'
+        run: |
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk dist/yoked-church-android.apk
+
+      - name: Package (Linux)
+        if: matrix.target == 'linux'
+        run: |
+          mkdir -p dist
+          tar -czf dist/yoked-church-linux.tar.gz -C build/linux/x64/release/bundle .
+
+      # `ditto` rather than `zip`, because a .app is a bundle with symlinks
+      # and an executable bit, and plain zip loses both - the app opens to
+      # "the application is damaged".
+      - name: Package (macOS)
+        if: matrix.target == 'macos'
+        run: |
+          mkdir -p dist
+          app="$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' | head -1)"
+          test -n "$app" || { echo "no .app produced"; exit 1; }
+          ditto -c -k --keepParent "$app" dist/yoked-church-macos.zip
+
+      - name: Package (Windows)
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath dist/yoked-church-windows.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: dist/${{ matrix.asset }}
+          if-no-files-found: error
+
+  publish:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+
+    # Only a tag push produces a release. A manual run has no version to
+    # publish under, so it stops at the artifacts.
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - run: ls -lh dist
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          # These builds are not code-signed. Saying so in the release
+          # body means the warning travels with the download even when
+          # someone lands here from a direct link rather than /download.
+          body: |
+            Install links and per-platform instructions are on the app's
+            **Download** page.
+
+            These builds are not code-signed, so the first launch shows a
+            warning:
+
+            - **macOS** - "cannot be opened because the developer cannot be
+              verified". Right-click the app, choose Open, then Open again.
+            - **Windows** - SmartScreen shows "Windows protected your PC".
+              Choose More info, then Run anyway.
+            - **Android** - your phone will ask permission to install apps
+              from this source.
+
+            The Linux build runs on the bundled demo content: no Firebase
+            plugin supports Linux, so it cannot connect to a live backend.
+
+# A note on the asset names, because the coupling is invisible from here:
+#
+# The in-app download buttons link to
+# `github.com/<repo>/releases/latest/download/<asset>`, which is what lets
+# a button keep working across releases without rebuilding the site. That
+# means these names are a contract, not a label. Renaming one here turns a
+# download button into a 404 with nothing failing in between - so
+# `test/features/download_test.dart` parses this file and asserts the Dart
+# side links to exactly the names produced here.

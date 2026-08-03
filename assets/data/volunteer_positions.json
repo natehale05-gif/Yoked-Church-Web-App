@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Sunday Greeter",
+    "description": "Welcome people at the doors, hand out bulletins, help visitors find their way.",
+    "date": "2026-08-02", "location": "Main Entrance", "slotsNeeded": 4
+  },
+  {
+    "title": "Kids Check-In Volunteer",
+    "description": "Run the check-in desk before the 9:00 service. Background check required.",
+    "date": "2026-08-02", "location": "Children's Wing", "slotsNeeded": 2
+  },
+  {
+    "title": "Food Drive Helper",
+    "description": "Sort and box donations for the community food drive.",
+    "date": "2026-08-08", "location": "Church Parking Lot", "slotsNeeded": 12
+  },
+  {
+    "title": "VBS Small Group Leader",
+    "description": "Lead a group of 8-10 kids through the week's activities.",
+    "date": "2026-08-17", "location": "Children's Wing", "slotsNeeded": 10
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "roomId": "local-2",
+    "roomName": "Upper Room",
+    "requestedByUid": "local-0",
+    "requestedByName": "Hannah Brooks",
+    "purpose": "Yoked small group",
+    "start": "2026-08-04T19:00:00",
+    "end": "2026-08-04T20:30:00",
+    "expectedAttendance": 12,
+    "status": "approved",
+    "moderatedBy": "Sarah Lee"
+  },
+  {
+    "roomId": "local-0",
+    "roomName": "Fellowship Hall",
+    "requestedByUid": "local-1",
+    "requestedByName": "Dev Patel",
+    "purpose": "Community food drive sorting",
+    "start": "2026-08-08T10:00:00",
+    "end": "2026-08-08T14:00:00",
+    "expectedAttendance": 25,
+    "status": "approved",
+    "moderatedBy": "John Miller"
+  },
+  {
+    "roomId": "local-2",
+    "roomName": "Upper Room",
+    "requestedByUid": "local-1",
+    "requestedByName": "Dev Patel",
+    "purpose": "Membership class",
+    "start": "2026-08-11T19:00:00",
+    "end": "2026-08-11T20:00:00",
+    "expectedAttendance": 8,
+    "status": "pending",
+    "moderatedBy": ""
+  },
+  {
+    "roomId": "local-0",
+    "roomName": "Fellowship Hall",
+    "requestedByUid": "local-0",
+    "requestedByName": "Hannah Brooks",
+    "purpose": "Baby shower",
+    "start": "2026-08-08T12:00:00",
+    "end": "2026-08-08T15:00:00",
+    "expectedAttendance": 30,
+    "status": "pending",
+    "moderatedBy": ""
+  }
+]

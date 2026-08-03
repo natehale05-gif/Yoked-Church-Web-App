@@ -1,0 +1,27 @@
+[
+  {
+    "question": "What should I wear?",
+    "answer": "Whatever you're comfortable in. You'll see everything from jeans to button-downs on a given Sunday.",
+    "sortOrder": 1
+  },
+  {
+    "question": "Where do I park?",
+    "answer": "The main lot is free and unreserved. Look for a greeter in a blue lanyard near the front doors - they'll point you where you need to go.",
+    "sortOrder": 2
+  },
+  {
+    "question": "What about my kids?",
+    "answer": "Kids from birth through 5th grade have their own programming during the service. Check-in opens 20 minutes before, and you'll get a pickup code that matches your child's tag.",
+    "sortOrder": 3
+  },
+  {
+    "question": "How long is a service?",
+    "answer": "About 70 minutes, including music, a message, and communion on the first Sunday of the month.",
+    "sortOrder": 4
+  },
+  {
+    "question": "Will I be asked to give or sign anything?",
+    "answer": "No. Giving is entirely voluntary and there's no pressure to fill anything out as a guest.",
+    "sortOrder": 5
+  }
+]

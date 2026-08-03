@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Summer Camp Registration",
+    "slug": "summer-camp",
+    "description": "Grades 6-12, August 10-14 at Lake Vernon. $180 per camper.",
+    "published": true,
+    "membersOnly": false,
+    "closesAt": "2026-08-01T23:59:59",
+    "confirmationMessage": "You're registered. We'll email the packing list in July.",
+    "fields": [
+      { "id": "f1", "label": "Camper's name", "type": "shortText", "required": true, "page": 0 },
+      { "id": "f2", "label": "Grade in the fall", "type": "dropdown", "required": true, "page": 0,
+        "options": ["6th", "7th", "8th", "9th", "10th", "11th", "12th"] },
+      { "id": "f3", "label": "Parent or guardian phone", "type": "phone", "required": true, "page": 0 },
+      { "id": "f4", "label": "Does your camper need transport from the church?",
+        "type": "radio", "required": true, "page": 1, "options": ["Yes", "No"] },
+      { "id": "f5", "label": "Pickup address", "type": "shortText", "required": true, "page": 1,
+        "helpText": "Where the bus should collect them.",
+        "showIf": { "fieldId": "f4", "equals": "Yes" } },
+      { "id": "f6", "label": "Allergies or medical notes", "type": "longText", "page": 1 },
+      { "id": "f7", "label": "I give permission for my camper to attend.",
+        "type": "checkbox", "required": true, "page": 1 }
+    ]
+  },
+  {
+    "title": "Serve Team Application",
+    "slug": "serve-team",
+    "description": "Tell us where you'd like to serve and we'll get in touch.",
+    "published": true,
+    "membersOnly": true,
+    "confirmationMessage": "Thanks - a ministry lead will reach out within a week.",
+    "fields": [
+      { "id": "f1", "label": "Which team interests you?", "type": "dropdown", "required": true, "page": 0,
+        "options": ["Worship", "Kids", "Hospitality", "Tech", "Not sure yet"] },
+      { "id": "f2", "label": "What instrument or role?", "type": "shortText", "page": 0,
+        "showIf": { "fieldId": "f1", "equals": "Worship" } },
+      { "id": "f3", "label": "Have you served here before?", "type": "radio", "page": 0,
+        "options": ["Yes", "No"] },
+      { "id": "f4", "label": "Anything else we should know?", "type": "longText", "page": 0 }
+    ]
+  }
+]
