@@ -75,6 +75,20 @@ entitlement, both because Flutter's template declares them for debug
 only. A third had been breaking every Android build outright - see
 `android/build.gradle.kts`.
 
+**M10 — one app, many churches, and a phone that behaves like one.**
+Every collection moved under `churches/{churchId}`, which took one
+getter in the repository base class and a rewrite of the security rules;
+roles moved with it, because being staff at one church should not make
+you staff at all of them. The app now opens on a church picker and
+becomes whichever church you choose - name, colours, content, features -
+and switching re-themes without a restart. Eleven rule assertions cover
+cross-tenant isolation specifically, verified by resolving a role
+against the wrong church and watching them go red.
+
+Phones got navigation that reaches: a bottom bar built from the
+church's feature flags, replacing the hamburger that opened a flat sheet
+of every destination in the app.
+
 ## Not built
 
 Listed because a buyer should know what they are not getting, not as a
@@ -112,9 +126,17 @@ commitment to build them.
 - **Live data on Linux.** No Firebase plugin supports Linux desktop, so
   that build runs on the bundled demo content and cannot sign in. The
   app falls back rather than crashing, and the download page states it.
-- **Multi-tenant SaaS.** This is one deploy per church. Managing many
-  churches' subscriptions and billing from one instance is a different
-  product.
+- **Billing and subscriptions.** Many churches now share one backend,
+  but nothing charges any of them. A church exists because a document
+  exists. That is the actual Shopify part, and it is its own project.
+- **Church self-signup.** Creating a church is an operator action, not a
+  form a pastor fills in. Cheap to add now that tenancy exists.
+- **Custom domains.** One app serves every church from one URL. A church
+  wanting `gracechapel.org` needs hosting that supports per-tenant
+  domains; GitHub Pages does not.
+- **Per-tab navigation stacks.** The bottom bar returns to a tab's root
+  rather than where you left it. Doing it properly means restructuring
+  every route into `StatefulShellRoute` branches.
 
 ## Open questions
 
