@@ -15,6 +15,8 @@ mixin _AnnouncementCodec implements EntityCodec<Announcement> {
 class FirestoreAnnouncementRepository extends FirestoreCrudRepository<Announcement>
     with _AnnouncementCodec
     implements AnnouncementRepository {
+  FirestoreAnnouncementRepository(super.churchId);
+
   @override
   String get collectionPath => 'announcements';
   @override

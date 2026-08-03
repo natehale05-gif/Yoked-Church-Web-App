@@ -35,6 +35,11 @@ class UploadFailure implements Exception {
 }
 
 class FirebaseFileStorage implements FileStorage {
+  FirebaseFileStorage(this.churchId);
+
+  /// Which church's bucket prefix uploads land under.
+  final String churchId;
+
   FirebaseStorage get _storage => FirebaseStorage.instance;
 
   @override
@@ -47,7 +52,11 @@ class FirebaseFileStorage implements FileStorage {
     required String contentType,
   }) async {
     try {
-      final ref = _storage.ref(path);
+      // Callers pass a bare path like `resources/handbook.pdf`; the
+      // church prefix is added here for the same reason it is added in
+      // the Firestore base repository - one place to get right, rather
+      // than every call site.
+      final ref = _storage.ref('churches/$churchId/$path');
       await ref.putData(bytes, SettableMetadata(contentType: contentType));
       return await ref.getDownloadURL();
     } on FirebaseException catch (error) {

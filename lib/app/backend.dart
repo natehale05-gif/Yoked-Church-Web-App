@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config/settings_providers.dart';
+import '../core/config/tenant.dart';
 import '../core/config/settings_repository.dart';
 import '../core/storage/file_storage.dart';
 import '../features/announcements/application/announcement_providers.dart';
@@ -13,6 +14,8 @@ import '../features/auth/application/auth_providers.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/data/user_repository.dart';
 import '../features/church_info/application/church_info_providers.dart';
+import '../features/churches/application/church_providers.dart';
+import '../features/churches/data/church_directory_repository.dart';
 import '../features/church_info/data/church_info_repository.dart';
 import '../features/connect/application/connect_providers.dart';
 import '../features/connect/data/connect_repository.dart';
@@ -66,7 +69,9 @@ List<Override> localOverrides() {
   final users = LocalUserRepository();
 
   return [
-      settingsRepositoryProvider.overrideWithValue(LocalSettingsRepository()),
+      churchDirectoryProvider.overrideWithValue(LocalChurchDirectoryRepository()),
+      settingsRepositoryProvider
+          .overrideWith((ref) => LocalSettingsRepository(ref.watch(currentChurchIdProvider))),
       authRepositoryProvider.overrideWithValue(LocalAuthRepository(users)),
       userRepositoryProvider.overrideWithValue(users),
       sermonRepositoryProvider.overrideWithValue(LocalSermonRepository()),
@@ -103,40 +108,47 @@ List<Override> localOverrides() {
 }
 
 /// Live mode against a configured Firebase project.
+///
+/// Every repository is built from [currentChurchIdProvider] rather than
+/// constructed once, so selecting a different church tears down and
+/// rebuilds the entire data layer. That is what makes switching church
+/// a re-render instead of a restart.
 List<Override> firestoreOverrides() => [
-      settingsRepositoryProvider.overrideWithValue(FirestoreSettingsRepository()),
-      authRepositoryProvider.overrideWithValue(FirebaseAuthRepository()),
-      userRepositoryProvider.overrideWithValue(FirestoreUserRepository()),
-      sermonRepositoryProvider.overrideWithValue(FirestoreSermonRepository()),
-      sermonSeriesRepositoryProvider.overrideWithValue(FirestoreSermonSeriesRepository()),
-      eventRepositoryProvider.overrideWithValue(FirestoreEventRepository()),
-      rsvpRepositoryProvider.overrideWithValue(FirestoreRsvpRepository()),
-      connectRepositoryProvider.overrideWithValue(FirestoreConnectRepository()),
-      staffRepositoryProvider.overrideWithValue(FirestoreStaffRepository()),
-      locationRepositoryProvider.overrideWithValue(FirestoreLocationRepository()),
-      faqRepositoryProvider.overrideWithValue(FirestoreFaqRepository()),
-      groupRepositoryProvider.overrideWithValue(FirestoreGroupRepository()),
-      membershipRepositoryProvider.overrideWithValue(FirestoreMembershipRepository()),
-      volunteerPositionRepositoryProvider.overrideWithValue(FirestoreVolunteerPositionRepository()),
-      volunteerAssignmentRepositoryProvider.overrideWithValue(FirestoreVolunteerAssignmentRepository()),
-      notificationRepositoryProvider.overrideWithValue(FirestoreNotificationRepository()),
-      givingRepositoryProvider.overrideWithValue(FirestoreGivingRepository()),
-      announcementRepositoryProvider.overrideWithValue(FirestoreAnnouncementRepository()),
-      auditRepositoryProvider.overrideWithValue(FirestoreAuditRepository()),
-      devotionalRepositoryProvider.overrideWithValue(FirestoreDevotionalRepository()),
-      readingPlanRepositoryProvider.overrideWithValue(FirestoreReadingPlanRepository()),
-      planProgressRepositoryProvider.overrideWithValue(FirestorePlanProgressRepository()),
-      sermonNoteRepositoryProvider.overrideWithValue(FirestoreSermonNoteRepository()),
-      resourceRepositoryProvider.overrideWithValue(FirestoreResourceRepository()),
-      fileStorageProvider.overrideWithValue(FirebaseFileStorage()),
-      roomRepositoryProvider.overrideWithValue(FirestoreRoomRepository()),
-      checkInRepositoryProvider.overrideWithValue(FirestoreCheckInRepository()),
-      bookingRepositoryProvider.overrideWithValue(FirestoreBookingRepository()),
-      prayerPostRepositoryProvider.overrideWithValue(FirestorePrayerPostRepository()),
-      intercessionRepositoryProvider.overrideWithValue(FirestoreIntercessionRepository()),
-      attendanceRepositoryProvider.overrideWithValue(FirestoreAttendanceRepository()),
-      formRepositoryProvider.overrideWithValue(FirestoreFormRepository()),
-      submissionRepositoryProvider.overrideWithValue(FirestoreSubmissionRepository()),
+      churchDirectoryProvider.overrideWithValue(FirestoreChurchDirectoryRepository()),
+      settingsRepositoryProvider
+          .overrideWith((ref) => FirestoreSettingsRepository(ref.watch(currentChurchIdProvider))),
+      authRepositoryProvider.overrideWith((ref) => FirebaseAuthRepository(ref.watch(currentChurchIdProvider))),
+      userRepositoryProvider.overrideWith((ref) => FirestoreUserRepository(ref.watch(currentChurchIdProvider))),
+      sermonRepositoryProvider.overrideWith((ref) => FirestoreSermonRepository(ref.watch(currentChurchIdProvider))),
+      sermonSeriesRepositoryProvider.overrideWith((ref) => FirestoreSermonSeriesRepository(ref.watch(currentChurchIdProvider))),
+      eventRepositoryProvider.overrideWith((ref) => FirestoreEventRepository(ref.watch(currentChurchIdProvider))),
+      rsvpRepositoryProvider.overrideWith((ref) => FirestoreRsvpRepository(ref.watch(currentChurchIdProvider))),
+      connectRepositoryProvider.overrideWith((ref) => FirestoreConnectRepository(ref.watch(currentChurchIdProvider))),
+      staffRepositoryProvider.overrideWith((ref) => FirestoreStaffRepository(ref.watch(currentChurchIdProvider))),
+      locationRepositoryProvider.overrideWith((ref) => FirestoreLocationRepository(ref.watch(currentChurchIdProvider))),
+      faqRepositoryProvider.overrideWith((ref) => FirestoreFaqRepository(ref.watch(currentChurchIdProvider))),
+      groupRepositoryProvider.overrideWith((ref) => FirestoreGroupRepository(ref.watch(currentChurchIdProvider))),
+      membershipRepositoryProvider.overrideWith((ref) => FirestoreMembershipRepository(ref.watch(currentChurchIdProvider))),
+      volunteerPositionRepositoryProvider.overrideWith((ref) => FirestoreVolunteerPositionRepository(ref.watch(currentChurchIdProvider))),
+      volunteerAssignmentRepositoryProvider.overrideWith((ref) => FirestoreVolunteerAssignmentRepository(ref.watch(currentChurchIdProvider))),
+      notificationRepositoryProvider.overrideWith((ref) => FirestoreNotificationRepository(ref.watch(currentChurchIdProvider))),
+      givingRepositoryProvider.overrideWith((ref) => FirestoreGivingRepository(ref.watch(currentChurchIdProvider))),
+      announcementRepositoryProvider.overrideWith((ref) => FirestoreAnnouncementRepository(ref.watch(currentChurchIdProvider))),
+      auditRepositoryProvider.overrideWith((ref) => FirestoreAuditRepository(ref.watch(currentChurchIdProvider))),
+      devotionalRepositoryProvider.overrideWith((ref) => FirestoreDevotionalRepository(ref.watch(currentChurchIdProvider))),
+      readingPlanRepositoryProvider.overrideWith((ref) => FirestoreReadingPlanRepository(ref.watch(currentChurchIdProvider))),
+      planProgressRepositoryProvider.overrideWith((ref) => FirestorePlanProgressRepository(ref.watch(currentChurchIdProvider))),
+      sermonNoteRepositoryProvider.overrideWith((ref) => FirestoreSermonNoteRepository(ref.watch(currentChurchIdProvider))),
+      resourceRepositoryProvider.overrideWith((ref) => FirestoreResourceRepository(ref.watch(currentChurchIdProvider))),
+      fileStorageProvider.overrideWith((ref) => FirebaseFileStorage(ref.watch(currentChurchIdProvider))),
+      roomRepositoryProvider.overrideWith((ref) => FirestoreRoomRepository(ref.watch(currentChurchIdProvider))),
+      checkInRepositoryProvider.overrideWith((ref) => FirestoreCheckInRepository(ref.watch(currentChurchIdProvider))),
+      bookingRepositoryProvider.overrideWith((ref) => FirestoreBookingRepository(ref.watch(currentChurchIdProvider))),
+      prayerPostRepositoryProvider.overrideWith((ref) => FirestorePrayerPostRepository(ref.watch(currentChurchIdProvider))),
+      intercessionRepositoryProvider.overrideWith((ref) => FirestoreIntercessionRepository(ref.watch(currentChurchIdProvider))),
+      attendanceRepositoryProvider.overrideWith((ref) => FirestoreAttendanceRepository(ref.watch(currentChurchIdProvider))),
+      formRepositoryProvider.overrideWith((ref) => FirestoreFormRepository(ref.watch(currentChurchIdProvider))),
+      submissionRepositoryProvider.overrideWith((ref) => FirestoreSubmissionRepository(ref.watch(currentChurchIdProvider))),
     ];
 
 List<Override> overridesFor(Backend backend) =>

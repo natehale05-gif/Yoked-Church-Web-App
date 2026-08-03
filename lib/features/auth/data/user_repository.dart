@@ -16,6 +16,8 @@ mixin _UserCodec implements EntityCodec<AppUser> {
 }
 
 class FirestoreUserRepository extends FirestoreCrudRepository<AppUser> with _UserCodec implements UserRepository {
+  FirestoreUserRepository(super.churchId);
+
   @override
   String get collectionPath => 'users';
   @override

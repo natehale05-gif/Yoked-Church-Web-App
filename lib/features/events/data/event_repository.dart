@@ -15,6 +15,8 @@ mixin _EventCodec implements EntityCodec<ChurchEvent> {
 class FirestoreEventRepository extends FirestoreCrudRepository<ChurchEvent>
     with _EventCodec
     implements EventRepository {
+  FirestoreEventRepository(super.churchId);
+
   @override
   String get collectionPath => 'events';
   @override

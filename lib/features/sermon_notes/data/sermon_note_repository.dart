@@ -20,6 +20,8 @@ mixin _NoteCodec implements EntityCodec<SermonNote> {
 class FirestoreSermonNoteRepository extends FirestoreCrudRepository<SermonNote>
     with _NoteCodec
     implements SermonNoteRepository {
+  FirestoreSermonNoteRepository(super.churchId);
+
   @override
   String get collectionPath => 'sermonNotes';
 

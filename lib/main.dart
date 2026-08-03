@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
 import 'app/backend.dart';
+import 'core/config/tenant.dart';
+import 'features/churches/application/church_providers.dart';
 import 'firebase_options.dart';
 
 /// Set with `--dart-define=USE_FIREBASE_EMULATOR=true` to point at a local
@@ -18,9 +20,17 @@ Future<void> main() async {
 
   final backend = await _initBackend();
 
+  // Read before the first frame so a returning member never sees the
+  // picker flash past on the way to their own church.
+  final savedChurchId = await ChurchPreference.read();
+
   runApp(
     ProviderScope(
-      overrides: overridesFor(backend),
+      overrides: [
+        ...overridesFor(backend),
+        if (savedChurchId != null)
+          selectedChurchIdProvider.overrideWith((ref) => savedChurchId),
+      ],
       child: const YokedChurchApp(),
     ),
   );

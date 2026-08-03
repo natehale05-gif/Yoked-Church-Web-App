@@ -1,12 +1,20 @@
 # Yoked Church
 
-A cross-platform Flutter church app and website, built to be resold as a
-customizable template: a public site, a member portal, and a staff
-dashboard that runs the church without anyone touching code.
+A cross-platform Flutter church app: a public site, a member portal, and
+a staff dashboard that runs the church without anyone touching code.
+
+**One app, many churches.** A member opens it, picks their church, and
+the app becomes that church's — its name, its colours, its content, its
+features. Switching church re-themes and re-reads everything without a
+restart. Every collection lives under `churches/{churchId}`, and the
+security rules answer every role question against *that* church, so
+being staff at one is not being staff at any other.
 
 The whole app — including every admin screen — runs with **no backend at
-all**, on bundled sample content. Connect Firebase when a church is ready
-and the same build serves live data. Nothing is recompiled to switch.
+all**, on bundled sample content: three demo churches with genuinely
+different branding, so the picker demonstrates the real thing. Connect
+Firebase when you are ready and the same build serves live data. Nothing
+is recompiled to switch.
 
 ```bash
 flutter pub get
@@ -21,14 +29,20 @@ staff, or admin and click through everything.
 **Almost nothing lives in code.** A church's name, tagline, brand colors,
 logo, About copy, service times, contact details, social and giving
 links, and every feature switch are edited in the app itself at
-`/admin/settings`, saved to a single Firestore document
-(`churchSettings/main`), and applied to the live site immediately —
-including the `ThemeData` the whole app is built from.
+`/admin/settings`, saved to that church's document (`churches/{churchId}`),
+and applied immediately — including the `ThemeData` the whole app is
+built from.
 
-Without Firebase, the same settings come from
-[`assets/data/church_settings.json`](assets/data/church_settings.json),
-which is also the fallback if Firestore is unreachable. Editing that file
-customizes the zero-backend build.
+That one document does double duty: it is the church's settings *and*
+its entry in the public directory the picker lists, so choosing a church
+has already fetched everything needed to theme the app as them.
+
+Without Firebase, the churches come from
+[`assets/data/churches.json`](assets/data/churches.json) — three of them,
+deliberately unalike — falling back to
+[`assets/data/church_settings.json`](assets/data/church_settings.json)
+for anything not listed there. Editing either customizes the
+zero-backend build.
 
 The shape of all of it is
 [`lib/core/config/church_settings.dart`](lib/core/config/church_settings.dart).
@@ -95,10 +109,15 @@ should still leave service times and directions on screen.
 
 New accounts default to `member`, and there is nobody to promote you yet.
 Sign up normally, then set that account's `role` to `admin` on its
-`users/{uid}` document in the Firebase console. After that, admins
+`churches/{churchId}/users/{uid}` document in the Firebase console.
+Roles are per church: promoting yourself at one church says nothing
+about any other. After that, admins
 promote and demote everyone else from `/admin/members`.
 
 ### Firestore collections
+
+Everything below lives **under a church**, as
+`churches/{churchId}/<collection>`:
 
 `users`, `sermons`, `events`, `submissions` (connect cards), `groups`,
 `groupMemberships`, `eventRsvps`, `givingRecords`, `volunteerPositions`,
@@ -108,12 +127,27 @@ promote and demote everyone else from `/admin/members`.
 `roomBookings`, `checkIns`, `attendanceRecords`, `formDefinitions`,
 `formSubmissions`.
 
+The only top-level collection is `churches` itself, which is
+world-readable — that is how the picker lists them and how the app
+themes itself before anyone signs in — and writable only by that
+church's own admins.
+
+Scoping happens in exactly one place,
+`FirestoreCrudRepository.collection` in
+[`lib/core/firestore/crud_repository.dart`](lib/core/firestore/crud_repository.dart);
+the thirty repositories above declare a bare collection name and never
+learn there is more than one church.
+
 Field shapes are the `fromMap`/`toMap` pairs in each feature's `domain/`.
 
 ### Storage
 
-Two prefixes: `resources/` (files staff attach to the resource library)
-and `formUploads/{formId}/` (files members attach to a form response).
+Two prefixes, both under the church: `churches/{churchId}/resources/`
+(files staff attach to the resource library) and
+`churches/{churchId}/formUploads/{formId}/` (files members attach to a
+form response). Callers pass the bare path; the church prefix is added
+in `FirebaseFileStorage`, for the same reason it is added in the
+Firestore base repository.
 
 One limit worth knowing before you rely on it: **an uploaded
 members-only resource is protected by an unguessable URL, not by a

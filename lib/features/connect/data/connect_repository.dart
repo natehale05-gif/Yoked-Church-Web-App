@@ -15,6 +15,8 @@ mixin _ConnectCodec implements EntityCodec<ConnectSubmission> {
 class FirestoreConnectRepository extends FirestoreCrudRepository<ConnectSubmission>
     with _ConnectCodec
     implements ConnectRepository {
+  FirestoreConnectRepository(super.churchId);
+
   @override
   String get collectionPath => 'submissions';
   @override

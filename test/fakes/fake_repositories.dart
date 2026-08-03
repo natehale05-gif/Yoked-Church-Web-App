@@ -3,6 +3,9 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yoked_church_app/core/config/church_settings.dart';
+import 'package:yoked_church_app/core/config/tenant.dart';
+import 'package:yoked_church_app/features/churches/application/church_providers.dart';
+import 'package:yoked_church_app/features/churches/data/church_directory_repository.dart';
 import 'package:yoked_church_app/core/config/settings_providers.dart';
 import 'package:yoked_church_app/core/config/settings_repository.dart';
 import 'package:yoked_church_app/core/firestore/crud_repository.dart';
@@ -613,6 +616,13 @@ List<Override> fakeOverrides({
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
   FakeVolunteerAssignmentRepository? assignmentRepo,
+  /// Which church the app is acting as.
+  ///
+  /// Defaulted rather than required: almost every test is about one
+  /// church's behaviour and should not have to say so. Pass null to get
+  /// the state a member is in before they have chosen one, which is what
+  /// sends them to the picker.
+  String? churchId = demoChurchId,
 }) {
   final connectRepo = connect ?? FakeConnectRepository()
     ..seedInMemory(const []);
@@ -622,6 +632,8 @@ List<Override> fakeOverrides({
     ..seedInMemory(assignments);
 
   return [
+    selectedChurchIdProvider.overrideWith((ref) => churchId),
+    churchDirectoryProvider.overrideWithValue(LocalChurchDirectoryRepository()),
     settingsRepositoryProvider.overrideWithValue(FakeSettingsRepository(settings)),
     authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInAs)),
     userRepositoryProvider.overrideWithValue(FakeUserRepository()..seedInMemory(members)),

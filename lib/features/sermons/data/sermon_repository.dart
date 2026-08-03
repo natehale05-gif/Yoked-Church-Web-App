@@ -25,6 +25,8 @@ mixin _SeriesCodec implements EntityCodec<SermonSeries> {
 }
 
 class FirestoreSermonRepository extends FirestoreCrudRepository<Sermon> with _SermonCodec implements SermonRepository {
+  FirestoreSermonRepository(super.churchId);
+
   @override
   String get collectionPath => 'sermons';
   @override
@@ -43,6 +45,8 @@ class LocalSermonRepository extends LocalCrudRepository<Sermon> with _SermonCode
 class FirestoreSermonSeriesRepository extends FirestoreCrudRepository<SermonSeries>
     with _SeriesCodec
     implements SermonSeriesRepository {
+  FirestoreSermonSeriesRepository(super.churchId);
+
   @override
   String get collectionPath => 'sermonSeries';
   @override

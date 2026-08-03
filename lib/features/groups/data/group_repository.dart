@@ -29,6 +29,8 @@ mixin _MembershipCodec implements EntityCodec<GroupMembership> {
 class FirestoreGroupRepository extends FirestoreCrudRepository<ChurchGroup>
     with _GroupCodec
     implements GroupRepository {
+  FirestoreGroupRepository(super.churchId);
+
   @override
   String get collectionPath => 'groups';
   @override
@@ -45,6 +47,8 @@ class LocalGroupRepository extends LocalCrudRepository<ChurchGroup> with _GroupC
 class FirestoreMembershipRepository extends FirestoreCrudRepository<GroupMembership>
     with _MembershipCodec
     implements MembershipRepository {
+  FirestoreMembershipRepository(super.churchId);
+
   @override
   String get collectionPath => 'groupMemberships';
 

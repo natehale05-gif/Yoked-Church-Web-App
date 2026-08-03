@@ -33,6 +33,8 @@ mixin _AssignmentCodec implements EntityCodec<VolunteerAssignment> {
 class FirestoreVolunteerPositionRepository extends FirestoreCrudRepository<VolunteerPosition>
     with _PositionCodec
     implements VolunteerPositionRepository {
+  FirestoreVolunteerPositionRepository(super.churchId);
+
   @override
   String get collectionPath => 'volunteerPositions';
   @override
@@ -51,6 +53,8 @@ class LocalVolunteerPositionRepository extends LocalCrudRepository<VolunteerPosi
 class FirestoreVolunteerAssignmentRepository extends FirestoreCrudRepository<VolunteerAssignment>
     with _AssignmentCodec
     implements VolunteerAssignmentRepository {
+  FirestoreVolunteerAssignmentRepository(super.churchId);
+
   @override
   String get collectionPath => 'volunteerAssignments';
 

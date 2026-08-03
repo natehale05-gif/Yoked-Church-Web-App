@@ -1,0 +1,194 @@
+[
+  {
+    "churchName": "Yoked Church",
+    "tagline": "Take my yoke upon you, and learn from me.",
+    "logoUrl": "",
+    "aboutHeadline": "Welcome Home",
+    "aboutBody": "Whoever you are and wherever you are on your journey, there's a place for you here. We're a community learning to walk yoked with Christ - together, unhurried, and free.",
+    "beliefs": "We believe the Bible is God's word to us, that Jesus is the Son of God who died and rose again, and that new life is a gift received by grace through faith. We gather weekly to worship, to learn, and to care for one another and our neighbors.",
+    "releasesRepo": "natehale05-gif/Yoked-Church-Web-App",
+    "visitInfo": "Come as you are. Park anywhere in the main lot - look for a greeter in a blue lanyard near the front doors, and they'll help you find the sanctuary, kids check-in, or just a good seat. Services run about 70 minutes.",
+    "colors": {
+      "primary": "#1B3A4B",
+      "accent": "#C9A24B",
+      "background": "#F7F5F0"
+    },
+    "contact": {
+      "address": "123 Faith Ave, Hometown, ST 00000",
+      "phone": "(555) 123-4567",
+      "email": "info@yokedchurch.org",
+      "mapUrl": "https://maps.google.com/?q=123+Faith+Ave"
+    },
+    "social": {
+      "facebook": "https://facebook.com/yokedchurch",
+      "instagram": "https://instagram.com/yokedchurch",
+      "youtube": "https://youtube.com/@yokedchurch",
+      "givingUrl": "https://tithe.ly/give?c=yokedchurch",
+      "liveStreamUrl": "https://www.youtube.com/@yokedchurch/live",
+      "podcastUrl": "https://podcasts.example.org/yoked-church/feed.xml"
+    },
+    "serviceTimes": [
+      {
+        "day": "Sunday",
+        "time": "9:00 AM",
+        "label": "Traditional Service"
+      },
+      {
+        "day": "Sunday",
+        "time": "11:00 AM",
+        "label": "Contemporary Service"
+      },
+      {
+        "day": "Wednesday",
+        "time": "6:30 PM",
+        "label": "Midweek Bible Study"
+      }
+    ],
+    "features": {
+      "sermons": true,
+      "events": true,
+      "giving": true,
+      "connect": true,
+      "groups": true,
+      "volunteering": true,
+      "prayerWall": true,
+      "readingPlans": true,
+      "devotionals": true,
+      "resources": true,
+      "kidsCheckIn": true,
+      "roomBooking": true,
+      "attendance": true,
+      "forms": true,
+      "appDownloads": true
+    },
+    "id": "yoked-demo"
+  },
+  {
+    "churchName": "Riverside Fellowship",
+    "tagline": "A place at the table for everyone.",
+    "logoUrl": "",
+    "aboutHeadline": "Come as you are",
+    "aboutBody": "Riverside is a young congregation meeting in a converted mill by the water. We are informal, loud on a good day, and serious about looking after each other.",
+    "beliefs": "We believe the Bible is God's word to us, that Jesus is the Son of God who died and rose again, and that new life is a gift received by grace through faith. We gather weekly to worship, to learn, and to care for one another and our neighbors.",
+    "releasesRepo": "",
+    "visitInfo": "Come as you are. Park anywhere in the main lot - look for a greeter in a blue lanyard near the front doors, and they'll help you find the sanctuary, kids check-in, or just a good seat. Services run about 70 minutes.",
+    "colors": {
+      "primary": "#2F4B3F",
+      "accent": "#D98C3F",
+      "background": "#F6F4EF"
+    },
+    "contact": {
+      "address": "40 Mill Race Road, Riverside, OR 97000",
+      "phone": "(555) 214-8890",
+      "email": "hello@riversidefellowship.org",
+      "mapUrl": "https://maps.google.com/?q=123+Faith+Ave"
+    },
+    "social": {
+      "facebook": "https://facebook.com/yokedchurch",
+      "instagram": "https://instagram.com/yokedchurch",
+      "youtube": "https://youtube.com/@yokedchurch",
+      "givingUrl": "https://tithe.ly/give?c=yokedchurch",
+      "liveStreamUrl": "https://www.youtube.com/@yokedchurch/live",
+      "podcastUrl": "https://podcasts.example.org/yoked-church/feed.xml"
+    },
+    "serviceTimes": [
+      {
+        "day": "Sunday",
+        "time": "9:00 AM",
+        "label": "Traditional Service"
+      },
+      {
+        "day": "Sunday",
+        "time": "11:00 AM",
+        "label": "Contemporary Service"
+      },
+      {
+        "day": "Wednesday",
+        "time": "6:30 PM",
+        "label": "Midweek Bible Study"
+      }
+    ],
+    "features": {
+      "sermons": true,
+      "events": true,
+      "giving": true,
+      "connect": true,
+      "groups": true,
+      "volunteering": true,
+      "prayerWall": true,
+      "readingPlans": true,
+      "devotionals": true,
+      "resources": true,
+      "kidsCheckIn": true,
+      "roomBooking": true,
+      "attendance": true,
+      "forms": true,
+      "appDownloads": true
+    },
+    "id": "riverside-fellowship"
+  },
+  {
+    "churchName": "St Augustine's",
+    "tagline": "Our hearts are restless until they rest in you.",
+    "logoUrl": "",
+    "aboutHeadline": "A parish since 1888",
+    "aboutBody": "A traditional parish in the middle of town, with a choral tradition, a soup kitchen, and the same bells since the year it was built.",
+    "beliefs": "We believe the Bible is God's word to us, that Jesus is the Son of God who died and rose again, and that new life is a gift received by grace through faith. We gather weekly to worship, to learn, and to care for one another and our neighbors.",
+    "releasesRepo": "",
+    "visitInfo": "Come as you are. Park anywhere in the main lot - look for a greeter in a blue lanyard near the front doors, and they'll help you find the sanctuary, kids check-in, or just a good seat. Services run about 70 minutes.",
+    "colors": {
+      "primary": "#3B2E52",
+      "accent": "#B08D57",
+      "background": "#F5F2F6"
+    },
+    "contact": {
+      "address": "1 Cathedral Close, Oldtown, MA 02100",
+      "phone": "(555) 660-1888",
+      "email": "parish@staugustines.org",
+      "mapUrl": "https://maps.google.com/?q=123+Faith+Ave"
+    },
+    "social": {
+      "facebook": "https://facebook.com/yokedchurch",
+      "instagram": "https://instagram.com/yokedchurch",
+      "youtube": "https://youtube.com/@yokedchurch",
+      "givingUrl": "https://tithe.ly/give?c=yokedchurch",
+      "liveStreamUrl": "https://www.youtube.com/@yokedchurch/live",
+      "podcastUrl": "https://podcasts.example.org/yoked-church/feed.xml"
+    },
+    "serviceTimes": [
+      {
+        "day": "Sunday",
+        "time": "9:00 AM",
+        "label": "Traditional Service"
+      },
+      {
+        "day": "Sunday",
+        "time": "11:00 AM",
+        "label": "Contemporary Service"
+      },
+      {
+        "day": "Wednesday",
+        "time": "6:30 PM",
+        "label": "Midweek Bible Study"
+      }
+    ],
+    "features": {
+      "sermons": true,
+      "events": true,
+      "giving": true,
+      "connect": true,
+      "groups": true,
+      "volunteering": true,
+      "prayerWall": true,
+      "readingPlans": true,
+      "devotionals": true,
+      "resources": true,
+      "kidsCheckIn": true,
+      "roomBooking": true,
+      "attendance": true,
+      "forms": true,
+      "appDownloads": true
+    },
+    "id": "st-augustine"
+  }
+]

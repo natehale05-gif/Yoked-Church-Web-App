@@ -32,6 +32,8 @@ mixin _ProgressCodec implements EntityCodec<PlanProgress> {
 class FirestoreReadingPlanRepository extends FirestoreCrudRepository<ReadingPlan>
     with _PlanCodec
     implements ReadingPlanRepository {
+  FirestoreReadingPlanRepository(super.churchId);
+
   @override
   String get collectionPath => 'readingPlans';
   @override
@@ -50,6 +52,8 @@ class LocalReadingPlanRepository extends LocalCrudRepository<ReadingPlan>
 class FirestorePlanProgressRepository extends FirestoreCrudRepository<PlanProgress>
     with _ProgressCodec
     implements PlanProgressRepository {
+  FirestorePlanProgressRepository(super.churchId);
+
   @override
   String get collectionPath => 'planProgress';
 

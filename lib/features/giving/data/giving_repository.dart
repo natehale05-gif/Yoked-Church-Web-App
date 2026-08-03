@@ -17,6 +17,8 @@ mixin _GivingCodec implements EntityCodec<GivingRecord> {
 class FirestoreGivingRepository extends FirestoreCrudRepository<GivingRecord>
     with _GivingCodec
     implements GivingRepository {
+  FirestoreGivingRepository(super.churchId);
+
   @override
   String get collectionPath => 'givingRecords';
   @override
