@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/config/church_settings.dart';
 import '../core/config/settings_providers.dart';
+import '../core/config/tenant.dart';
 import '../core/widgets/app_shell.dart';
 import '../core/widgets/section_container.dart';
 import '../features/account/presentation/account_home_screen.dart';
@@ -45,6 +46,7 @@ import '../features/auth/presentation/sign_in_screen.dart';
 import '../features/auth/presentation/sign_up_screen.dart';
 import '../features/church_info/presentation/about_screen.dart';
 import '../features/church_info/presentation/visit_screen.dart';
+import '../features/churches/presentation/church_picker_screen.dart';
 import '../features/connect/presentation/connect_screen.dart';
 import '../features/devotionals/presentation/devotional_detail_screen.dart';
 import '../features/devotionals/presentation/devotionals_screen.dart';
@@ -103,6 +105,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       final signedIn = ref.read(isSignedInProvider);
       final loading = ref.read(authLoadingProvider);
 
+      // Which church you are in has nothing to do with whether you are
+      // signed in - a visitor picks one too - so this is checked before
+      // the auth gate below rather than after it. Behind that gate it
+      // would not run on a cold start, and the first thing a new member
+      // saw would be some other church's home page.
+      if (ref.read(selectedChurchIdProvider) == null && path != '/choose-church') {
+        return '/choose-church';
+      }
+
       // Don't bounce anyone while the first auth check is still in flight,
       // or a signed-in member refreshing /account lands on the login page.
       if (loading) return null;
@@ -130,6 +141,11 @@ final routerProvider = Provider<GoRouter>((ref) {
     errorBuilder: (context, state) => AppShell(child: _NotFound(location: state.uri.toString())),
     routes: [
       // Auth screens sit outside the site shell - a focused, chrome-free flow.
+      GoRoute(
+        path: '/choose-church',
+        builder: (_, state) =>
+            ChurchPickerScreen(canCancel: state.uri.queryParameters['switch'] == '1'),
+      ),
       GoRoute(path: '/sign-in', builder: (_, _) => const SignInScreen()),
       GoRoute(path: '/sign-up', builder: (_, _) => const SignUpScreen()),
       GoRoute(path: '/forgot-password', builder: (_, _) => const ForgotPasswordScreen()),

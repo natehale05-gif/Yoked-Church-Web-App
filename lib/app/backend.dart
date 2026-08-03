@@ -14,6 +14,8 @@ import '../features/auth/application/auth_providers.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/data/user_repository.dart';
 import '../features/church_info/application/church_info_providers.dart';
+import '../features/churches/application/church_providers.dart';
+import '../features/churches/data/church_directory_repository.dart';
 import '../features/church_info/data/church_info_repository.dart';
 import '../features/connect/application/connect_providers.dart';
 import '../features/connect/data/connect_repository.dart';
@@ -67,7 +69,9 @@ List<Override> localOverrides() {
   final users = LocalUserRepository();
 
   return [
-      settingsRepositoryProvider.overrideWithValue(LocalSettingsRepository()),
+      churchDirectoryProvider.overrideWithValue(LocalChurchDirectoryRepository()),
+      settingsRepositoryProvider
+          .overrideWith((ref) => LocalSettingsRepository(ref.watch(currentChurchIdProvider))),
       authRepositoryProvider.overrideWithValue(LocalAuthRepository(users)),
       userRepositoryProvider.overrideWithValue(users),
       sermonRepositoryProvider.overrideWithValue(LocalSermonRepository()),
@@ -110,7 +114,9 @@ List<Override> localOverrides() {
 /// rebuilds the entire data layer. That is what makes switching church
 /// a re-render instead of a restart.
 List<Override> firestoreOverrides() => [
-      settingsRepositoryProvider.overrideWith((ref) => FirestoreSettingsRepository(ref.watch(currentChurchIdProvider))),
+      churchDirectoryProvider.overrideWithValue(FirestoreChurchDirectoryRepository()),
+      settingsRepositoryProvider
+          .overrideWith((ref) => FirestoreSettingsRepository(ref.watch(currentChurchIdProvider))),
       authRepositoryProvider.overrideWith((ref) => FirebaseAuthRepository(ref.watch(currentChurchIdProvider))),
       userRepositoryProvider.overrideWith((ref) => FirestoreUserRepository(ref.watch(currentChurchIdProvider))),
       sermonRepositoryProvider.overrideWith((ref) => FirestoreSermonRepository(ref.watch(currentChurchIdProvider))),
