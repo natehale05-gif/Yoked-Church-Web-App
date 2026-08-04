@@ -102,8 +102,19 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: _AuthRefresh(ref),
     redirect: (context, state) {
       final path = state.uri.path;
-      final signedIn = ref.read(isSignedInProvider);
-      final loading = ref.read(authLoadingProvider);
+
+      // Read the auth state itself, not the providers derived from it.
+      //
+      // This runs from the refresh below, and Riverpod invokes a listener
+      // before recomputing anything downstream of what changed - so at
+      // this moment `isSignedInProvider` still reports the *previous*
+      // user. That is not a detail: the notification fired when someone
+      // signs in is the one that matters, and reading it stale is how
+      // signing in used to leave you sitting on the sign-in page.
+      final auth = ref.read(authStateProvider);
+      final user = auth.valueOrNull;
+      final signedIn = user != null;
+      final loading = auth.isLoading;
 
       // Which church you are in has nothing to do with whether you are
       // signed in - a visitor picks one too - so this is checked before
@@ -130,12 +141,20 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (path.startsWith('/account') && !signedIn) return '/sign-in';
       if (path.startsWith('/admin')) {
         if (!signedIn) return '/sign-in';
-        if (!ref.read(isStaffProvider)) return '/account';
+        if (!user.isStaff) return '/account';
         // Members/roles, settings, and the audit trail can reshape the
         // church, so they are admin-only even among staff.
-        if (_adminOnlyPaths.contains(path) && !ref.read(isAdminProvider)) return '/admin';
+        if (_adminOnlyPaths.contains(path) && !user.isAdmin) return '/admin';
       }
-      if (_authPaths.contains(path) && signedIn) return '/account';
+
+      // Where signing in takes you is decided here and nowhere else.
+      //
+      // The screens used to navigate themselves the moment the call
+      // returned, which is a beat before the auth state reaches this
+      // guard - so the guard saw a signed-out visitor asking for /admin
+      // and sent them back to /sign-in, undoing the sign-in they had
+      // just completed.
+      if (_authPaths.contains(path) && signedIn) return user.isStaff ? '/admin' : '/account';
       return null;
     },
     errorBuilder: (context, state) => AppShell(child: _NotFound(location: state.uri.toString())),
@@ -229,6 +248,11 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 /// Re-runs the router's redirect whenever the signed-in user changes.
+///
+/// This is the only notification the guard gets, so the guard has to be
+/// able to answer correctly from inside it - which is why it reads
+/// [authStateProvider] rather than anything derived from it. See the
+/// redirect above.
 class _AuthRefresh extends ChangeNotifier {
   _AuthRefresh(Ref ref) {
     ref.listen(authStateProvider, (_, _) => notifyListeners());

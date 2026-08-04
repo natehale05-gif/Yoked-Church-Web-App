@@ -55,9 +55,15 @@ class AuthLayout extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(subtitle, style: const TextStyle(color: Colors.black54), textAlign: TextAlign.center),
                     const SizedBox(height: 28),
-                    Card(child: Padding(padding: const EdgeInsets.all(24), child: child)),
-                    const SizedBox(height: 16),
+                    // Above the form, not below it. With no backend
+                    // connected these buttons are the only way in - the
+                    // form accepts anything and saves nothing - and on a
+                    // 390x844 phone they landed below the fold, so the
+                    // app looked like it had no way in at all. Renders
+                    // nothing for a church with a real backend, so the
+                    // order costs them nothing.
                     const DemoModeCard(),
+                    Card(child: Padding(padding: const EdgeInsets.all(24), child: child)),
                   ],
                 ),
               ),
@@ -81,14 +87,9 @@ class DemoModeCard extends ConsumerWidget {
     final controller = ref.read(authControllerProvider.notifier);
     final busy = ref.watch(authControllerProvider).isLoading;
 
-    Future<void> preview(UserRole role) async {
-      if (await controller.signInAsDemo(role) && context.mounted) {
-        context.go(role == UserRole.member ? '/account' : '/admin');
-      }
-    }
-
     return Card(
       color: Colors.amber.withValues(alpha: 0.08),
+      margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -112,9 +113,13 @@ class DemoModeCard extends ConsumerWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
+                // No navigation here: the route guard sends a signed-in
+                // person off the auth pages, and to the right one for
+                // their role. Doing it from both places is what broke
+                // this - see the redirect in lib/app/router.dart.
                 for (final role in UserRole.values)
                   OutlinedButton(
-                    onPressed: busy ? null : () => preview(role),
+                    onPressed: busy ? null : () => controller.signInAsDemo(role),
                     child: Text('As ${role.name}'),
                   ),
               ],
@@ -138,10 +143,6 @@ class SocialSignInButtons extends ConsumerWidget {
     final controller = ref.read(authControllerProvider.notifier);
     final busy = ref.watch(authControllerProvider).isLoading;
 
-    Future<void> go(Future<bool> Function() action) async {
-      if (await action() && context.mounted) context.go('/account');
-    }
-
     return Column(
       children: [
         const SizedBox(height: 20),
@@ -157,14 +158,14 @@ class SocialSignInButtons extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         OutlinedButton.icon(
-          onPressed: busy ? null : () => go(controller.signInWithGoogle),
+          onPressed: busy ? null : controller.signInWithGoogle,
           icon: const Icon(Icons.g_mobiledata, size: 28),
           label: const Text('Continue with Google'),
           style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
-          onPressed: busy ? null : () => go(controller.signInWithApple),
+          onPressed: busy ? null : controller.signInWithApple,
           icon: const Icon(Icons.apple),
           label: const Text('Continue with Apple'),
           style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
