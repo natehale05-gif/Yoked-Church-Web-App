@@ -5,6 +5,7 @@ import 'package:yoked_church_app/app/app.dart';
 import 'package:yoked_church_app/app/router.dart';
 import 'package:yoked_church_app/core/config/church_settings.dart';
 import 'package:yoked_church_app/core/config/settings_providers.dart';
+import 'package:yoked_church_app/core/config/tenant.dart';
 import 'package:yoked_church_app/features/auth/domain/app_user.dart';
 import 'package:yoked_church_app/features/live/domain/live_status.dart';
 
@@ -80,6 +81,29 @@ void main() {
 
       expect(find.text('Watch Online'), findsNothing);
       expect(find.text('LIVE NOW'), findsNothing);
+    });
+  });
+
+  group('the sermons page', () {
+    testWidgets('offers a link to watch, not a claim that something is on', (tester) async {
+      final container = ProviderContainer(
+        overrides: fakeOverrides(settings: withStream('https://example.org/live')),
+      );
+      addTearDown(container.dispose);
+
+      tester.view.physicalSize = const Size(1400, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(container: container, child: const YokedChurchApp()),
+      );
+      await tester.pumpAndSettle();
+      container.read(routerProvider).go(churchPath(demoChurchId, '/sermons'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Watch Online'), findsOneWidget);
+      expect(find.text('Watch Live'), findsNothing);
     });
   });
 

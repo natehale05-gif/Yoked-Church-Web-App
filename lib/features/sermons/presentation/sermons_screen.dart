@@ -29,18 +29,23 @@ class SermonsScreen extends ConsumerWidget {
       children: [
         PageBanner(
           title: 'Sermons',
-          subtitle: 'Catch up on past messages or watch this week live.',
+          subtitle: 'Catch up on past messages, or watch online.',
           action: (liveUrl.isEmpty && podcastUrl.isEmpty)
               ? null
               : Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   children: [
+                    // "Watch Online", for the same reason the home page
+                    // says it: this link is to wherever the church
+                    // streams, which is there whether or not anything is
+                    // happening. The home page's banner is what says
+                    // "live", and only when it is true.
                     if (liveUrl.isNotEmpty)
                       OutlinedButton.icon(
                         onPressed: () => launchUrl(Uri.parse(liveUrl), webOnlyWindowName: '_blank'),
                         icon: const Icon(Icons.live_tv, color: Colors.white),
-                        label: const Text('Watch Live'),
+                        label: const Text('Watch Online'),
                         style: onWhite,
                       ),
                     if (podcastUrl.isNotEmpty)
