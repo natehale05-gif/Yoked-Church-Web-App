@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yoked_church_app/app/app.dart';
+import 'package:yoked_church_app/core/config/tenant.dart';
 import 'package:yoked_church_app/app/router.dart';
 import 'package:yoked_church_app/core/config/church_settings.dart';
 import 'package:yoked_church_app/core/widgets/app_shell.dart';
@@ -120,7 +121,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        container.read(routerProvider).routerDelegate.currentConfiguration.uri.path,
+        subPathOf(container.read(routerProvider).routerDelegate.currentConfiguration.uri.path),
         '/admin/audit',
       );
     });

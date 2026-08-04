@@ -134,7 +134,7 @@ class _ChurchTile extends ConsumerWidget {
         trailing: selected ? const Icon(Icons.check_circle) : const Icon(Icons.chevron_right),
         onTap: () {
           chooseChurch(ref, church.id);
-          context.go('/');
+          context.go(churchHome(church.id));
         },
       ),
     );

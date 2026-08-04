@@ -86,3 +86,10 @@ void chooseChurch(WidgetRef ref, String churchId) {
   ref.read(churchSearchProvider.notifier).state = '';
   ChurchPreference.write(churchId);
 }
+
+/// Where choosing a church should take you.
+///
+/// The provider and the URL are two halves of the same fact now, and the
+/// only way they cannot disagree is if one function sets both. Callers
+/// do `chooseChurch(...)` then `context.go(churchHome(id))`.
+String churchHome(String churchId) => churchPath(churchId);

@@ -39,12 +39,21 @@ class AuthLayout extends ConsumerWidget {
                           children: [
                             Icon(Icons.church, color: settings.colors.primary, size: 28),
                             const SizedBox(width: 10),
-                            Text(
-                              settings.churchName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(color: settings.colors.primary),
+                            // Flexible because church names are long.
+                            // "First Presbyterian Church of Riverside"
+                            // overflowed this row on a phone, and a
+                            // church cannot shorten its own name to fit
+                            // somebody's sign-in page.
+                            Flexible(
+                              child: Text(
+                                settings.churchName,
+                                maxLines: 2,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(color: settings.colors.primary),
+                              ),
                             ),
                           ],
                         ),

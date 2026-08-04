@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yoked_church_app/app/app.dart';
+import 'package:yoked_church_app/core/config/tenant.dart';
 import 'package:yoked_church_app/app/router.dart';
 import 'package:yoked_church_app/features/auth/application/auth_providers.dart';
 import 'package:yoked_church_app/features/events/application/rsvp_providers.dart';
@@ -48,7 +49,10 @@ void main() {
       container.read(routerProvider).go('/admin');
       await tester.pumpAndSettle();
 
-      expect(container.read(routerProvider).routerDelegate.currentConfiguration.uri.path, '/account');
+      expect(
+        subPathOf(container.read(routerProvider).routerDelegate.currentConfiguration.uri.path),
+        '/account',
+      );
     });
 
     testWidgets('a signed-in member reaches /account directly', (tester) async {

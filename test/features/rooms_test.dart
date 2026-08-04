@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:yoked_church_app/core/config/tenant.dart';
 import 'package:yoked_church_app/app/app.dart';
 import 'package:yoked_church_app/app/router.dart';
 import 'package:yoked_church_app/core/config/church_settings.dart';
@@ -34,7 +35,7 @@ void main() {
   }
 
   String pathOf(ProviderContainer c) =>
-      c.read(routerProvider).routerDelegate.currentConfiguration.uri.path;
+      subPathOf(c.read(routerProvider).routerDelegate.currentConfiguration.uri.path);
 
   const hall = Room(id: 'hall', name: 'Fellowship Hall', capacity: 120);
   const nursery = Room(id: 'nursery', name: 'Nursery', bookable: false);

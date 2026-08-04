@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/config/tenant.dart';
 import '../../app/theme.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/notifications/application/notification_providers.dart';
@@ -129,7 +130,10 @@ class AppBottomNav extends ConsumerWidget {
   Widget _build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final destinations = bottomNav(settings);
-    final currentPath = GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+    // Stripped of the church prefix: every destination below is a
+    // bare path, and the location is now `/c/{church}/...`.
+    final currentPath =
+        subPathOf(GoRouter.of(context).routerDelegate.currentConfiguration.uri.path);
 
     // Anything reached from More - a devotional, the account, a form -
     // keeps More lit rather than falsely highlighting Home.
@@ -196,7 +200,10 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
     // throw on the error/404 page - there is no matched route to describe -
     // which would turn any bad URL into a crashed page instead of a
     // friendly "not found".
-    final currentPath = GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+    // Stripped of the church prefix: every destination below is a
+    // bare path, and the location is now `/c/{church}/...`.
+    final currentPath =
+        subPathOf(GoRouter.of(context).routerDelegate.currentConfiguration.uri.path);
     // Collapse to a menu below desktop width so the link row never has to
     // squeeze into a narrow (e.g. tablet) viewport.
     final collapsed = !Breakpoints.isDesktop(context);

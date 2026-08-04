@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/tenant.dart';
 import '../../../app/theme.dart';
 import '../../../core/config/church_settings.dart';
 import '../../../core/config/settings_providers.dart';
@@ -84,7 +85,10 @@ class AdminHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isAdmin = ref.watch(isAdminProvider);
-    final current = GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+    // Stripped of the church prefix: every destination below is a
+    // bare path, and the location is now `/c/{church}/...`.
+    final current =
+        subPathOf(GoRouter.of(context).routerDelegate.currentConfiguration.uri.path);
     final tabs = visibleAdminTabs(ref.watch(featureFlagsProvider), isAdmin: isAdmin);
 
     return PageBanner(
