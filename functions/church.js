@@ -90,7 +90,11 @@ function newChurchDocument(name, ownerUid, now = new Date()) {
     beliefs: '',
     visitInfo: '',
     releasesRepo: '',
-    colors: { primary: '#1B3A4B', accent: '#C79A3C', background: '#F7F5F0' },
+    // Harbour, the first theme in lib/core/config/themes.dart, which
+    // is also BrandColors.fallback. Three copies of a default that
+    // disagree is how a new church opens on colours the gallery does
+    // not offer.
+    colors: { primary: '#1B3A4B', accent: '#C9A24B', background: '#F7F5F0' },
     contact: { address: '', phone: '', email: '', mapUrl: '' },
     social: {
       facebook: '',

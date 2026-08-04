@@ -111,11 +111,41 @@ reading each channel's RSS feed for free and spending a single unit on
 `videos.list`. A finished stream becomes an unpublished sermon keyed by
 video id, so the next poll five minutes later creates nothing.
 
+**M12 — the part that makes it a product.** Every church got an address:
+`/c/{slug}`, so a link to your church opens *your* church rather than
+whichever one the recipient looked at last. The sixty-six existing
+`context.go('/sermons')` call sites did not change — the redirect
+rewrites bare paths onto the current church, and the guards still reason
+about bare paths because only one function knows about the prefix.
+
+Then the thing that had been missing all along: **signing up**. Creating
+a church used to mean an operator writing a Firestore document and
+setting a role by hand in a console. Now it is four fields and thirty
+seconds, and the founder lands in their own dashboard as its admin.
+Creation stays server-side — the rules still refuse it outright, because
+a rule permissive enough to let you create a church *and* write yourself
+in as its admin is a rule that lets anyone mint admin rights.
+
+That dashboard needed something to say, so it got a setup checklist
+derived from what is actually there, and the settings screen got a
+gallery of ready-made looks for the many churches that have a logo but
+no brand guide.
+
 ## Not built
 
 Listed because a buyer should know what they are not getting, not as a
 commitment to build them.
 
+- **Billing.** Nothing is charged, nothing is gated, there are no plans
+  and no Stripe. Named because "like Shopify" usually implies charging,
+  and this deliberately does not.
+- **Custom domains.** A church's address is `<host>/#/c/their-slug`, not
+  `theirchurch.com`. Per-tenant domains need wildcard DNS and a host
+  that terminates TLS for them, which GitHub Pages cannot do — it would
+  mean moving hosting.
+- **Renaming a church's address.** Slugs are permanent. Changing one
+  breaks every link already shared, so it would mean keeping redirects
+  forever.
 - **Push and email notifications.** The in-app inbox is real and
   staff-write-only. Nothing leaves the app: no FCM, no email. Form
   notification routing deliberately targets staff *accounts* rather than

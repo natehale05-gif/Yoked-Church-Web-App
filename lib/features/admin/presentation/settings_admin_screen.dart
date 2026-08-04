@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/church_settings.dart';
 import '../../../core/config/settings_providers.dart';
+import '../../../core/config/themes.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/responsive.dart';
 import '../../../core/widgets/section_container.dart';
@@ -147,8 +148,17 @@ class _SettingsAdminScreenState extends ConsumerState<SettingsAdminScreen> {
               ),
               _Section(
                 title: 'Brand colors',
-                description: 'Paste hex codes from your brand guide, e.g. #1B3A4B.',
+                description: 'Start from a ready-made look, then change anything you '
+                    'like. If you have a brand guide, paste its hex codes below.',
                 children: [
+                  _ThemeGallery(
+                    current: _colors,
+                    // A theme only fills in the fields below; the hex
+                    // codes remain the record, so there is nothing new
+                    // to save and nothing that can disagree with them.
+                    onPicked: (theme) => setState(() => _colors = theme.colors),
+                  ),
+                  const SizedBox(height: 20),
                   _ColorField(
                     label: 'Primary',
                     color: _colors.primary,
@@ -414,6 +424,117 @@ class _Section extends StatelessWidget {
   }
 }
 
+/// Ready-made looks, as swatches you can see rather than codes you have
+/// to imagine.
+///
+/// A church with a brand guide pastes hex codes into the fields below.
+/// A church without one - which is most of them - was left staring at
+/// `#RRGGBB` with no way to tell what it would do.
+class _ThemeGallery extends StatelessWidget {
+  final BrandColors current;
+  final ValueChanged<ChurchTheme> onPicked;
+
+  const _ThemeGallery({required this.current, required this.onPicked});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        for (final theme in churchThemes)
+          _ThemeSwatch(
+            theme: theme,
+            selected: theme.matches(current),
+            onTap: () => onPicked(theme),
+          ),
+      ],
+    );
+  }
+}
+
+class _ThemeSwatch extends StatelessWidget {
+  final ChurchTheme theme;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ThemeSwatch({required this.theme, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      width: 168,
+      child: Material(
+        color: theme.colors.background,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: selected ? scheme.primary : Colors.black12,
+                width: selected ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    // The bar and the dot are the two colours doing the
+                    // work everywhere else in the app: the banner, and
+                    // whatever sits on it.
+                    Expanded(
+                      child: Container(
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: theme.colors.primary,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      width: 26,
+                      height: 26,
+                      decoration: BoxDecoration(
+                        color: theme.colors.accent,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        theme.name,
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                      ),
+                    ),
+                    if (selected) Icon(Icons.check_circle, size: 16, color: scheme.primary),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  theme.description,
+                  style: const TextStyle(color: Colors.black54, fontSize: 11.5, height: 1.3),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Hex text field with a live swatch. Parsing reuses [BrandColors.fromMap],
 /// which already tolerates `#RRGGBB`, bare `RRGGBB`, and `#AARRGGBB`.
 class _ColorField extends StatefulWidget {
@@ -438,6 +559,21 @@ class _ColorFieldState extends State<_ColorField> {
 
   static String _hex(Color color) =>
       '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+
+  /// Follows the colour when it is changed from outside - which is what
+  /// picking a theme does.
+  ///
+  /// Guarded on the *parsed* value rather than the text, so someone
+  /// halfway through typing `#1B3A` is not interrupted by their own
+  /// keystrokes being rewritten.
+  @override
+  void didUpdateWidget(_ColorField old) {
+    super.didUpdateWidget(old);
+    final shown = BrandColors.fromMap({'primary': _controller.text}).primary;
+    if (shown.toARGB32() != widget.color.toARGB32()) {
+      _controller.text = _hex(widget.color);
+    }
+  }
 
   @override
   void dispose() {

@@ -21,17 +21,52 @@ flutter pub get
 flutter run -d chrome
 ```
 
-That's the zero-backend mode. Sign in from the demo panel as a member,
-staff, or admin and click through everything.
+That's the zero-backend mode. Press **Start your church site**, name a
+church, and you are its admin thirty seconds later — the whole signup
+works with no backend at all. Or open one of the sample churches and
+sign in from the demo panel as a member, staff, or admin.
+
+## Every church has an address
+
+`/#/c/grace-chapel` is a church's site. Send that link to anyone and it
+opens *their* church — its name, its colours, its sermons — whichever
+church the recipient looked at last. Signing up mints the address from
+the church's name and shows it while you type, because it is permanent:
+it goes on the noticeboard and in the newsletter, and renaming it would
+break every link already shared.
+
+The product's own pages are the three that are not a church: `/` (what
+this is), `/start` (make one), `/choose-church` (find one).
+
+## Setting up a church
+
+Nobody has to do anything in a console. **Start your church site** asks
+for four things — the church's name, and someone to run it — and lands
+you in your own dashboard, as its admin, with a checklist of what is
+still missing: service times, where you meet, a welcome, colours, a
+first sermon. Each row goes to the screen that fixes it, and the list
+disappears when there is nothing left.
+
+Creating a church is the one write the security rules refuse outright.
+`churches/{churchId}` keeps `allow create: if false`, because creating a
+church means writing yourself in as its admin in the same breath, and a
+rule permissive enough to allow that lets anyone mint admin rights over
+a church they have just invented. The `createChurch` Cloud Function
+holds the only path — which also lets it allocate the address inside a
+transaction, so two people naming their church the same thing at the
+same moment cannot both win it.
 
 ## Customizing for a church
 
 **Almost nothing lives in code.** A church's name, tagline, brand colors,
 logo, About copy, service times, contact details, social and giving
 links, and every feature switch are edited in the app itself at
-`/admin/settings`, saved to that church's document (`churches/{churchId}`),
-and applied immediately — including the `ThemeData` the whole app is
-built from.
+`/admin/settings` — including a gallery of ready-made looks, for the
+many churches that have a logo but no brand guide and were otherwise
+left staring at `#RRGGBB`. Picking one fills in the same three hex
+fields, so there is no second place branding is stored. All of it saves
+to that church's document (`churches/{churchId}`) and applies
+immediately — including the `ThemeData` the whole app is built from.
 
 That one document does double duty: it is the church's settings *and*
 its entry in the public directory the picker lists, so choosing a church
@@ -105,14 +140,22 @@ If Firebase is configured but fails to initialize, the app falls back to
 bundled content rather than showing a broken site. A backend outage
 should still leave service times and directions on screen.
 
-### Bootstrapping the first admin
+### The first admin
 
-New accounts default to `member`, and there is nobody to promote you yet.
-Sign up normally, then set that account's `role` to `admin` on its
-`churches/{churchId}/users/{uid}` document in the Firebase console.
-Roles are per church: promoting yourself at one church says nothing
-about any other. After that, admins
-promote and demote everyone else from `/admin/members`.
+Nothing to do: whoever creates a church is its admin, written in by
+`createChurch` in the same transaction that creates the church. After
+that, admins promote and demote everyone else from `/admin/members`.
+
+Roles are per church — being an admin at one says nothing about any
+other — so someone joining an existing church starts as a `member`, and
+that church's admins decide the rest.
+
+Deploy the function before anyone signs up, or `/start` has nothing to
+call:
+
+```bash
+firebase deploy --only functions --project <your-project-id>
+```
 
 ### Going live automatically from YouTube
 

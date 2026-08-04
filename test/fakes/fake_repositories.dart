@@ -189,20 +189,28 @@ ChurchSettings testSettings({
   // for the wrong reason, the route being shut either way.
   String releasesRepo = 'test-church/test-app',
   SocialLinks? social,
+  // Enough of the document to describe a church at any point in its
+  // setup, from the minute it was created to fully filled in - which is
+  // what the setup checklist is a function of.
+  String aboutBody = 'About body copy.',
+  BrandColors? colors,
+  ContactInfo? contact,
+  List<ServiceTime>? serviceTimes,
 }) =>
     ChurchSettings(
       churchName: churchName,
       releasesRepo: releasesRepo,
       tagline: 'A tagline',
       aboutHeadline: 'Welcome Home',
-      aboutBody: 'About body copy.',
-      colors: BrandColors.fallback,
-      contact: const ContactInfo(
-        address: '1 Test St',
-        phone: '(555) 000-0000',
-        email: 'test@example.org',
-        mapUrl: '',
-      ),
+      aboutBody: aboutBody,
+      colors: colors ?? BrandColors.fallback,
+      contact: contact ??
+          const ContactInfo(
+            address: '1 Test St',
+            phone: '(555) 000-0000',
+            email: 'test@example.org',
+            mapUrl: '',
+          ),
       social: social ??
           const SocialLinks(
             facebook: '',
@@ -211,7 +219,8 @@ ChurchSettings testSettings({
             givingUrl: 'https://example.org/give',
             liveStreamUrl: '',
           ),
-      serviceTimes: const [ServiceTime(day: 'Sunday', time: '9:00 AM', label: 'Morning')],
+      serviceTimes: serviceTimes ??
+          const [ServiceTime(day: 'Sunday', time: '9:00 AM', label: 'Morning')],
       features: features ?? const FeatureFlags(),
     );
 
