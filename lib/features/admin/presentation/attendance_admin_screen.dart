@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../app/theme.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/responsive.dart';
 import '../../../core/widgets/section_container.dart';
 import '../../attendance/application/attendance_providers.dart';
 import '../../attendance/domain/attendance_record.dart';
@@ -134,42 +136,38 @@ class _RecordPanelState extends ConsumerState<_RecordPanel> {
                 style: TextStyle(color: Colors.black54),
               )
             else ...[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // Side by side these two left the date sixty-three pixels on
+              // a phone, which is not enough to write a date on one line.
+              ResponsiveRow(
+                flex: const [2, 1],
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<Gathering>(
-                      initialValue: _gathering,
-                      isExpanded: true,
-                      decoration: const InputDecoration(labelText: 'Gathering'),
-                      items: [
-                        for (final g in gatherings)
-                          DropdownMenuItem(value: g, child: Text('${_typeLabel(g.type)} · ${g.name}')),
-                      ],
-                      onChanged: (value) => setState(() {
-                        _gathering = value;
-                        _present.clear();
-                        _saved = false;
-                      }),
-                    ),
+                  DropdownButtonFormField<Gathering>(
+                    initialValue: _gathering,
+                    isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'Gathering'),
+                    items: [
+                      for (final g in gatherings)
+                        DropdownMenuItem(value: g, child: Text('${_typeLabel(g.type)} · ${g.name}')),
+                    ],
+                    onChanged: (value) => setState(() {
+                      _gathering = value;
+                      _present.clear();
+                      _saved = false;
+                    }),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: _date,
-                          firstDate: DateTime(DateTime.now().year - 5),
-                          lastDate: DateTime.now().add(const Duration(days: 1)),
-                        );
-                        if (picked != null) setState(() => _date = dayOf(picked));
-                      },
-                      child: InputDecorator(
-                        decoration: const InputDecoration(labelText: 'Date'),
-                        child: Text(DateFormat.yMMMEd().format(_date)),
-                      ),
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _date,
+                        firstDate: DateTime(DateTime.now().year - 5),
+                        lastDate: DateTime.now().add(const Duration(days: 1)),
+                      );
+                      if (picked != null) setState(() => _date = dayOf(picked));
+                    },
+                    child: InputDecorator(
+                      decoration: const InputDecoration(labelText: 'Date'),
+                      child: Text(DateFormat.yMMMEd().format(_date)),
                     ),
                   ),
                 ],
@@ -186,7 +184,9 @@ class _RecordPanelState extends ConsumerState<_RecordPanel> {
                 )
               else
                 SizedBox(
-                  width: 200,
+                  // Full width on a phone; a 200px box beside nothing just
+                  // looks like something failed to load.
+                  width: Breakpoints.isMobile(context) ? double.infinity : 200,
                   child: TextField(
                     controller: _headcount,
                     keyboardType: TextInputType.number,

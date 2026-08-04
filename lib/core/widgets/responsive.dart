@@ -62,6 +62,51 @@ class ResponsiveRow extends StatelessWidget {
   }
 }
 
+/// Detail on the left, a control on the right - the control underneath on
+/// a phone.
+///
+/// [ResponsiveRow] is the wrong tool when one side is a button: it wraps
+/// every child in an `Expanded`, so the button stretches to a share of the
+/// row instead of sizing to its label. Here only the detail flexes.
+///
+/// Without this the button takes whatever width it wants and the text gets
+/// the remainder, which on a 390px screen is how "Request to join" left
+/// twenty-one pixels for a group's name. The control moves below the
+/// breakpoint and sits at the right, matching `AdminListTile`.
+class DetailWithAction extends StatelessWidget {
+  final Widget child;
+  final Widget action;
+  final double spacing;
+  final CrossAxisAlignment crossAxisAlignment;
+
+  const DetailWithAction({
+    super.key,
+    required this.child,
+    required this.action,
+    this.spacing = 16,
+    this.crossAxisAlignment = CrossAxisAlignment.start,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (Breakpoints.isMobile(context)) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          child,
+          SizedBox(height: spacing * 0.75),
+          Align(alignment: Alignment.centerRight, child: action),
+        ],
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: crossAxisAlignment,
+      children: [Expanded(child: child), SizedBox(width: spacing), action],
+    );
+  }
+}
+
 /// A label-and-value pair that stops fighting for width on a phone.
 ///
 /// A fixed label column reads well at desk width and leaves about a
