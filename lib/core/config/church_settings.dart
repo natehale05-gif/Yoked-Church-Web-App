@@ -207,6 +207,14 @@ class SocialLinks {
   final String givingUrl;
   final String liveStreamUrl;
 
+  /// The church's YouTube channel id, e.g. `UCxxxxxxxxxxxxxxxxxxxxxx`.
+  ///
+  /// Not a URL and not a handle: the scheduled poller reads the channel's
+  /// RSS feed, which is keyed by id. Empty means this church is not
+  /// polled at all, which is the right default - a church that never
+  /// streams should cost nothing.
+  final String youtubeChannelId;
+
   /// An existing feed on Anchor, Buzzsprout, Spotify, wherever. A
   /// podcast feed has to be static XML at a fixed URL that Apple and
   /// Spotify poll on a schedule; a client-side build on static hosting
@@ -219,6 +227,7 @@ class SocialLinks {
     required this.youtube,
     required this.givingUrl,
     required this.liveStreamUrl,
+    this.youtubeChannelId = '',
     this.podcastUrl = '',
   });
 
@@ -228,6 +237,7 @@ class SocialLinks {
         youtube: map['youtube'] as String? ?? '',
         givingUrl: map['givingUrl'] as String? ?? '',
         liveStreamUrl: map['liveStreamUrl'] as String? ?? '',
+        youtubeChannelId: map['youtubeChannelId'] as String? ?? '',
         podcastUrl: map['podcastUrl'] as String? ?? '',
       );
 
@@ -237,6 +247,7 @@ class SocialLinks {
         'youtube': youtube,
         'givingUrl': givingUrl,
         'liveStreamUrl': liveStreamUrl,
+        'youtubeChannelId': youtubeChannelId,
         'podcastUrl': podcastUrl,
       };
 

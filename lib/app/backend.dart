@@ -32,6 +32,8 @@ import '../features/giving/data/giving_repository.dart';
 import '../features/groups/application/group_providers.dart';
 import '../features/groups/data/group_repository.dart';
 import '../features/kids/application/check_in_providers.dart';
+import '../features/live/application/live_providers.dart';
+import '../features/live/data/live_repository.dart';
 import '../features/kids/data/check_in_repository.dart';
 import '../features/notifications/application/notification_providers.dart';
 import '../features/notifications/data/notification_repository.dart';
@@ -74,6 +76,7 @@ List<Override> localOverrides() {
           .overrideWith((ref) => LocalSettingsRepository(ref.watch(currentChurchIdProvider))),
       authRepositoryProvider.overrideWithValue(LocalAuthRepository(users)),
       userRepositoryProvider.overrideWithValue(users),
+      liveRepositoryProvider.overrideWithValue(LocalLiveRepository()),
       sermonRepositoryProvider.overrideWithValue(LocalSermonRepository()),
       sermonSeriesRepositoryProvider.overrideWithValue(LocalSermonSeriesRepository()),
       eventRepositoryProvider.overrideWithValue(LocalEventRepository()),
@@ -119,6 +122,7 @@ List<Override> firestoreOverrides() => [
           .overrideWith((ref) => FirestoreSettingsRepository(ref.watch(currentChurchIdProvider))),
       authRepositoryProvider.overrideWith((ref) => FirebaseAuthRepository(ref.watch(currentChurchIdProvider))),
       userRepositoryProvider.overrideWith((ref) => FirestoreUserRepository(ref.watch(currentChurchIdProvider))),
+      liveRepositoryProvider.overrideWith((ref) => FirestoreLiveRepository(ref.watch(currentChurchIdProvider))),
       sermonRepositoryProvider.overrideWith((ref) => FirestoreSermonRepository(ref.watch(currentChurchIdProvider))),
       sermonSeriesRepositoryProvider.overrideWith((ref) => FirestoreSermonSeriesRepository(ref.watch(currentChurchIdProvider))),
       eventRepositoryProvider.overrideWith((ref) => FirestoreEventRepository(ref.watch(currentChurchIdProvider))),

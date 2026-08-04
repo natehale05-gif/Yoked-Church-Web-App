@@ -7,6 +7,9 @@ import 'package:yoked_church_app/core/config/tenant.dart';
 import 'package:yoked_church_app/features/churches/application/church_providers.dart';
 import 'package:yoked_church_app/features/churches/data/church_directory_repository.dart';
 import 'package:yoked_church_app/core/config/settings_providers.dart';
+import 'package:yoked_church_app/features/live/application/live_providers.dart';
+import 'package:yoked_church_app/features/live/data/live_repository.dart';
+import 'package:yoked_church_app/features/live/domain/live_status.dart';
 import 'package:yoked_church_app/core/config/settings_repository.dart';
 import 'package:yoked_church_app/core/firestore/crud_repository.dart';
 import 'package:yoked_church_app/features/announcements/application/announcement_providers.dart';
@@ -171,6 +174,7 @@ ChurchSettings testSettings({
   // deliberately clears it - otherwise the feature-flag test would pass
   // for the wrong reason, the route being shut either way.
   String releasesRepo = 'test-church/test-app',
+  SocialLinks? social,
 }) =>
     ChurchSettings(
       churchName: churchName,
@@ -185,13 +189,14 @@ ChurchSettings testSettings({
         email: 'test@example.org',
         mapUrl: '',
       ),
-      social: const SocialLinks(
-        facebook: '',
-        instagram: '',
-        youtube: '',
-        givingUrl: 'https://example.org/give',
-        liveStreamUrl: '',
-      ),
+      social: social ??
+          const SocialLinks(
+            facebook: '',
+            instagram: '',
+            youtube: '',
+            givingUrl: 'https://example.org/give',
+            liveStreamUrl: '',
+          ),
       serviceTimes: const [ServiceTime(day: 'Sunday', time: '9:00 AM', label: 'Morning')],
       features: features ?? const FeatureFlags(),
     );
@@ -616,6 +621,10 @@ List<Override> fakeOverrides({
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
   FakeVolunteerAssignmentRepository? assignmentRepo,
+  /// Whether the church is streaming right now. Off by default: a
+  /// permanent "Live now" is the exact lie the banner exists to stop.
+  LiveStatus live = const LiveStatus(),
+
   /// Which church the app is acting as.
   ///
   /// Defaulted rather than required: almost every test is about one
@@ -636,6 +645,7 @@ List<Override> fakeOverrides({
     churchDirectoryProvider.overrideWithValue(LocalChurchDirectoryRepository()),
     settingsRepositoryProvider.overrideWithValue(FakeSettingsRepository(settings)),
     authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInAs)),
+    liveRepositoryProvider.overrideWithValue(FakeLiveRepository(live)),
     userRepositoryProvider.overrideWithValue(FakeUserRepository()..seedInMemory(members)),
     sermonRepositoryProvider.overrideWithValue(FakeSermonRepository()..seedInMemory(sermons)),
     sermonSeriesRepositoryProvider.overrideWithValue(FakeSermonSeriesRepository()..seedInMemory(series)),
@@ -733,6 +743,17 @@ Devotional testDevotional({
       publishDate: publishDate ?? DateTime(2026, 7, 1),
       published: published,
     );
+
+/// Live status the test controls, so the "Live now" banner can be proved
+/// without a YouTube channel or a scheduled function.
+class FakeLiveRepository implements LiveRepository {
+  final LiveStatus status;
+
+  const FakeLiveRepository([this.status = const LiveStatus()]);
+
+  @override
+  Stream<LiveStatus> watch() => Stream.value(status);
+}
 
 /// Auth fake that can start signed-in and supports sign-out/sign-in.
 class FakeAuthRepository implements AuthRepository {

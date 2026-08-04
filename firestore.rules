@@ -53,6 +53,15 @@ service cloud.firestore {
         allow write: if isStaff(churchId);
       }
 
+      // Whether the church is streaming right now. Written only by the
+      // scheduled poller, which uses the Admin SDK and bypasses these
+      // rules entirely - so no client, not even an admin, can announce a
+      // service that is not happening.
+      match /live/{id} {
+        allow read: if true;
+        allow write: if false;
+      }
+
       // Drafts and future-dated entries are filtered client-side, not here:
       // a rule cannot express "published and dated on or before today"
       // without an index-backed query, and the list read is a single

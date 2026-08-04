@@ -114,6 +114,56 @@ Roles are per church: promoting yourself at one church says nothing
 about any other. After that, admins
 promote and demote everyone else from `/admin/members`.
 
+### Going live automatically from YouTube
+
+Paste a church's YouTube channel id into **Settings → Live streaming**
+and the home page raises a "Live now" banner by itself whenever that
+channel starts streaming, then files the finished stream as an
+**unpublished** sermon for staff to review. A church that leaves the
+field blank is never polled and costs nothing.
+
+This is the one part of the app that needs a server. Setting it up:
+
+1. **Move the Firebase project to the pay-as-you-go (Blaze) plan.** Cloud
+   Scheduler will not run on Spark. At this scale the bill is pennies,
+   but it is the first thing here that needs a card.
+2. In the [Google Cloud console](https://console.cloud.google.com/apis/library/youtube.googleapis.com),
+   enable the **YouTube Data API v3** on the same project, then create an
+   API key under *APIs & Services → Credentials*. Restrict it to that one
+   API.
+3. Give the key to Firebase — it lives server-side and must never reach
+   the client bundle, because anything shipped to a browser is public:
+   ```bash
+   firebase functions:secrets:set YOUTUBE_API_KEY --project <your-project-id>
+   firebase deploy --only functions --project <your-project-id>
+   ```
+4. Find the channel id in YouTube Studio under *Settings → Channel →
+   Advanced settings*. It starts with `UC` — a handle like `@yokedchurch`
+   or a channel URL will not work.
+
+`/admin/settings` shows when the poller last looked, which is how you
+tell a wrong channel id from a quiet week.
+
+**How it stays inside the quota.** The obvious call, `search.list` with
+`eventType=live`, costs 100 units against a 10,000/day default: polling
+one church every five minutes would be 28,800 units and the feature would
+die on its first day. Instead each poll reads the channel's RSS feed
+(free) and makes one `videos.list` call on the ids it returns (1 unit) —
+about 300 units a day for one church, so a few dozen churches share one
+key comfortably.
+
+**What it writes.** `churches/{churchId}/live/current` holds whether they
+are streaming, and is world-readable and writable by nobody: whether a
+church is live is a fact about YouTube, not a claim the church gets to
+make from a browser console. Finished streams become
+`churches/{churchId}/sermons/yt-<videoId>` with `source: youtubeAuto`
+and `published: false` — keyed by video id, so the next poll five minutes
+later creates nothing and never overwrites an edit a staff member has
+already made to the draft.
+
+The code is in [`functions/`](functions/); the decisions it makes are
+pure functions in `functions/youtube.js`, covered by `npm test` there.
+
 ### Firestore collections
 
 Everything below lives **under a church**, as
@@ -125,7 +175,7 @@ Everything below lives **under a church**, as
 `devotionals`, `readingPlans`, `planProgress`, `sermonNotes`,
 `resources`, `prayerPosts`, `prayerIntercessions`, `rooms`,
 `roomBookings`, `checkIns`, `attendanceRecords`, `formDefinitions`,
-`formSubmissions`.
+`formSubmissions`, `live`.
 
 The only top-level collection is `churches` itself, which is
 world-readable — that is how the picker lists them and how the app
@@ -161,7 +211,8 @@ restricted document, link it from a service that enforces access.
 
 ## What's in it
 
-**Public** — home with live-stream banner, sermons with series and
+**Public** — home with a live banner that appears only when the
+church is actually streaming, sermons with series and
 search, events, giving, connect cards, about, staff, visit, FAQ,
 locations, devotionals, reading plans, resource library, and public form
 sign-ups.
@@ -198,6 +249,7 @@ lib/
 assets/
   data/         sample content, incl. church_settings.json
   fonts/        Lora + Work Sans, bundled so text never depends on a CDN
+functions/     the scheduled YouTube poller - the only server-side code
 firestore.rules, storage.rules, firestore.indexes.json, firebase.json
 test/           Flutter tests
 test_rules/     Firestore security-rule tests (Node, emulator)
@@ -218,7 +270,7 @@ flutter build web --release
 ### Security rules
 
 The rules are the only thing protecting giving history, kids' pickup
-codes, and form responses. They have their own suite — 104 assertions
+codes, and form responses. They have their own suite — 121 assertions
 across every collection, each with at least one *denied* case — run
 against the Firebase emulator:
 
@@ -228,6 +280,17 @@ cd test_rules && ./run.sh
 
 That starts the emulator, runs the suite, and shuts it down. Re-run it
 whenever `firestore.rules` changes.
+
+### The scheduled function
+
+```bash
+npm --prefix functions test
+```
+
+No install needed: what is worth testing there — what counts as live,
+what gets imported, what a second poll does — is pure functions over the
+shapes YouTube returns, so none of it needs the network or the Firebase
+SDKs.
 
 ### Running against the emulator
 

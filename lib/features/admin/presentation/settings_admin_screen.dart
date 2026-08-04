@@ -6,6 +6,7 @@ import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/responsive.dart';
 import '../../../core/widgets/section_container.dart';
+import '../../live/application/live_providers.dart';
 import '../application/settings_controller.dart';
 import 'admin_header.dart';
 
@@ -49,6 +50,7 @@ class _SettingsAdminScreenState extends ConsumerState<SettingsAdminScreen> {
     _field('youtube', s.social.youtube);
     _field('givingUrl', s.social.givingUrl);
     _field('liveStreamUrl', s.social.liveStreamUrl);
+    _field('youtubeChannelId', s.social.youtubeChannelId);
     _field('podcastUrl', s.social.podcastUrl);
     _field('releasesRepo', s.releasesRepo);
     _colors = s.colors;
@@ -93,6 +95,7 @@ class _SettingsAdminScreenState extends ConsumerState<SettingsAdminScreen> {
           youtube: _text('youtube'),
           givingUrl: _text('givingUrl'),
           liveStreamUrl: _text('liveStreamUrl'),
+          youtubeChannelId: _text('youtubeChannelId'),
           podcastUrl: _text('podcastUrl'),
         ),
         serviceTimes: [
@@ -252,6 +255,18 @@ class _SettingsAdminScreenState extends ConsumerState<SettingsAdminScreen> {
                 ],
               ),
               _Section(
+                title: 'Live streaming',
+                description: 'Paste your channel id and the home page raises a '
+                    '"Live now" banner by itself whenever you go live, then files '
+                    'the finished stream as an unpublished sermon for you to '
+                    'review. Find the id in YouTube Studio under Settings → '
+                    'Channel → Advanced settings; it starts with UC.',
+                children: [
+                  _text_('YouTube channel ID', 'youtubeChannelId'),
+                  const _LastChecked(),
+                ],
+              ),
+              _Section(
                 title: 'App downloads',
                 description: 'The GitHub repository whose releases hold the '
                     'installable apps, as owner/repo. Leave it blank and the '
@@ -320,6 +335,57 @@ const _featureLabels = {
   'forms': 'Forms & sign-ups',
   'appDownloads': 'App download page',
 };
+
+/// When the poller last looked at this church's channel.
+///
+/// The difference between "we checked, you are not streaming" and
+/// "nothing has ever checked" is the whole of whether the setup worked,
+/// and an admin who has just pasted a channel id has no other way to
+/// tell - the banner staying away looks identical either way.
+class _LastChecked extends ConsumerWidget {
+  const _LastChecked();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(liveStatusProvider).valueOrNull;
+    final checkedAt = status?.checkedAt;
+
+    final (icon, message) = switch (status) {
+      null => (Icons.hourglass_empty, 'Checking…'),
+      _ when checkedAt == null => (
+          Icons.schedule,
+          'Not checked yet. The first check runs within five minutes of '
+              'saving a channel id.',
+        ),
+      _ when status.live => (Icons.sensors, 'Live now — last checked ${_ago(checkedAt)}.'),
+      _ => (Icons.check_circle_outline, 'Not streaming. Last checked ${_ago(checkedAt)}.'),
+    };
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: Colors.black54),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(message, style: const TextStyle(color: Colors.black54, fontSize: 13)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _ago(DateTime when) {
+    final minutes = DateTime.now().difference(when).inMinutes;
+    if (minutes < 1) return 'just now';
+    if (minutes < 60) return '$minutes minute${minutes == 1 ? '' : 's'} ago';
+    final hours = minutes ~/ 60;
+    if (hours < 24) return '$hours hour${hours == 1 ? '' : 's'} ago';
+    final days = hours ~/ 24;
+    return '$days day${days == 1 ? '' : 's'} ago';
+  }
+}
 
 class _Section extends StatelessWidget {
   final String title;

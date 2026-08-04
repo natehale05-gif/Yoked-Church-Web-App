@@ -89,17 +89,33 @@ Phones got navigation that reaches: a bottom bar built from the
 church's feature flags, replacing the hamburger that opened a flat sheet
 of every destination in the app.
 
+**M11 — a way in, screens that read, and a live banner that means it.**
+Demo sign-in did nothing on the deployed site: Riverpod fires the
+router's refresh listener before recomputing anything derived from the
+auth state, so the guard read the *previous* user on the one
+notification that mattered and bounced the sign-in it had just
+completed. The guard now reads the auth state at its source and is the
+only thing that decides where signing in takes you.
+
+With the signed-in half reachable, the route sweep ran for the first
+time and found not crashes but text squeezed into slivers - an email
+address at 68px, a group's name at 21px. `responsive_test.dart` gained
+an assertion that can see that class of problem, and the screens it
+named were fixed; the staff dashboard's nineteen tabs stopped being a
+horizontal scroller that showed four.
+
+YouTube live detection landed, which needed the project's first
+server-side code. One scheduled function serves every church - possible
+only because tenancy came first - and stays inside a 10,000/day quota by
+reading each channel's RSS feed for free and spending a single unit on
+`videos.list`. A finished stream becomes an unpublished sermon keyed by
+video id, so the next poll five minutes later creates nothing.
+
 ## Not built
 
 Listed because a buyer should know what they are not getting, not as a
 commitment to build them.
 
-- **YouTube live/VOD sync.** The homepage live banner is driven by a
-  `liveStreamUrl` in settings, set by hand. Automatic detection — banner
-  appears when the channel goes live, ended stream lands in the sermon
-  library for review — needs a scheduled server-side job holding a
-  YouTube Data API key, so it cannot be a static-site feature. It is the
-  largest single item here.
 - **Push and email notifications.** The in-app inbox is real and
   staff-write-only. Nothing leaves the app: no FCM, no email. Form
   notification routing deliberately targets staff *accounts* rather than
