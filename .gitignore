@@ -28,6 +28,11 @@ doc/api/
 # JavaScript because Firebase's rules-unit-testing library only exists
 # there. Without this negation the whole suite is silently untracked.
 !test_rules/*.js
+# ...and the Cloud Functions, likewise genuinely JavaScript. This one
+# caught us out: `git add functions/` reported success and committed the
+# package.json alone, leaving a deploy surface with no code in it.
+!functions/*.js
+!functions/test/*.js
 
 node_modules/
 
