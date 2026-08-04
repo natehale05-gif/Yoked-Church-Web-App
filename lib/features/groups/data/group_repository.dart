@@ -38,6 +38,8 @@ class FirestoreGroupRepository extends FirestoreCrudRepository<ChurchGroup>
 }
 
 class LocalGroupRepository extends LocalCrudRepository<ChurchGroup> with _GroupCodec implements GroupRepository {
+  LocalGroupRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/groups.json';
   @override
@@ -62,6 +64,8 @@ class FirestoreMembershipRepository extends FirestoreCrudRepository<GroupMembers
 class LocalMembershipRepository extends LocalCrudRepository<GroupMembership>
     with _MembershipCodec
     implements MembershipRepository {
+  LocalMembershipRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/group_memberships.json';
 

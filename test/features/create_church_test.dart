@@ -9,6 +9,9 @@ import 'package:yoked_church_app/features/churches/application/church_providers.
 import 'package:yoked_church_app/features/churches/data/church_directory_repository.dart';
 import 'package:yoked_church_app/features/churches/domain/church_slug.dart';
 import 'package:yoked_church_app/features/churches/domain/church_summary.dart';
+import 'package:yoked_church_app/features/connect/data/connect_repository.dart';
+import 'package:yoked_church_app/features/events/data/event_repository.dart';
+import 'package:yoked_church_app/features/sermons/data/sermon_repository.dart';
 
 import '../fakes/fake_repositories.dart';
 
@@ -177,6 +180,43 @@ void main() {
         pathOf(c),
         '/c/grace-chapel-2/admin',
         reason: 'turning away the second Grace Chapel is losing a customer over another\'s name',
+      );
+    });
+  });
+
+  group('whose content is whose', () {
+    // Asserted against the real local repositories rather than through
+    // the app, because the widget harness swaps in fakes that are seeded
+    // empty - so a "starts empty" assertion there would pass whatever
+    // the rule did, and prove nothing.
+    setUp(TestWidgetsFlutterBinding.ensureInitialized);
+
+    test('a church someone just made starts empty', () async {
+      // The zero-backend mode used to share one set of collections
+      // between every church. That was invisible while the only churches
+      // were the bundled ones, and became a lie the moment a person
+      // could create their own: signing up and landing on a dashboard
+      // reporting two unread messages you have never seen is not a demo
+      // of a product, it is a demo of a bug.
+      LocalChurchDirectoryRepository.reset();
+      final id = await LocalChurchDirectoryRepository()
+          .create(name: 'Grace Chapel', desiredSlug: 'grace-chapel');
+
+      expect(await LocalSermonRepository(id).fetchAll(), isEmpty);
+      expect(await LocalEventRepository(id).fetchAll(), isEmpty);
+      expect(await LocalConnectRepository(id).fetchAll(), isEmpty);
+    });
+
+    test('the sample churches keep the sample content', () async {
+      // The other half of the same rule. An empty demo would make the
+      // picker prove nothing.
+      LocalChurchDirectoryRepository.reset();
+
+      expect(await LocalSermonRepository(demoChurchId).fetchAll(), isNotEmpty);
+      expect(
+        await LocalSermonRepository('riverside-fellowship').fetchAll(),
+        isNotEmpty,
+        reason: 'all three bundled churches are meant to be walkable',
       );
     });
   });

@@ -76,6 +76,15 @@ class LocalChurchDirectoryRepository implements ChurchDirectoryRepository {
     return _cache!;
   }
 
+  /// Whether this church came with the app rather than being created in
+  /// it. Only the bundled ones get the bundled sample content.
+  static Future<bool> isBundled(String churchId) async {
+    for (final map in await load()) {
+      if (map['id'] == churchId) return map['bundled'] != false;
+    }
+    return false;
+  }
+
   @override
   Future<List<ChurchSummary>> fetchAll() async {
     final raw = await load();
@@ -106,7 +115,9 @@ class LocalChurchDirectoryRepository implements ChurchDirectoryRepository {
 
     _cache = [
       ...raw,
-      {'id': id, 'churchName': name},
+      // `bundled: false` is what keeps the sample sermons and the
+      // sample unread messages out of a church somebody just made.
+      {'id': id, 'churchName': name, 'bundled': false},
     ];
     return id;
   }

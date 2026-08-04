@@ -28,6 +28,8 @@ class FirestoreAnnouncementRepository extends FirestoreCrudRepository<Announceme
 class LocalAnnouncementRepository extends LocalCrudRepository<Announcement>
     with _AnnouncementCodec
     implements AnnouncementRepository {
+  LocalAnnouncementRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/announcements.json';
 

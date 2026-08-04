@@ -24,6 +24,8 @@ class FirestoreEventRepository extends FirestoreCrudRepository<ChurchEvent>
 }
 
 class LocalEventRepository extends LocalCrudRepository<ChurchEvent> with _EventCodec implements EventRepository {
+  LocalEventRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/events.json';
   @override

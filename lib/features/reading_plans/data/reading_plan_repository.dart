@@ -43,6 +43,8 @@ class FirestoreReadingPlanRepository extends FirestoreCrudRepository<ReadingPlan
 class LocalReadingPlanRepository extends LocalCrudRepository<ReadingPlan>
     with _PlanCodec
     implements ReadingPlanRepository {
+  LocalReadingPlanRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/reading_plans.json';
   @override
@@ -68,6 +70,8 @@ class FirestorePlanProgressRepository extends FirestoreCrudRepository<PlanProgre
 class LocalPlanProgressRepository extends LocalCrudRepository<PlanProgress>
     with _ProgressCodec
     implements PlanProgressRepository {
+  LocalPlanProgressRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/plan_progress.json';
 

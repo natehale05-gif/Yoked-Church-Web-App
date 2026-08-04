@@ -31,6 +31,8 @@ class FirestoreConnectRepository extends FirestoreCrudRepository<ConnectSubmissi
 class LocalConnectRepository extends LocalCrudRepository<ConnectSubmission>
     with _ConnectCodec
     implements ConnectRepository {
+  LocalConnectRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/connect_submissions.json';
 

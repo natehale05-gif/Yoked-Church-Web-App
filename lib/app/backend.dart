@@ -66,8 +66,15 @@ enum Backend { local, firestore }
 /// which is what makes the template demo-able before a customer sets up
 /// Firebase.
 List<Override> localOverrides() {
-  // Shared, so a demo sign-in enrols that account in the same in-memory
-  // congregation every other screen reads from.
+  // Shared across churches, unlike every other collection below.
+  //
+  // A demo sign-in has to enrol into the same congregation the screens
+  // read from, and the demo session is held by the auth repository
+  // itself - so making this per-church would sign the founder out at
+  // the moment they were sent to the church they had just created.
+  // The cost is that a brand-new church's Members list shows the sample
+  // congregation; the content that matters - sermons, events, the
+  // inbox - is properly its own.
   final users = LocalUserRepository();
 
   return [
@@ -77,36 +84,36 @@ List<Override> localOverrides() {
       authRepositoryProvider.overrideWithValue(LocalAuthRepository(users)),
       userRepositoryProvider.overrideWithValue(users),
       liveRepositoryProvider.overrideWithValue(LocalLiveRepository()),
-      sermonRepositoryProvider.overrideWithValue(LocalSermonRepository()),
-      sermonSeriesRepositoryProvider.overrideWithValue(LocalSermonSeriesRepository()),
-      eventRepositoryProvider.overrideWithValue(LocalEventRepository()),
-      rsvpRepositoryProvider.overrideWithValue(LocalRsvpRepository()),
-      connectRepositoryProvider.overrideWithValue(LocalConnectRepository()),
-      staffRepositoryProvider.overrideWithValue(LocalStaffRepository()),
-      locationRepositoryProvider.overrideWithValue(LocalLocationRepository()),
-      faqRepositoryProvider.overrideWithValue(LocalFaqRepository()),
-      groupRepositoryProvider.overrideWithValue(LocalGroupRepository()),
-      membershipRepositoryProvider.overrideWithValue(LocalMembershipRepository()),
-      volunteerPositionRepositoryProvider.overrideWithValue(LocalVolunteerPositionRepository()),
-      volunteerAssignmentRepositoryProvider.overrideWithValue(LocalVolunteerAssignmentRepository()),
-      notificationRepositoryProvider.overrideWithValue(LocalNotificationRepository()),
-      givingRepositoryProvider.overrideWithValue(LocalGivingRepository()),
-      announcementRepositoryProvider.overrideWithValue(LocalAnnouncementRepository()),
-      auditRepositoryProvider.overrideWithValue(LocalAuditRepository()),
-      devotionalRepositoryProvider.overrideWithValue(LocalDevotionalRepository()),
-      readingPlanRepositoryProvider.overrideWithValue(LocalReadingPlanRepository()),
-      planProgressRepositoryProvider.overrideWithValue(LocalPlanProgressRepository()),
-      sermonNoteRepositoryProvider.overrideWithValue(LocalSermonNoteRepository()),
-      resourceRepositoryProvider.overrideWithValue(LocalResourceRepository()),
+      sermonRepositoryProvider.overrideWith((ref) => LocalSermonRepository(ref.watch(currentChurchIdProvider))),
+      sermonSeriesRepositoryProvider.overrideWith((ref) => LocalSermonSeriesRepository(ref.watch(currentChurchIdProvider))),
+      eventRepositoryProvider.overrideWith((ref) => LocalEventRepository(ref.watch(currentChurchIdProvider))),
+      rsvpRepositoryProvider.overrideWith((ref) => LocalRsvpRepository(ref.watch(currentChurchIdProvider))),
+      connectRepositoryProvider.overrideWith((ref) => LocalConnectRepository(ref.watch(currentChurchIdProvider))),
+      staffRepositoryProvider.overrideWith((ref) => LocalStaffRepository(ref.watch(currentChurchIdProvider))),
+      locationRepositoryProvider.overrideWith((ref) => LocalLocationRepository(ref.watch(currentChurchIdProvider))),
+      faqRepositoryProvider.overrideWith((ref) => LocalFaqRepository(ref.watch(currentChurchIdProvider))),
+      groupRepositoryProvider.overrideWith((ref) => LocalGroupRepository(ref.watch(currentChurchIdProvider))),
+      membershipRepositoryProvider.overrideWith((ref) => LocalMembershipRepository(ref.watch(currentChurchIdProvider))),
+      volunteerPositionRepositoryProvider.overrideWith((ref) => LocalVolunteerPositionRepository(ref.watch(currentChurchIdProvider))),
+      volunteerAssignmentRepositoryProvider.overrideWith((ref) => LocalVolunteerAssignmentRepository(ref.watch(currentChurchIdProvider))),
+      notificationRepositoryProvider.overrideWith((ref) => LocalNotificationRepository(ref.watch(currentChurchIdProvider))),
+      givingRepositoryProvider.overrideWith((ref) => LocalGivingRepository(ref.watch(currentChurchIdProvider))),
+      announcementRepositoryProvider.overrideWith((ref) => LocalAnnouncementRepository(ref.watch(currentChurchIdProvider))),
+      auditRepositoryProvider.overrideWith((ref) => LocalAuditRepository(ref.watch(currentChurchIdProvider))),
+      devotionalRepositoryProvider.overrideWith((ref) => LocalDevotionalRepository(ref.watch(currentChurchIdProvider))),
+      readingPlanRepositoryProvider.overrideWith((ref) => LocalReadingPlanRepository(ref.watch(currentChurchIdProvider))),
+      planProgressRepositoryProvider.overrideWith((ref) => LocalPlanProgressRepository(ref.watch(currentChurchIdProvider))),
+      sermonNoteRepositoryProvider.overrideWith((ref) => LocalSermonNoteRepository(ref.watch(currentChurchIdProvider))),
+      resourceRepositoryProvider.overrideWith((ref) => LocalResourceRepository(ref.watch(currentChurchIdProvider))),
       fileStorageProvider.overrideWithValue(const UnavailableFileStorage()),
-      roomRepositoryProvider.overrideWithValue(LocalRoomRepository()),
-      checkInRepositoryProvider.overrideWithValue(LocalCheckInRepository()),
-      bookingRepositoryProvider.overrideWithValue(LocalBookingRepository()),
-      prayerPostRepositoryProvider.overrideWithValue(LocalPrayerPostRepository()),
-      intercessionRepositoryProvider.overrideWithValue(LocalIntercessionRepository()),
-      attendanceRepositoryProvider.overrideWithValue(LocalAttendanceRepository()),
-      formRepositoryProvider.overrideWithValue(LocalFormRepository()),
-      submissionRepositoryProvider.overrideWithValue(LocalSubmissionRepository()),
+      roomRepositoryProvider.overrideWith((ref) => LocalRoomRepository(ref.watch(currentChurchIdProvider))),
+      checkInRepositoryProvider.overrideWith((ref) => LocalCheckInRepository(ref.watch(currentChurchIdProvider))),
+      bookingRepositoryProvider.overrideWith((ref) => LocalBookingRepository(ref.watch(currentChurchIdProvider))),
+      prayerPostRepositoryProvider.overrideWith((ref) => LocalPrayerPostRepository(ref.watch(currentChurchIdProvider))),
+      intercessionRepositoryProvider.overrideWith((ref) => LocalIntercessionRepository(ref.watch(currentChurchIdProvider))),
+      attendanceRepositoryProvider.overrideWith((ref) => LocalAttendanceRepository(ref.watch(currentChurchIdProvider))),
+      formRepositoryProvider.overrideWith((ref) => LocalFormRepository(ref.watch(currentChurchIdProvider))),
+      submissionRepositoryProvider.overrideWith((ref) => LocalSubmissionRepository(ref.watch(currentChurchIdProvider))),
     ];
 }
 

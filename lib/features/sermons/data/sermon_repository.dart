@@ -36,6 +36,8 @@ class FirestoreSermonRepository extends FirestoreCrudRepository<Sermon> with _Se
 }
 
 class LocalSermonRepository extends LocalCrudRepository<Sermon> with _SermonCodec implements SermonRepository {
+  LocalSermonRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/sermons.json';
   @override
@@ -58,6 +60,8 @@ class FirestoreSermonSeriesRepository extends FirestoreCrudRepository<SermonSeri
 class LocalSermonSeriesRepository extends LocalCrudRepository<SermonSeries>
     with _SeriesCodec
     implements SermonSeriesRepository {
+  LocalSermonSeriesRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/sermon_series.json';
   @override

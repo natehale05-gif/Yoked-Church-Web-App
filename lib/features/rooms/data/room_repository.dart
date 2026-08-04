@@ -36,6 +36,8 @@ class FirestoreRoomRepository extends FirestoreCrudRepository<Room> with _RoomCo
 }
 
 class LocalRoomRepository extends LocalCrudRepository<Room> with _RoomCodec implements RoomRepository {
+  LocalRoomRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/rooms.json';
   @override
@@ -62,6 +64,8 @@ class FirestoreBookingRepository extends FirestoreCrudRepository<RoomBooking>
 class LocalBookingRepository extends LocalCrudRepository<RoomBooking>
     with _BookingCodec
     implements BookingRepository {
+  LocalBookingRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/room_bookings.json';
   @override
