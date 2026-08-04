@@ -236,6 +236,26 @@ function section(title) {
   await check('staff can write a sermon', () =>
     assertSucceeds(setDoc(doc(staff, 'churches/church1/sermons', 's2'), { title: 'New', published: true })));
 
+  // ------------------------------------------------------ church signup
+  section('church signup');
+  // Creating a church means writing yourself in as its admin in the same
+  // breath. A rule permissive enough to allow that lets anyone mint
+  // admin rights, so there is no such rule - the createChurch function
+  // holds the only path, and bypasses these with the Admin SDK.
+  await check('a signed-in person cannot create a church directly', () =>
+    assertFails(setDoc(doc(member, 'churches', 'brand-new'), { churchName: 'Mine' })));
+  await check('an admin cannot create another church directly', () =>
+    assertFails(setDoc(doc(admin, 'churches', 'brand-new'), { churchName: 'Mine' })));
+  await check('an admin cannot delete their own church', () =>
+    assertFails(deleteDoc(doc(admin, 'churches', 'church1'))));
+  await check('an admin can still edit their own church', () =>
+    assertSucceeds(updateDoc(doc(admin, 'churches', 'church1'), { tagline: 'New tagline' })));
+  // The signup cap. A cap you can read is a cap you can plan around.
+  await check('nobody can read the signup counter', () =>
+    assertFails(getDoc(doc(member, 'signups', 'member1'))));
+  await check('nobody can raise their own signup counter', () =>
+    assertFails(setDoc(doc(member, 'signups', 'member1'), { churches: 0 })));
+
   // --------------------------------------------------------- live status
   section('live status');
   await check('a visitor sees that the church is live', () =>

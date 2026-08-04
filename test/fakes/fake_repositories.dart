@@ -798,6 +798,15 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> signOut() async => _emit(null);
   @override
   Future<void> signInAsDemo(UserRole role) async => _emit(testMember(role: role));
+
+  /// Mirrors what the server does on a real backend, and what
+  /// [LocalAuthRepository] does with none: whoever sets up a church is
+  /// its admin.
+  @override
+  Future<void> becomeFounder(String churchId) async {
+    final me = _current;
+    if (me != null) _emit(me.copyWith(role: UserRole.admin));
+  }
 }
 
 AppUser testMember({

@@ -48,6 +48,7 @@ import '../features/church_info/presentation/about_screen.dart';
 import '../features/church_info/presentation/visit_screen.dart';
 import '../features/churches/presentation/church_picker_screen.dart';
 import '../features/churches/presentation/church_scope.dart';
+import '../features/churches/presentation/create_church_screen.dart';
 import '../features/connect/presentation/connect_screen.dart';
 import '../features/devotionals/presentation/devotional_detail_screen.dart';
 import '../features/devotionals/presentation/devotionals_screen.dart';
@@ -190,6 +191,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       // The product's own pages. Everything else in the app belongs to
       // a church; these three are what you see before you have one.
       GoRoute(path: '/', builder: (_, _) => const LandingScreen()),
+      GoRoute(path: '/start', builder: (_, _) => const CreateChurchScreen()),
       GoRoute(
         path: '/choose-church',
         builder: (_, state) =>

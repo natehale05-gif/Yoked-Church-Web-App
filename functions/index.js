@@ -7,10 +7,20 @@
  * channel id is skipped entirely and costs nothing.
  */
 const { onSchedule } = require('firebase-functions/v2/scheduler');
+const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { defineSecret } = require('firebase-functions/params');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const logger = require('firebase-functions/logger');
+
+const {
+  MAX_PER_ACCOUNT,
+  slugify,
+  slugProblem,
+  availableSlug,
+  newChurchDocument,
+  ownerMembership,
+} = require('./church');
 
 const {
   videoIdsFromFeed,
@@ -117,3 +127,72 @@ exports.pollLiveStreams = onSchedule(
     }
   },
 );
+
+/**
+ * Creates a church and makes the caller its admin.
+ *
+ * The only path there is. The Firestore rules keep
+ * `allow create: if false` on `churches/{churchId}`, because creating a
+ * church means writing yourself in as its admin in the same breath - and
+ * a rule permissive enough to allow that is a rule that lets anyone mint
+ * admin rights over a church they have just invented next to yours.
+ *
+ * Doing it here instead buys three things a rule could not: the id is
+ * allocated inside a transaction so two people naming their church the
+ * same thing at the same moment cannot both win it, one account cannot
+ * create churches without limit, and the church document and the
+ * membership either both exist or neither does.
+ */
+exports.createChurch = onCall(async (request) => {
+  const uid = request.auth && request.auth.uid;
+  if (!uid) {
+    throw new HttpsError('unauthenticated', 'Sign in first, so we know who runs this church.');
+  }
+
+  const name = String((request.data && request.data.name) || '').trim();
+  if (!name) throw new HttpsError('invalid-argument', 'What is your church called?');
+
+  // Re-derived rather than trusted: the client sends a slug so the
+  // person could see it while typing, not so it can choose its own id.
+  const desired = slugify(request.data.slug || name);
+  const problem = slugProblem(desired);
+  if (problem) throw new HttpsError('invalid-argument', problem);
+
+  const db = getFirestore();
+  const churches = db.collection('churches');
+  const counter = db.doc(`signups/${uid}`);
+
+  const churchId = await db.runTransaction(async (tx) => {
+    const counterSnap = await tx.get(counter);
+    const created = counterSnap.exists ? (counterSnap.data().churches || 0) : 0;
+    if (created >= MAX_PER_ACCOUNT) {
+      throw new HttpsError(
+        'resource-exhausted',
+        `One account can set up ${MAX_PER_ACCOUNT} churches. Get in touch if you need more.`,
+      );
+    }
+
+    // Only the handful of ids this name could produce need checking,
+    // rather than the whole directory - which is what keeps signup a
+    // constant-cost operation however many churches exist.
+    const candidates = [desired];
+    for (let n = 2; n <= MAX_PER_ACCOUNT + 8; n++) candidates.push(`${desired}-${n}`);
+    const existing = await Promise.all(candidates.map((id) => tx.get(churches.doc(id))));
+    const taken = new Set(candidates.filter((_, i) => existing[i].exists));
+
+    const id = availableSlug(desired, taken);
+    const now = new Date();
+
+    tx.set(churches.doc(id), newChurchDocument(name, uid, now));
+    tx.set(
+      churches.doc(id).collection('users').doc(uid),
+      ownerMembership(uid, request.auth.token.email, request.auth.token.name, now),
+    );
+    tx.set(counter, { churches: created + 1, updatedAt: now.toISOString() }, { merge: true });
+
+    return id;
+  });
+
+  logger.info('church created', { churchId, uid });
+  return { churchId };
+});

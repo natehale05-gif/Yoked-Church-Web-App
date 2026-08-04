@@ -37,6 +37,20 @@ abstract interface class AuthRepository {
 
   /// Demo-only: preview the app as a given role. Throws elsewhere.
   Future<void> signInAsDemo(UserRole role);
+
+  /// Makes the signed-in account the admin of a church it has just
+  /// created.
+  ///
+  /// On a real backend this has already happened: `createChurch` writes
+  /// the church document and the founder's membership in one
+  /// transaction, precisely so a client cannot mint admin rights for
+  /// itself. There the implementation is a no-op.
+  ///
+  /// With no backend there is no transaction and no server, so the
+  /// zero-backend mode does it here - otherwise someone who sets up a
+  /// church in the demo lands outside the dashboard they were just sent
+  /// to, a member of a church they founded.
+  Future<void> becomeFounder(String churchId);
 }
 
 class FirebaseAuthRepository implements AuthRepository {
@@ -148,6 +162,12 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<void> signInAsDemo(UserRole role) async {
     throw const AuthFailure('Demo sign-in is not available on a live backend.');
   }
+
+  /// Nothing to do: `createChurch` already wrote the membership, and
+  /// switching to the new church rebuilds this repository against it, so
+  /// the role arrives on the next emission of [authStateChanges].
+  @override
+  Future<void> becomeFounder(String churchId) async {}
 }
 
 /// In-memory auth for the zero-backend mode.
@@ -235,4 +255,13 @@ class LocalAuthRepository implements AuthRepository {
 
   @override
   Future<void> signInAsDemo(UserRole role) => _enrolAndEmit(_demoUser(role));
+
+  /// Keeps their name and email - they typed them a moment ago - and
+  /// changes only what founding a church changes.
+  @override
+  Future<void> becomeFounder(String churchId) async {
+    final me = _current;
+    if (me == null) return;
+    await _enrolAndEmit(me.copyWith(role: UserRole.admin));
+  }
 }
