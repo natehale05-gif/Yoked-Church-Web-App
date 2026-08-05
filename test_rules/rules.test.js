@@ -93,6 +93,11 @@ function section(title) {
       setDoc(doc(db, 'churches/church1/devotionals', 'd1'), { title: 'A devotional', published: true }),
       setDoc(doc(db, 'churches/church1/readingPlans', 'p1'), { title: 'A plan', published: true }),
 
+      // Written in real life by the scheduled poller via the Admin SDK,
+      // which bypasses rules; seeded here so the read cases have a
+      // document to read.
+      setDoc(doc(db, 'churches/church1/live', 'current'), { live: true, videoId: 'abc123' }),
+
       setDoc(doc(db, 'churches/church1/resources', 'public1'), { title: 'Bulletin', membersOnly: false }),
       setDoc(doc(db, 'churches/church1/resources', 'internal1'), { title: 'Directory', membersOnly: true }),
 
@@ -230,6 +235,44 @@ function section(title) {
     assertFails(setDoc(doc(member, 'churches/church1/sermons', 'x'), { title: 'Mine' })));
   await check('staff can write a sermon', () =>
     assertSucceeds(setDoc(doc(staff, 'churches/church1/sermons', 's2'), { title: 'New', published: true })));
+
+  // ------------------------------------------------------ church signup
+  section('church signup');
+  // Creating a church means writing yourself in as its admin in the same
+  // breath. A rule permissive enough to allow that lets anyone mint
+  // admin rights, so there is no such rule - the createChurch function
+  // holds the only path, and bypasses these with the Admin SDK.
+  await check('a signed-in person cannot create a church directly', () =>
+    assertFails(setDoc(doc(member, 'churches', 'brand-new'), { churchName: 'Mine' })));
+  await check('an admin cannot create another church directly', () =>
+    assertFails(setDoc(doc(admin, 'churches', 'brand-new'), { churchName: 'Mine' })));
+  await check('an admin cannot delete their own church', () =>
+    assertFails(deleteDoc(doc(admin, 'churches', 'church1'))));
+  await check('an admin can still edit their own church', () =>
+    assertSucceeds(updateDoc(doc(admin, 'churches', 'church1'), { tagline: 'New tagline' })));
+  // The signup cap. A cap you can read is a cap you can plan around.
+  await check('nobody can read the signup counter', () =>
+    assertFails(getDoc(doc(member, 'signups', 'member1'))));
+  await check('nobody can raise their own signup counter', () =>
+    assertFails(setDoc(doc(member, 'signups', 'member1'), { churches: 0 })));
+
+  // --------------------------------------------------------- live status
+  section('live status');
+  await check('a visitor sees that the church is live', () =>
+    assertSucceeds(read(visitor, 'live', 'current')));
+  // Nobody may claim a service is happening. This is the one collection
+  // an admin is locked out of, because "are they streaming" is a fact
+  // about YouTube rather than a decision the church gets to make.
+  await check('a visitor cannot announce a stream', () =>
+    assertFails(setDoc(doc(visitor, 'churches/church1/live', 'current'), { live: true })));
+  await check('a member cannot announce a stream', () =>
+    assertFails(setDoc(doc(member, 'churches/church1/live', 'current'), { live: true })));
+  await check('staff cannot announce a stream', () =>
+    assertFails(setDoc(doc(staff, 'churches/church1/live', 'current'), { live: true })));
+  await check('an admin cannot announce a stream either', () =>
+    assertFails(setDoc(doc(admin, 'churches/church1/live', 'current'), { live: true })));
+  await check('an admin cannot take one down', () =>
+    assertFails(deleteDoc(doc(admin, 'churches/church1/live', 'current'))));
 
   // ----------------------------------------------------------- resources
   section('resources');

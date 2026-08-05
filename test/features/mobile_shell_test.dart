@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yoked_church_app/app/app.dart';
+import 'package:yoked_church_app/core/config/tenant.dart';
 import 'package:yoked_church_app/app/router.dart';
 import 'package:yoked_church_app/core/config/church_settings.dart';
 import 'package:yoked_church_app/core/widgets/app_shell.dart';
+import 'package:yoked_church_app/features/admin/presentation/admin_header.dart';
+import 'package:yoked_church_app/features/auth/domain/app_user.dart';
 
 import '../fakes/fake_repositories.dart';
 
@@ -16,12 +19,13 @@ void main() {
     WidgetTester tester,
     Size size, {
     ChurchSettings? settings,
+    AppUser? signedInAs,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    final container = ProviderContainer(overrides: fakeOverrides(settings: settings));
+    final container = ProviderContainer(overrides: fakeOverrides(settings: settings, signedInAs: signedInAs));
     addTearDown(container.dispose);
 
     await tester.pumpWidget(
@@ -77,6 +81,63 @@ void main() {
 
       final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
       expect(bar.selectedIndex, bottomNav(testSettings()).length - 1);
+    });
+  });
+
+  group('the staff dashboard on a phone', () {
+    /// Nineteen tabs in a horizontal scroller showed four and gave no
+    /// sign the rest existed, so the dashboard looked like it had four
+    /// sections. On a phone they live behind one control instead.
+    Future<ProviderContainer> pumpAdmin(WidgetTester tester, Size size) async {
+      final container = await pumpAt(tester, size, signedInAs: testMember(role: UserRole.admin));
+      container.read(routerProvider).go('/admin');
+      await tester.pumpAndSettle();
+      return container;
+    }
+
+    /// Scoped to the header, because the overview page lists the same
+    /// sections again as a grid of shortcuts.
+    Finder inHeader(String label) =>
+        find.descendant(of: find.byType(AdminHeader), matching: find.text(label));
+
+    testWidgets('every section is reachable from one control', (tester) async {
+      final container = await pumpAdmin(tester, phone);
+
+      // The strip is gone; one button stands in for all of them.
+      expect(inHeader('Audit Log'), findsNothing, reason: 'the far tab should not be in the header');
+
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Overview'));
+      await tester.pumpAndSettle();
+
+      final inSheet = find.widgetWithText(ListTile, 'Audit Log');
+      expect(inSheet, findsOneWidget, reason: 'the sheet lists every section');
+
+      // Nineteen sections do not fit on one phone screen; the sheet
+      // scrolls, which is the point - the strip it replaced gave no sign
+      // there was anything to scroll to.
+      await tester.ensureVisible(inSheet);
+      await tester.pumpAndSettle();
+      await tester.tap(inSheet);
+      await tester.pumpAndSettle();
+
+      expect(
+        subPathOf(container.read(routerProvider).routerDelegate.currentConfiguration.uri.path),
+        '/admin/audit',
+      );
+    });
+
+    testWidgets('the control says which section you are in', (tester) async {
+      final container = await pumpAdmin(tester, phone);
+
+      container.read(routerProvider).go('/admin/settings');
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(OutlinedButton, 'Settings'), findsOneWidget);
+    });
+
+    testWidgets('a desktop still gets the full strip', (tester) async {
+      await pumpAdmin(tester, desktop);
+      expect(inHeader('Audit Log'), findsOneWidget);
     });
   });
 

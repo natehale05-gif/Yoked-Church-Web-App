@@ -7,6 +7,9 @@ import 'package:yoked_church_app/core/config/tenant.dart';
 import 'package:yoked_church_app/features/churches/application/church_providers.dart';
 import 'package:yoked_church_app/features/churches/data/church_directory_repository.dart';
 import 'package:yoked_church_app/core/config/settings_providers.dart';
+import 'package:yoked_church_app/features/live/application/live_providers.dart';
+import 'package:yoked_church_app/features/live/data/live_repository.dart';
+import 'package:yoked_church_app/features/live/domain/live_status.dart';
 import 'package:yoked_church_app/core/config/settings_repository.dart';
 import 'package:yoked_church_app/core/firestore/crud_repository.dart';
 import 'package:yoked_church_app/features/announcements/application/announcement_providers.dart';
@@ -98,6 +101,8 @@ class FakeSettingsRepository implements SettingsRepository {
 }
 
 class FakeSermonRepository extends LocalCrudRepository<Sermon> implements SermonRepository {
+  FakeSermonRepository([super.churchId]);
+
   @override
   Sermon fromMap(String id, Map<String, dynamic> map) => Sermon.fromMap(id, map);
   @override
@@ -109,6 +114,8 @@ class FakeSermonRepository extends LocalCrudRepository<Sermon> implements Sermon
 }
 
 class FakeSermonSeriesRepository extends LocalCrudRepository<SermonSeries> implements SermonSeriesRepository {
+  FakeSermonSeriesRepository([super.churchId]);
+
   @override
   SermonSeries fromMap(String id, Map<String, dynamic> map) => SermonSeries.fromMap(id, map);
   @override
@@ -118,6 +125,8 @@ class FakeSermonSeriesRepository extends LocalCrudRepository<SermonSeries> imple
 }
 
 class FakeEventRepository extends LocalCrudRepository<ChurchEvent> implements EventRepository {
+  FakeEventRepository([super.churchId]);
+
   @override
   ChurchEvent fromMap(String id, Map<String, dynamic> map) => ChurchEvent.fromMap(id, map);
   @override
@@ -129,6 +138,8 @@ class FakeEventRepository extends LocalCrudRepository<ChurchEvent> implements Ev
 }
 
 class FakeConnectRepository extends LocalCrudRepository<ConnectSubmission> implements ConnectRepository {
+  FakeConnectRepository([super.churchId]);
+
   @override
   ConnectSubmission fromMap(String id, Map<String, dynamic> map) => ConnectSubmission.fromMap(id, map);
   @override
@@ -138,6 +149,8 @@ class FakeConnectRepository extends LocalCrudRepository<ConnectSubmission> imple
 }
 
 class FakeStaffRepository extends LocalCrudRepository<StaffMember> implements StaffRepository {
+  FakeStaffRepository([super.churchId]);
+
   @override
   StaffMember fromMap(String id, Map<String, dynamic> map) => StaffMember.fromMap(id, map);
   @override
@@ -147,6 +160,8 @@ class FakeStaffRepository extends LocalCrudRepository<StaffMember> implements St
 }
 
 class FakeLocationRepository extends LocalCrudRepository<ChurchLocation> implements LocationRepository {
+  FakeLocationRepository([super.churchId]);
+
   @override
   ChurchLocation fromMap(String id, Map<String, dynamic> map) => ChurchLocation.fromMap(id, map);
   @override
@@ -156,6 +171,8 @@ class FakeLocationRepository extends LocalCrudRepository<ChurchLocation> impleme
 }
 
 class FakeFaqRepository extends LocalCrudRepository<Faq> implements FaqRepository {
+  FakeFaqRepository([super.churchId]);
+
   @override
   Faq fromMap(String id, Map<String, dynamic> map) => Faq.fromMap(id, map);
   @override
@@ -171,32 +188,45 @@ ChurchSettings testSettings({
   // deliberately clears it - otherwise the feature-flag test would pass
   // for the wrong reason, the route being shut either way.
   String releasesRepo = 'test-church/test-app',
+  SocialLinks? social,
+  // Enough of the document to describe a church at any point in its
+  // setup, from the minute it was created to fully filled in - which is
+  // what the setup checklist is a function of.
+  String aboutBody = 'About body copy.',
+  BrandColors? colors,
+  ContactInfo? contact,
+  List<ServiceTime>? serviceTimes,
 }) =>
     ChurchSettings(
       churchName: churchName,
       releasesRepo: releasesRepo,
       tagline: 'A tagline',
       aboutHeadline: 'Welcome Home',
-      aboutBody: 'About body copy.',
-      colors: BrandColors.fallback,
-      contact: const ContactInfo(
-        address: '1 Test St',
-        phone: '(555) 000-0000',
-        email: 'test@example.org',
-        mapUrl: '',
-      ),
-      social: const SocialLinks(
-        facebook: '',
-        instagram: '',
-        youtube: '',
-        givingUrl: 'https://example.org/give',
-        liveStreamUrl: '',
-      ),
-      serviceTimes: const [ServiceTime(day: 'Sunday', time: '9:00 AM', label: 'Morning')],
+      aboutBody: aboutBody,
+      colors: colors ?? BrandColors.fallback,
+      contact: contact ??
+          const ContactInfo(
+            address: '1 Test St',
+            phone: '(555) 000-0000',
+            email: 'test@example.org',
+            mapUrl: '',
+          ),
+      social: social ??
+          const SocialLinks(
+            facebook: '',
+            instagram: '',
+            youtube: '',
+            givingUrl: 'https://example.org/give',
+            liveStreamUrl: '',
+          ),
+      serviceTimes: serviceTimes ??
+          const [ServiceTime(day: 'Sunday', time: '9:00 AM', label: 'Morning')],
       features: features ?? const FeatureFlags(),
     );
 
 class FakeGroupRepository extends LocalCrudRepository<ChurchGroup> implements GroupRepository {
+  FakeGroupRepository([super.churchId]);
+
   @override
   ChurchGroup fromMap(String id, Map<String, dynamic> map) => ChurchGroup.fromMap(id, map);
   @override
@@ -206,6 +236,8 @@ class FakeGroupRepository extends LocalCrudRepository<ChurchGroup> implements Gr
 }
 
 class FakeMembershipRepository extends LocalCrudRepository<GroupMembership> implements MembershipRepository {
+  FakeMembershipRepository([super.churchId]);
+
   @override
   GroupMembership fromMap(String id, Map<String, dynamic> map) => GroupMembership.fromMap(id, map);
   @override
@@ -219,6 +251,8 @@ class FakeMembershipRepository extends LocalCrudRepository<GroupMembership> impl
 }
 
 class FakeRsvpRepository extends LocalCrudRepository<EventRsvp> implements RsvpRepository {
+  FakeRsvpRepository([super.churchId]);
+
   @override
   EventRsvp fromMap(String id, Map<String, dynamic> map) => EventRsvp.fromMap(id, map);
   @override
@@ -244,6 +278,8 @@ class FakeRsvpRepository extends LocalCrudRepository<EventRsvp> implements RsvpR
 
 class FakeVolunteerPositionRepository extends LocalCrudRepository<VolunteerPosition>
     implements VolunteerPositionRepository {
+  FakeVolunteerPositionRepository([super.churchId]);
+
   @override
   VolunteerPosition fromMap(String id, Map<String, dynamic> map) => VolunteerPosition.fromMap(id, map);
   @override
@@ -254,6 +290,8 @@ class FakeVolunteerPositionRepository extends LocalCrudRepository<VolunteerPosit
 
 class FakeVolunteerAssignmentRepository extends LocalCrudRepository<VolunteerAssignment>
     implements VolunteerAssignmentRepository {
+  FakeVolunteerAssignmentRepository([super.churchId]);
+
   @override
   VolunteerAssignment fromMap(String id, Map<String, dynamic> map) => VolunteerAssignment.fromMap(id, map);
   @override
@@ -271,6 +309,8 @@ class FakeVolunteerAssignmentRepository extends LocalCrudRepository<VolunteerAss
 
 class FakeNotificationRepository extends LocalCrudRepository<AppNotification>
     implements NotificationRepository {
+  FakeNotificationRepository([super.churchId]);
+
   @override
   AppNotification fromMap(String id, Map<String, dynamic> map) => AppNotification.fromMap(id, map);
   @override
@@ -289,6 +329,8 @@ class FakeNotificationRepository extends LocalCrudRepository<AppNotification>
 }
 
 class FakeGivingRepository extends LocalCrudRepository<GivingRecord> implements GivingRepository {
+  FakeGivingRepository([super.churchId]);
+
   @override
   GivingRecord fromMap(String id, Map<String, dynamic> map) => GivingRecord.fromMap(id, map);
   @override
@@ -300,6 +342,8 @@ class FakeGivingRepository extends LocalCrudRepository<GivingRecord> implements 
 }
 
 class FakeUserRepository extends LocalCrudRepository<AppUser> implements UserRepository {
+  FakeUserRepository([super.churchId]);
+
   @override
   AppUser fromMap(String id, Map<String, dynamic> map) => AppUser.fromMap(id, map);
   @override
@@ -317,6 +361,8 @@ class FakeUserRepository extends LocalCrudRepository<AppUser> implements UserRep
 
 class FakeAnnouncementRepository extends LocalCrudRepository<Announcement>
     implements AnnouncementRepository {
+  FakeAnnouncementRepository([super.churchId]);
+
   @override
   Announcement fromMap(String id, Map<String, dynamic> map) => Announcement.fromMap(id, map);
   @override
@@ -328,6 +374,8 @@ class FakeAnnouncementRepository extends LocalCrudRepository<Announcement>
 }
 
 class FakeDevotionalRepository extends LocalCrudRepository<Devotional> implements DevotionalRepository {
+  FakeDevotionalRepository([super.churchId]);
+
   @override
   Devotional fromMap(String id, Map<String, dynamic> map) => Devotional.fromMap(id, map);
   @override
@@ -339,6 +387,8 @@ class FakeDevotionalRepository extends LocalCrudRepository<Devotional> implement
 }
 
 class FakeReadingPlanRepository extends LocalCrudRepository<ReadingPlan> implements ReadingPlanRepository {
+  FakeReadingPlanRepository([super.churchId]);
+
   @override
   ReadingPlan fromMap(String id, Map<String, dynamic> map) => ReadingPlan.fromMap(id, map);
   @override
@@ -351,6 +401,8 @@ class FakeReadingPlanRepository extends LocalCrudRepository<ReadingPlan> impleme
 
 class FakePlanProgressRepository extends LocalCrudRepository<PlanProgress>
     implements PlanProgressRepository {
+  FakePlanProgressRepository([super.churchId]);
+
   @override
   PlanProgress fromMap(String id, Map<String, dynamic> map) => PlanProgress.fromMap(id, map);
   @override
@@ -371,6 +423,8 @@ class FakePlanProgressRepository extends LocalCrudRepository<PlanProgress>
 }
 
 class FakeSermonNoteRepository extends LocalCrudRepository<SermonNote> implements SermonNoteRepository {
+  FakeSermonNoteRepository([super.churchId]);
+
   @override
   SermonNote fromMap(String id, Map<String, dynamic> map) => SermonNote.fromMap(id, map);
   @override
@@ -394,6 +448,8 @@ class FakeSermonNoteRepository extends LocalCrudRepository<SermonNote> implement
 }
 
 class FakeResourceRepository extends LocalCrudRepository<Resource> implements ResourceRepository {
+  FakeResourceRepository([super.churchId]);
+
   @override
   Resource fromMap(String id, Map<String, dynamic> map) => Resource.fromMap(id, map);
   @override
@@ -434,6 +490,8 @@ class FakeFileStorage implements FileStorage {
 }
 
 class FakePrayerPostRepository extends LocalCrudRepository<PrayerPost> implements PrayerPostRepository {
+  FakePrayerPostRepository([super.churchId]);
+
   @override
   PrayerPost fromMap(String id, Map<String, dynamic> map) => PrayerPost.fromMap(id, map);
   @override
@@ -446,6 +504,8 @@ class FakePrayerPostRepository extends LocalCrudRepository<PrayerPost> implement
 
 class FakeIntercessionRepository extends LocalCrudRepository<PrayerIntercession>
     implements IntercessionRepository {
+  FakeIntercessionRepository([super.churchId]);
+
   @override
   PrayerIntercession fromMap(String id, Map<String, dynamic> map) => PrayerIntercession.fromMap(id, map);
   @override
@@ -469,6 +529,8 @@ class FakeIntercessionRepository extends LocalCrudRepository<PrayerIntercession>
 }
 
 class FakeRoomRepository extends LocalCrudRepository<Room> implements RoomRepository {
+  FakeRoomRepository([super.churchId]);
+
   @override
   Room fromMap(String id, Map<String, dynamic> map) => Room.fromMap(id, map);
   @override
@@ -480,6 +542,8 @@ class FakeRoomRepository extends LocalCrudRepository<Room> implements RoomReposi
 }
 
 class FakeBookingRepository extends LocalCrudRepository<RoomBooking> implements BookingRepository {
+  FakeBookingRepository([super.churchId]);
+
   @override
   RoomBooking fromMap(String id, Map<String, dynamic> map) => RoomBooking.fromMap(id, map);
   @override
@@ -495,6 +559,8 @@ class FakeBookingRepository extends LocalCrudRepository<RoomBooking> implements 
 }
 
 class FakeCheckInRepository extends LocalCrudRepository<CheckInSession> implements CheckInRepository {
+  FakeCheckInRepository([super.churchId]);
+
   @override
   CheckInSession fromMap(String id, Map<String, dynamic> map) => CheckInSession.fromMap(id, map);
   @override
@@ -512,6 +578,8 @@ class FakeCheckInRepository extends LocalCrudRepository<CheckInSession> implemen
 
 class FakeAttendanceRepository extends LocalCrudRepository<AttendanceRecord>
     implements AttendanceRepository {
+  FakeAttendanceRepository([super.churchId]);
+
   @override
   AttendanceRecord fromMap(String id, Map<String, dynamic> map) => AttendanceRecord.fromMap(id, map);
   @override
@@ -538,6 +606,8 @@ class FakeAttendanceRepository extends LocalCrudRepository<AttendanceRecord>
 }
 
 class FakeFormRepository extends LocalCrudRepository<FormDefinition> implements FormRepository {
+  FakeFormRepository([super.churchId]);
+
   @override
   FormDefinition fromMap(String id, Map<String, dynamic> map) => FormDefinition.fromMap(id, map);
   @override
@@ -555,6 +625,8 @@ class FakeFormRepository extends LocalCrudRepository<FormDefinition> implements 
 
 class FakeSubmissionRepository extends LocalCrudRepository<FormSubmission>
     implements SubmissionRepository {
+  FakeSubmissionRepository([super.churchId]);
+
   @override
   FormSubmission fromMap(String id, Map<String, dynamic> map) => FormSubmission.fromMap(id, map);
   @override
@@ -569,6 +641,8 @@ class FakeSubmissionRepository extends LocalCrudRepository<FormSubmission>
 }
 
 class FakeAuditRepository extends LocalCrudRepository<AuditEntry> implements AuditRepository {
+  FakeAuditRepository([super.churchId]);
+
   @override
   AuditEntry fromMap(String id, Map<String, dynamic> map) => AuditEntry.fromMap(id, map);
   @override
@@ -616,6 +690,10 @@ List<Override> fakeOverrides({
   FakeConnectRepository? connect,
   FakeRsvpRepository? rsvps,
   FakeVolunteerAssignmentRepository? assignmentRepo,
+  /// Whether the church is streaming right now. Off by default: a
+  /// permanent "Live now" is the exact lie the banner exists to stop.
+  LiveStatus live = const LiveStatus(),
+
   /// Which church the app is acting as.
   ///
   /// Defaulted rather than required: almost every test is about one
@@ -636,6 +714,7 @@ List<Override> fakeOverrides({
     churchDirectoryProvider.overrideWithValue(LocalChurchDirectoryRepository()),
     settingsRepositoryProvider.overrideWithValue(FakeSettingsRepository(settings)),
     authRepositoryProvider.overrideWithValue(FakeAuthRepository(signedInAs)),
+    liveRepositoryProvider.overrideWithValue(FakeLiveRepository(live)),
     userRepositoryProvider.overrideWithValue(FakeUserRepository()..seedInMemory(members)),
     sermonRepositoryProvider.overrideWithValue(FakeSermonRepository()..seedInMemory(sermons)),
     sermonSeriesRepositoryProvider.overrideWithValue(FakeSermonSeriesRepository()..seedInMemory(series)),
@@ -734,6 +813,17 @@ Devotional testDevotional({
       published: published,
     );
 
+/// Live status the test controls, so the "Live now" banner can be proved
+/// without a YouTube channel or a scheduled function.
+class FakeLiveRepository implements LiveRepository {
+  final LiveStatus status;
+
+  const FakeLiveRepository([this.status = const LiveStatus()]);
+
+  @override
+  Stream<LiveStatus> watch() => Stream.value(status);
+}
+
 /// Auth fake that can start signed-in and supports sign-out/sign-in.
 class FakeAuthRepository implements AuthRepository {
   final _controller = StreamController<AppUser?>.broadcast();
@@ -777,6 +867,15 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> signOut() async => _emit(null);
   @override
   Future<void> signInAsDemo(UserRole role) async => _emit(testMember(role: role));
+
+  /// Mirrors what the server does on a real backend, and what
+  /// [LocalAuthRepository] does with none: whoever sets up a church is
+  /// its admin.
+  @override
+  Future<void> becomeFounder(String churchId) async {
+    final me = _current;
+    if (me != null) _emit(me.copyWith(role: UserRole.admin));
+  }
 }
 
 AppUser testMember({

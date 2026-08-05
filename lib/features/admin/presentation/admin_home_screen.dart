@@ -13,7 +13,108 @@ import '../../rooms/application/room_providers.dart';
 import '../../groups/domain/group.dart';
 import '../../volunteering/application/volunteering_providers.dart';
 import '../../volunteering/domain/volunteering.dart';
+import '../application/setup_checklist.dart';
 import 'admin_header.dart';
+
+/// What is still missing, and where to go and add it.
+///
+/// A church that has just signed up lands here on an empty dashboard.
+/// Without this it is a grid of twenty tools and no indication which one
+/// matters first - which is the moment most self-serve products lose
+/// people.
+///
+/// Disappears entirely once everything is done, rather than sitting
+/// there as a permanent "8 of 8". A checklist you cannot finish is
+/// furniture.
+class _SetupChecklist extends ConsumerWidget {
+  const _SetupChecklist();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final steps = ref.watch(setupChecklistProvider);
+    final remaining = steps.where((s) => !s.done).toList();
+    if (remaining.isEmpty) return const SizedBox.shrink();
+
+    final progress = ref.watch(setupProgressProvider);
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 36),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text('Finish setting up', style: theme.textTheme.titleLarge),
+                  ),
+                  Text(
+                    '${progress.done} of ${progress.total}',
+                    style: const TextStyle(color: Colors.black54, fontSize: 13),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress.total == 0 ? 0 : progress.done / progress.total,
+                  minHeight: 6,
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Only what is left. The done ones are not an achievement
+              // to display, they are just no longer the question.
+              for (final step in remaining) _SetupRow(step: step),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SetupRow extends StatelessWidget {
+  final SetupStep step;
+
+  const _SetupRow({required this.step});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => context.go(step.path),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.radio_button_unchecked, size: 18, color: Colors.black38),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(step.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 2),
+                  Text(
+                    step.why,
+                    style: const TextStyle(color: Colors.black54, fontSize: 12.5, height: 1.3),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right, size: 18, color: Colors.black38),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class AdminHomeScreen extends ConsumerWidget {
   const AdminHomeScreen({super.key});
@@ -35,6 +136,7 @@ class AdminHomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const _SetupChecklist(),
               Text('Needs attention', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 16),
               const _NeedsAttention(),

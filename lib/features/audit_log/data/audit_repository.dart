@@ -26,6 +26,8 @@ class FirestoreAuditRepository extends FirestoreCrudRepository<AuditEntry>
 }
 
 class LocalAuditRepository extends LocalCrudRepository<AuditEntry> with _AuditCodec implements AuditRepository {
+  LocalAuditRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/audit_log.json';
 

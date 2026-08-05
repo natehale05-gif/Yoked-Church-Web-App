@@ -42,6 +42,8 @@ class FirestoreAttendanceRepository extends FirestoreCrudRepository<AttendanceRe
 class LocalAttendanceRepository extends LocalCrudRepository<AttendanceRecord>
     with _AttendanceCodec
     implements AttendanceRepository {
+  LocalAttendanceRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/attendance.json';
   @override

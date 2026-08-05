@@ -21,17 +21,52 @@ flutter pub get
 flutter run -d chrome
 ```
 
-That's the zero-backend mode. Sign in from the demo panel as a member,
-staff, or admin and click through everything.
+That's the zero-backend mode. Press **Start your church site**, name a
+church, and you are its admin thirty seconds later — the whole signup
+works with no backend at all. Or open one of the sample churches and
+sign in from the demo panel as a member, staff, or admin.
+
+## Every church has an address
+
+`/#/c/grace-chapel` is a church's site. Send that link to anyone and it
+opens *their* church — its name, its colours, its sermons — whichever
+church the recipient looked at last. Signing up mints the address from
+the church's name and shows it while you type, because it is permanent:
+it goes on the noticeboard and in the newsletter, and renaming it would
+break every link already shared.
+
+The product's own pages are the three that are not a church: `/` (what
+this is), `/start` (make one), `/choose-church` (find one).
+
+## Setting up a church
+
+Nobody has to do anything in a console. **Start your church site** asks
+for four things — the church's name, and someone to run it — and lands
+you in your own dashboard, as its admin, with a checklist of what is
+still missing: service times, where you meet, a welcome, colours, a
+first sermon. Each row goes to the screen that fixes it, and the list
+disappears when there is nothing left.
+
+Creating a church is the one write the security rules refuse outright.
+`churches/{churchId}` keeps `allow create: if false`, because creating a
+church means writing yourself in as its admin in the same breath, and a
+rule permissive enough to allow that lets anyone mint admin rights over
+a church they have just invented. The `createChurch` Cloud Function
+holds the only path — which also lets it allocate the address inside a
+transaction, so two people naming their church the same thing at the
+same moment cannot both win it.
 
 ## Customizing for a church
 
 **Almost nothing lives in code.** A church's name, tagline, brand colors,
 logo, About copy, service times, contact details, social and giving
 links, and every feature switch are edited in the app itself at
-`/admin/settings`, saved to that church's document (`churches/{churchId}`),
-and applied immediately — including the `ThemeData` the whole app is
-built from.
+`/admin/settings` — including a gallery of ready-made looks, for the
+many churches that have a logo but no brand guide and were otherwise
+left staring at `#RRGGBB`. Picking one fills in the same three hex
+fields, so there is no second place branding is stored. All of it saves
+to that church's document (`churches/{churchId}`) and applies
+immediately — including the `ThemeData` the whole app is built from.
 
 That one document does double duty: it is the church's settings *and*
 its entry in the public directory the picker lists, so choosing a church
@@ -105,14 +140,72 @@ If Firebase is configured but fails to initialize, the app falls back to
 bundled content rather than showing a broken site. A backend outage
 should still leave service times and directions on screen.
 
-### Bootstrapping the first admin
+### The first admin
 
-New accounts default to `member`, and there is nobody to promote you yet.
-Sign up normally, then set that account's `role` to `admin` on its
-`churches/{churchId}/users/{uid}` document in the Firebase console.
-Roles are per church: promoting yourself at one church says nothing
-about any other. After that, admins
-promote and demote everyone else from `/admin/members`.
+Nothing to do: whoever creates a church is its admin, written in by
+`createChurch` in the same transaction that creates the church. After
+that, admins promote and demote everyone else from `/admin/members`.
+
+Roles are per church — being an admin at one says nothing about any
+other — so someone joining an existing church starts as a `member`, and
+that church's admins decide the rest.
+
+Deploy the function before anyone signs up, or `/start` has nothing to
+call:
+
+```bash
+firebase deploy --only functions --project <your-project-id>
+```
+
+### Going live automatically from YouTube
+
+Paste a church's YouTube channel id into **Settings → Live streaming**
+and the home page raises a "Live now" banner by itself whenever that
+channel starts streaming, then files the finished stream as an
+**unpublished** sermon for staff to review. A church that leaves the
+field blank is never polled and costs nothing.
+
+This is the one part of the app that needs a server. Setting it up:
+
+1. **Move the Firebase project to the pay-as-you-go (Blaze) plan.** Cloud
+   Scheduler will not run on Spark. At this scale the bill is pennies,
+   but it is the first thing here that needs a card.
+2. In the [Google Cloud console](https://console.cloud.google.com/apis/library/youtube.googleapis.com),
+   enable the **YouTube Data API v3** on the same project, then create an
+   API key under *APIs & Services → Credentials*. Restrict it to that one
+   API.
+3. Give the key to Firebase — it lives server-side and must never reach
+   the client bundle, because anything shipped to a browser is public:
+   ```bash
+   firebase functions:secrets:set YOUTUBE_API_KEY --project <your-project-id>
+   firebase deploy --only functions --project <your-project-id>
+   ```
+4. Find the channel id in YouTube Studio under *Settings → Channel →
+   Advanced settings*. It starts with `UC` — a handle like `@yokedchurch`
+   or a channel URL will not work.
+
+`/admin/settings` shows when the poller last looked, which is how you
+tell a wrong channel id from a quiet week.
+
+**How it stays inside the quota.** The obvious call, `search.list` with
+`eventType=live`, costs 100 units against a 10,000/day default: polling
+one church every five minutes would be 28,800 units and the feature would
+die on its first day. Instead each poll reads the channel's RSS feed
+(free) and makes one `videos.list` call on the ids it returns (1 unit) —
+about 300 units a day for one church, so a few dozen churches share one
+key comfortably.
+
+**What it writes.** `churches/{churchId}/live/current` holds whether they
+are streaming, and is world-readable and writable by nobody: whether a
+church is live is a fact about YouTube, not a claim the church gets to
+make from a browser console. Finished streams become
+`churches/{churchId}/sermons/yt-<videoId>` with `source: youtubeAuto`
+and `published: false` — keyed by video id, so the next poll five minutes
+later creates nothing and never overwrites an edit a staff member has
+already made to the draft.
+
+The code is in [`functions/`](functions/); the decisions it makes are
+pure functions in `functions/youtube.js`, covered by `npm test` there.
 
 ### Firestore collections
 
@@ -125,7 +218,7 @@ Everything below lives **under a church**, as
 `devotionals`, `readingPlans`, `planProgress`, `sermonNotes`,
 `resources`, `prayerPosts`, `prayerIntercessions`, `rooms`,
 `roomBookings`, `checkIns`, `attendanceRecords`, `formDefinitions`,
-`formSubmissions`.
+`formSubmissions`, `live`.
 
 The only top-level collection is `churches` itself, which is
 world-readable — that is how the picker lists them and how the app
@@ -161,7 +254,8 @@ restricted document, link it from a service that enforces access.
 
 ## What's in it
 
-**Public** — home with live-stream banner, sermons with series and
+**Public** — home with a live banner that appears only when the
+church is actually streaming, sermons with series and
 search, events, giving, connect cards, about, staff, visit, FAQ,
 locations, devotionals, reading plans, resource library, and public form
 sign-ups.
@@ -198,6 +292,7 @@ lib/
 assets/
   data/         sample content, incl. church_settings.json
   fonts/        Lora + Work Sans, bundled so text never depends on a CDN
+functions/     the scheduled YouTube poller - the only server-side code
 firestore.rules, storage.rules, firestore.indexes.json, firebase.json
 test/           Flutter tests
 test_rules/     Firestore security-rule tests (Node, emulator)
@@ -218,7 +313,7 @@ flutter build web --release
 ### Security rules
 
 The rules are the only thing protecting giving history, kids' pickup
-codes, and form responses. They have their own suite — 104 assertions
+codes, and form responses. They have their own suite — 121 assertions
 across every collection, each with at least one *denied* case — run
 against the Firebase emulator:
 
@@ -228,6 +323,17 @@ cd test_rules && ./run.sh
 
 That starts the emulator, runs the suite, and shuts it down. Re-run it
 whenever `firestore.rules` changes.
+
+### The scheduled function
+
+```bash
+npm --prefix functions test
+```
+
+No install needed: what is worth testing there — what counts as live,
+what gets imported, what a second poll does — is pure functions over the
+shapes YouTube returns, so none of it needs the network or the Firebase
+SDKs.
 
 ### Running against the emulator
 

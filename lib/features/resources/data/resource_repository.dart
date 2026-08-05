@@ -28,6 +28,8 @@ class FirestoreResourceRepository extends FirestoreCrudRepository<Resource>
 class LocalResourceRepository extends LocalCrudRepository<Resource>
     with _ResourceCodec
     implements ResourceRepository {
+  LocalResourceRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/resources.json';
   @override

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/responsive.dart';
 import '../../../core/widgets/section_container.dart';
 import '../../attendance/application/attendance_providers.dart';
 import '../../attendance/presentation/group_attendance_panel.dart';
@@ -70,41 +71,36 @@ class _GroupTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final brand = ref.watch(settingsProvider).colors;
 
+    final details = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (group.category.isNotEmpty)
+          Text(
+            group.category.toUpperCase(),
+            style: TextStyle(color: brand.accent, fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+        const SizedBox(height: 4),
+        Text(group.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
+        if (group.whenAndWhere.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(group.whenAndWhere, style: const TextStyle(color: Colors.black54)),
+        ],
+        if (group.leaderName.isNotEmpty)
+          Text('Led by ${group.leaderName}', style: const TextStyle(color: Colors.black54, fontSize: 13)),
+        if (group.description.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(group.description),
+        ],
+      ],
+    );
+
+    final join = _JoinButton(group: group, membership: membership);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(20),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (group.category.isNotEmpty)
-                    Text(
-                      group.category.toUpperCase(),
-                      style: TextStyle(color: brand.accent, fontSize: 12, fontWeight: FontWeight.w700),
-                    ),
-                  const SizedBox(height: 4),
-                  Text(group.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
-                  if (group.whenAndWhere.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(group.whenAndWhere, style: const TextStyle(color: Colors.black54)),
-                  ],
-                  if (group.leaderName.isNotEmpty)
-                    Text('Led by ${group.leaderName}', style: const TextStyle(color: Colors.black54, fontSize: 13)),
-                  if (group.description.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(group.description),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            _JoinButton(group: group, membership: membership),
-          ],
-        ),
+        child: DetailWithAction(action: join, child: details),
       ),
     );
   }

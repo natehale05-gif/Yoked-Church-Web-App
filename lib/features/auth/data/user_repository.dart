@@ -38,6 +38,8 @@ class FirestoreUserRepository extends FirestoreCrudRepository<AppUser> with _Use
 }
 
 class LocalUserRepository extends LocalCrudRepository<AppUser> with _UserCodec implements UserRepository {
+  LocalUserRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/members.json';
 

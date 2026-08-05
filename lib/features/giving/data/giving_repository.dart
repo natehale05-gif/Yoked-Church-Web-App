@@ -33,6 +33,8 @@ class FirestoreGivingRepository extends FirestoreCrudRepository<GivingRecord>
 class LocalGivingRepository extends LocalCrudRepository<GivingRecord>
     with _GivingCodec
     implements GivingRepository {
+  LocalGivingRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/giving.json';
 

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/responsive.dart';
 import '../../../core/widgets/section_container.dart';
 import '../../rooms/application/room_providers.dart';
 import '../../rooms/domain/room.dart';
@@ -185,25 +186,22 @@ class _RequestFormState extends ConsumerState<_RequestForm> {
                 ],
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'Requests are confirmed by staff, so a room is not held until you hear back.',
-                      style: TextStyle(color: Colors.black54, fontSize: 12),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: _sending ? null : _submit,
-                    child: _sending
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Text('Request room'),
-                  ),
-                ],
+              DetailWithAction(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                action: ElevatedButton(
+                  onPressed: _sending ? null : _submit,
+                  child: _sending
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Request room'),
+                ),
+                child: const Text(
+                  'Requests are confirmed by staff, so a room is not held until you hear back.',
+                  style: TextStyle(color: Colors.black54, fontSize: 12),
+                ),
               ),
             ],
           ),
@@ -256,19 +254,17 @@ class _MyBookingCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(booking.purpose, style: const TextStyle(fontWeight: FontWeight.w700)),
-                ),
-                Chip(
-                  label: Text(label),
-                  labelStyle: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 12),
-                  backgroundColor: color.withValues(alpha: 0.1),
-                  side: BorderSide.none,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ],
+            DetailWithAction(
+              spacing: 8,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              action: Chip(
+                label: Text(label),
+                labelStyle: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 12),
+                backgroundColor: color.withValues(alpha: 0.1),
+                side: BorderSide.none,
+                visualDensity: VisualDensity.compact,
+              ),
+              child: Text(booking.purpose, style: const TextStyle(fontWeight: FontWeight.w700)),
             ),
             const SizedBox(height: 6),
             Text('${booking.roomName} · ${bookingWhen(booking)}',

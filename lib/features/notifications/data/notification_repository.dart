@@ -43,6 +43,8 @@ class FirestoreNotificationRepository extends FirestoreCrudRepository<AppNotific
 class LocalNotificationRepository extends LocalCrudRepository<AppNotification>
     with _NotificationCodec
     implements NotificationRepository {
+  LocalNotificationRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/notifications.json';
 

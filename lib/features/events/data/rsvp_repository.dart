@@ -43,6 +43,8 @@ class FirestoreRsvpRepository extends FirestoreCrudRepository<EventRsvp> with _R
 }
 
 class LocalRsvpRepository extends LocalCrudRepository<EventRsvp> with _RsvpCodec implements RsvpRepository {
+  LocalRsvpRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/event_rsvps.json';
 

@@ -28,6 +28,8 @@ class FirestoreDevotionalRepository extends FirestoreCrudRepository<Devotional>
 class LocalDevotionalRepository extends LocalCrudRepository<Devotional>
     with _DevotionalCodec
     implements DevotionalRepository {
+  LocalDevotionalRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/devotionals.json';
   @override

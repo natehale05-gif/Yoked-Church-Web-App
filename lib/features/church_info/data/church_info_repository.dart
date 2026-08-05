@@ -46,6 +46,8 @@ class FirestoreStaffRepository extends FirestoreCrudRepository<StaffMember>
 }
 
 class LocalStaffRepository extends LocalCrudRepository<StaffMember> with _StaffCodec implements StaffRepository {
+  LocalStaffRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/staff.json';
   @override
@@ -66,6 +68,8 @@ class FirestoreLocationRepository extends FirestoreCrudRepository<ChurchLocation
 class LocalLocationRepository extends LocalCrudRepository<ChurchLocation>
     with _LocationCodec
     implements LocationRepository {
+  LocalLocationRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/locations.json';
   @override
@@ -82,6 +86,8 @@ class FirestoreFaqRepository extends FirestoreCrudRepository<Faq> with _FaqCodec
 }
 
 class LocalFaqRepository extends LocalCrudRepository<Faq> with _FaqCodec implements FaqRepository {
+  LocalFaqRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/faqs.json';
   @override

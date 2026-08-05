@@ -36,6 +36,8 @@ class FirestoreSermonNoteRepository extends FirestoreCrudRepository<SermonNote>
 class LocalSermonNoteRepository extends LocalCrudRepository<SermonNote>
     with _NoteCodec
     implements SermonNoteRepository {
+  LocalSermonNoteRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/sermon_notes.json';
 

@@ -24,10 +24,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     super.dispose();
   }
 
+  /// No navigation on success: the route guard moves a signed-in person
+  /// off this page, and to the right one for their role.
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    final ok = await ref.read(authControllerProvider.notifier).signIn(_email.text.trim(), _password.text);
-    if (ok && mounted) context.go('/account');
+    await ref.read(authControllerProvider.notifier).signIn(_email.text.trim(), _password.text);
   }
 
   @override

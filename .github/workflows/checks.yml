@@ -48,6 +48,23 @@ jobs:
       - run: ./run.sh
         working-directory: test_rules
 
+  functions:
+    name: Scheduled function
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # No install step: the decisions worth testing - what counts as
+      # live, what gets imported, what a second poll does - are pure
+      # functions with no dependencies. The Firebase SDKs are only needed
+      # to deploy.
+      - run: npm test
+        working-directory: functions
+
   android:
     name: Android build
     runs-on: ubuntu-latest

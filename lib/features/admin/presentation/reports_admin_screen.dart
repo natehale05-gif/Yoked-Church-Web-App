@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/theme.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
@@ -99,7 +100,9 @@ class _MetricCard extends ConsumerWidget {
     final change = trend?.changeLabel;
 
     return SizedBox(
-      width: 260,
+      // A fixed 260 leaves a dead gutter down the side of a 390px screen,
+      // where the cards could simply be the width of the page.
+      width: Breakpoints.isMobile(context) ? double.infinity : 260,
       child: Card(
         margin: EdgeInsets.zero,
         child: Padding(

@@ -51,6 +51,9 @@ dependencies:
   cloud_firestore: ^5.5.0
   firebase_auth: ^5.3.1
   firebase_storage: ^12.4.10
+  # Church signup is a callable function, not a client write - see
+  # FirestoreChurchDirectoryRepository.create.
+  cloud_functions: ^5.2.0
   file_picker: ^11.0.2
   web: ^1.1.1
   shared_preferences: ^2.5.5

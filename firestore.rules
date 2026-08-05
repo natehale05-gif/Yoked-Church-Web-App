@@ -41,6 +41,16 @@ service cloud.firestore {
       allow create, delete: if false;
     }
 
+    // How many churches an account has set up.
+    //
+    // Written only by the createChurch function, which uses the Admin
+    // SDK and bypasses these rules. Unreadable from a client too: it is
+    // the signup cap, and a cap you can read is a cap you can plan
+    // around.
+    match /signups/{uid} {
+      allow read, write: if false;
+    }
+
     match /churches/{churchId} {
       // Public content - visible to anyone, editable by staff/admin only.
       match /sermons/{id} {
@@ -51,6 +61,15 @@ service cloud.firestore {
       match /events/{id} {
         allow read: if true;
         allow write: if isStaff(churchId);
+      }
+
+      // Whether the church is streaming right now. Written only by the
+      // scheduled poller, which uses the Admin SDK and bypasses these
+      // rules entirely - so no client, not even an admin, can announce a
+      // service that is not happening.
+      match /live/{id} {
+        allow read: if true;
+        allow write: if false;
       }
 
       // Drafts and future-dated entries are filtered client-side, not here:

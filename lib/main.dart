@@ -20,9 +20,17 @@ Future<void> main() async {
 
   final backend = await _initBackend();
 
-  // Read before the first frame so a returning member never sees the
-  // picker flash past on the way to their own church.
-  final savedChurchId = await ChurchPreference.read();
+  // Which church, decided before the first frame.
+  //
+  // The URL wins: someone opening a link to /c/riverside/sermons is
+  // asking for Riverside, whoever they last visited. Resolving it here
+  // rather than after the app is up is the difference between a deep
+  // link working and a deep link showing the previous church's content
+  // and colours while it corrects itself.
+  //
+  // Falls back to what they chose last time, so a returning member never
+  // sees the picker flash past on the way to their own church.
+  final savedChurchId = _churchFromUrl() ?? await ChurchPreference.read();
 
   runApp(
     ProviderScope(
@@ -34,6 +42,19 @@ Future<void> main() async {
       child: const YokedChurchApp(),
     ),
   );
+}
+
+/// The church named in the address the app was opened at, if any.
+///
+/// Reads [Uri.base], which on the web is the page URL. The app routes on
+/// the fragment, so the path lives there; the non-fragment path is
+/// checked too for a build served without the hash strategy. Off the web
+/// [Uri.base] is the working directory, which matches neither, so this
+/// is null and the saved preference decides - correctly, since a desktop
+/// or phone build has no address bar to have been deep-linked from.
+String? _churchFromUrl() {
+  final fragment = Uri.base.fragment;
+  return churchIdFromLocation(fragment.isEmpty ? Uri.base.path : fragment);
 }
 
 /// Chooses the data source once, at startup.

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/responsive.dart';
 import '../../../core/widgets/section_container.dart';
 import '../../prayer_wall/application/prayer_providers.dart';
 import '../../prayer_wall/domain/prayer_post.dart';
@@ -120,25 +121,22 @@ class _RequestFormState extends ConsumerState<_RequestForm> {
               subtitle: const Text('Your name is never stored on an anonymous request.'),
             ),
             const SizedBox(height: 4),
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Requests go to staff first, so nothing reaches the wall unreviewed.',
-                    style: TextStyle(color: Colors.black54, fontSize: 12),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: _sending ? null : _submit,
-                  child: _sending
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Text('Send request'),
-                ),
-              ],
+            DetailWithAction(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              action: ElevatedButton(
+                onPressed: _sending ? null : _submit,
+                child: _sending
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Text('Send request'),
+              ),
+              child: const Text(
+                'Requests go to staff first, so nothing reaches the wall unreviewed.',
+                style: TextStyle(color: Colors.black54, fontSize: 12),
+              ),
             ),
           ],
         ),

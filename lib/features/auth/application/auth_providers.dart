@@ -25,10 +25,6 @@ final isStaffProvider = Provider<bool>((ref) => ref.watch(currentUserProvider)?.
 
 final isAdminProvider = Provider<bool>((ref) => ref.watch(currentUserProvider)?.isAdmin ?? false);
 
-/// True until the first auth emission arrives, so route guards don't
-/// bounce a signed-in member to the login page during startup.
-final authLoadingProvider = Provider<bool>((ref) => ref.watch(authStateProvider).isLoading);
-
 final memberDirectoryProvider = FutureProvider<List<AppUser>>((ref) {
   // Re-read whenever the signed-in user changes (e.g. after opting in).
   ref.watch(currentUserProvider);

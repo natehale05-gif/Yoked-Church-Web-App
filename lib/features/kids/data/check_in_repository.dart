@@ -37,6 +37,8 @@ class FirestoreCheckInRepository extends FirestoreCrudRepository<CheckInSession>
 class LocalCheckInRepository extends LocalCrudRepository<CheckInSession>
     with _CheckInCodec
     implements CheckInRepository {
+  LocalCheckInRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/check_ins.json';
 

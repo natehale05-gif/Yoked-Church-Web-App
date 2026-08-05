@@ -46,6 +46,8 @@ class FirestorePrayerPostRepository extends FirestoreCrudRepository<PrayerPost>
 class LocalPrayerPostRepository extends LocalCrudRepository<PrayerPost>
     with _PostCodec
     implements PrayerPostRepository {
+  LocalPrayerPostRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/prayer_posts.json';
   @override
@@ -78,6 +80,8 @@ class FirestoreIntercessionRepository extends FirestoreCrudRepository<PrayerInte
 class LocalIntercessionRepository extends LocalCrudRepository<PrayerIntercession>
     with _IntercessionCodec
     implements IntercessionRepository {
+  LocalIntercessionRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/prayer_intercessions.json';
 

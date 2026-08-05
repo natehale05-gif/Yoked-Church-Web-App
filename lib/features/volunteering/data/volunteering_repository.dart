@@ -44,6 +44,8 @@ class FirestoreVolunteerPositionRepository extends FirestoreCrudRepository<Volun
 class LocalVolunteerPositionRepository extends LocalCrudRepository<VolunteerPosition>
     with _PositionCodec
     implements VolunteerPositionRepository {
+  LocalVolunteerPositionRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/volunteer_positions.json';
   @override
@@ -72,6 +74,8 @@ class FirestoreVolunteerAssignmentRepository extends FirestoreCrudRepository<Vol
 class LocalVolunteerAssignmentRepository extends LocalCrudRepository<VolunteerAssignment>
     with _AssignmentCodec
     implements VolunteerAssignmentRepository {
+  LocalVolunteerAssignmentRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/volunteer_assignments.json';
 

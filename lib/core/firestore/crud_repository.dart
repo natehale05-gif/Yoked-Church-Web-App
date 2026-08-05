@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../../features/churches/data/church_directory_repository.dart';
+import '../config/tenant.dart';
 import 'sample_data.dart';
 
 /// The read/write surface every content collection shares.
@@ -118,6 +120,18 @@ abstract class FirestoreCrudRepository<T> with EntityCodec<T> implements CrudRep
 /// including the admin CMS, which in the previous architecture simply
 /// failed without Firebase.
 abstract class LocalCrudRepository<T> with EntityCodec<T> implements CrudRepository<T> {
+  LocalCrudRepository([this.churchId = demoChurchId]);
+
+  /// Which church's content this holds.
+  ///
+  /// The Firestore side has had this since tenancy landed; the local
+  /// side did not, so every church shared one set of in-memory
+  /// collections. That was invisible while the only churches were the
+  /// bundled ones - and became a lie the moment someone could create
+  /// their own, which opened holding another church's sermons and
+  /// somebody else's unread messages.
+  final String churchId;
+
   /// Asset to seed from, e.g. `assets/data/sermons.json`. Null seeds empty.
   String? get seedAsset => null;
 
@@ -160,6 +174,11 @@ abstract class LocalCrudRepository<T> with EntityCodec<T> implements CrudReposit
   Future<void> _seed() async {
     final asset = seedAsset;
     if (asset == null) return;
+
+    // Sample content belongs to the sample churches. A church somebody
+    // set up a minute ago starts empty, the way a real one does - and
+    // the dashboard's setup checklist is what fills it.
+    if (!await LocalChurchDirectoryRepository.isBundled(churchId)) return;
     try {
       final raw = await rootBundle.loadString(asset);
       // Read as relative to the day it was authored, not as absolute

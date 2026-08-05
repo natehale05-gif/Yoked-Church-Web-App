@@ -11,6 +11,8 @@ import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/section_container.dart';
 import '../../devotionals/application/devotional_providers.dart';
 import '../../events/application/event_providers.dart';
+import '../../live/application/live_providers.dart';
+import '../../live/domain/live_status.dart';
 import '../../sermons/application/sermon_providers.dart';
 import '../../sermons/presentation/sermons_screen.dart';
 
@@ -35,15 +37,16 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class _Hero extends StatelessWidget {
+class _Hero extends ConsumerWidget {
   final ChurchSettings settings;
 
   const _Hero({required this.settings});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isMobile = Breakpoints.isMobile(context);
     final liveUrl = settings.social.liveStreamUrl;
+    final status = ref.watch(liveStatusProvider).valueOrNull ?? const LiveStatus();
 
     return Container(
       width: double.infinity,
@@ -52,6 +55,10 @@ class _Hero extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (status.isWatchable) ...[
+            _LiveNow(status: status),
+            const SizedBox(height: 24),
+          ],
           Text(
             settings.churchName,
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
@@ -75,6 +82,11 @@ class _Hero extends StatelessWidget {
             runSpacing: 12,
             children: [
               ElevatedButton(onPressed: () => context.go('/visit'), child: const Text('Plan a Visit')),
+              // "Watch Online", not "Watch Live". This link is to
+              // wherever the church streams, which is there whether or
+              // not anything is happening - and a page that claims a
+              // service is live every day of the week teaches people to
+              // ignore it. The banner above is what says "live".
               if (liveUrl.isNotEmpty)
                 OutlinedButton(
                   onPressed: () => launchUrl(Uri.parse(liveUrl), webOnlyWindowName: '_blank'),
@@ -82,11 +94,58 @@ class _Hero extends StatelessWidget {
                     foregroundColor: Colors.white,
                     side: const BorderSide(color: Colors.white70),
                   ),
-                  child: const Text('Watch Live'),
+                  child: const Text('Watch Online'),
                 ),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Shown only while a stream is actually running, on the word of the
+/// scheduled job that watches the church's YouTube channel.
+class _LiveNow extends StatelessWidget {
+  final LiveStatus status;
+
+  const _LiveNow({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.red.shade700,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => launchUrl(Uri.parse(status.watchUrl), webOnlyWindowName: '_blank'),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.sensors, color: Colors.white, size: 18),
+              const SizedBox(width: 10),
+              const Text(
+                'LIVE NOW',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, letterSpacing: 1),
+              ),
+              if (status.title.isNotEmpty) ...[
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    status.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+              const SizedBox(width: 12),
+              const Icon(Icons.play_arrow, color: Colors.white, size: 20),
+            ],
+          ),
+        ),
       ),
     );
   }

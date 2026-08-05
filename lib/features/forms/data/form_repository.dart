@@ -48,6 +48,8 @@ class FirestoreFormRepository extends FirestoreCrudRepository<FormDefinition>
 class LocalFormRepository extends LocalCrudRepository<FormDefinition>
     with _FormCodec
     implements FormRepository {
+  LocalFormRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/forms.json';
   @override
@@ -79,6 +81,8 @@ class FirestoreSubmissionRepository extends FirestoreCrudRepository<FormSubmissi
 class LocalSubmissionRepository extends LocalCrudRepository<FormSubmission>
     with _SubmissionCodec
     implements SubmissionRepository {
+  LocalSubmissionRepository([super.churchId]);
+
   @override
   String? get seedAsset => 'assets/data/form_submissions.json';
 

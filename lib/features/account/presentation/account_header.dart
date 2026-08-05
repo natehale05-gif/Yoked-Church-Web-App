@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/tenant.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/section_container.dart';
 
@@ -16,7 +17,10 @@ class AccountHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final flags = ref.watch(featureFlagsProvider);
-    final current = GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+    // Stripped of the church prefix: every destination below is a
+    // bare path, and the location is now `/c/{church}/...`.
+    final current =
+        subPathOf(GoRouter.of(context).routerDelegate.currentConfiguration.uri.path);
 
     final tabs = <({String label, String path})>[
       (label: 'Overview', path: '/account'),

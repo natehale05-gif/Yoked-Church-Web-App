@@ -1,0 +1,16 @@
+{
+  "name": "yoked-church-functions",
+  "description": "Scheduled YouTube live detection and sermon import, for every church at once.",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.2",
+    "firebase-functions": "^6.3.0"
+  }
+}

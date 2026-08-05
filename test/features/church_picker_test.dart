@@ -12,6 +12,11 @@ import '../fakes/fake_repositories.dart';
 /// One app, many churches. These cover the two things that makes true:
 /// nothing is reachable until a church is chosen, and choosing one
 /// actually changes which church the app is.
+///
+/// The picker is no longer the app's front door - a stranger gets the
+/// product's landing page, and churches are reached by their own
+/// addresses. That is covered in church_url_test.dart; these are about
+/// the picker itself.
 void main() {
   Future<ProviderContainer> pumpApp(WidgetTester tester, List<Override> overrides) async {
     tester.view.physicalSize = const Size(1400, 3000);
@@ -28,15 +33,29 @@ void main() {
     return container;
   }
 
-  String pathOf(ProviderContainer c) =>
+  /// Opens the picker directly. It used to be wherever a church-less
+  /// visitor landed; now it is a page you go to.
+  Future<ProviderContainer> pumpPicker(WidgetTester tester, List<Override> overrides) async {
+    final container = await pumpApp(tester, overrides);
+    container.read(routerProvider).go('/choose-church');
+    await tester.pumpAndSettle();
+    return container;
+  }
+
+  /// The whole address, prefix and all - only the test about *addresses*
+  /// wants this one.
+  String addressOf(ProviderContainer c) =>
       c.read(routerProvider).routerDelegate.currentConfiguration.uri.path;
 
+  /// The path within a church, which is what the guards below are about.
+  String pathOf(ProviderContainer c) => subPathOf(addressOf(c));
+
   group('before a church is chosen', () {
-    testWidgets('the app opens on the picker', (tester) async {
-      final container = await pumpApp(tester, fakeOverrides(churchId: null));
+    testWidgets('the picker is where you find one', (tester) async {
+      final container = await pumpPicker(tester, fakeOverrides(churchId: null));
 
       expect(pathOf(container), '/choose-church');
-      expect(find.text('Find your church'), findsOneWidget);
+      expect(find.text('Find your church'), findsWidgets);
     });
 
     testWidgets('every other route sends you there', (tester) async {
@@ -52,19 +71,23 @@ void main() {
     });
 
     testWidgets('choosing one lets you in', (tester) async {
-      final container = await pumpApp(tester, fakeOverrides(churchId: null));
+      final container = await pumpPicker(tester, fakeOverrides(churchId: null));
 
       await tester.tap(find.text('Riverside Fellowship'));
       await tester.pumpAndSettle();
 
       expect(container.read(selectedChurchIdProvider), 'riverside-fellowship');
-      expect(pathOf(container), '/');
+      expect(
+        addressOf(container),
+        churchPath('riverside-fellowship'),
+        reason: 'choosing a church should put you at its address, not at a church-less /',
+      );
     });
   });
 
   group('the picker', () {
     testWidgets('lists the bundled churches', (tester) async {
-      await pumpApp(tester, fakeOverrides(churchId: null));
+      await pumpPicker(tester, fakeOverrides(churchId: null));
 
       expect(find.text('Yoked Church'), findsWidgets);
       expect(find.text('Riverside Fellowship'), findsOneWidget);
@@ -72,7 +95,7 @@ void main() {
     });
 
     testWidgets('filters as you type, and says so when nothing matches', (tester) async {
-      await pumpApp(tester, fakeOverrides(churchId: null));
+      await pumpPicker(tester, fakeOverrides(churchId: null));
 
       await tester.enterText(find.byType(TextField).first, 'riverside');
       await tester.pumpAndSettle();

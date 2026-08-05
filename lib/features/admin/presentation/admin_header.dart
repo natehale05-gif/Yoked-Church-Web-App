@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/tenant.dart';
 import '../../../app/theme.dart';
 import '../../../core/config/church_settings.dart';
 import '../../../core/config/settings_providers.dart';
@@ -84,7 +85,10 @@ class AdminHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isAdmin = ref.watch(isAdminProvider);
-    final current = GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+    // Stripped of the church prefix: every destination below is a
+    // bare path, and the location is now `/c/{church}/...`.
+    final current =
+        subPathOf(GoRouter.of(context).routerDelegate.currentConfiguration.uri.path);
     final tabs = visibleAdminTabs(ref.watch(featureFlagsProvider), isAdmin: isAdmin);
 
     return PageBanner(
@@ -92,30 +96,88 @@ class AdminHeader extends ConsumerWidget {
       eyebrow: 'Staff Dashboard',
       title: title,
       subtitle: subtitle,
-      below: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (final tab in tabs)
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: TextButton(
-                  onPressed: () => context.go(tab.path),
-                  style: TextButton.styleFrom(
-                    backgroundColor: current == tab.path
-                        ? ref.watch(settingsProvider).colors.accent.withValues(alpha: 0.25)
-                        : null,
-                    foregroundColor:
-                        current == tab.path ? ref.watch(settingsProvider).colors.accent : Colors.white70,
-                  ),
-                  child: Text(
-                    tab.label,
-                    style: TextStyle(fontWeight: current == tab.path ? FontWeight.w700 : FontWeight.w500),
-                  ),
-                ),
+      below: Breakpoints.isMobile(context)
+          ? _AdminTabPicker(tabs: tabs, current: current)
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final tab in tabs)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: TextButton(
+                        onPressed: () => context.go(tab.path),
+                        style: TextButton.styleFrom(
+                          backgroundColor: current == tab.path
+                              ? ref.watch(settingsProvider).colors.accent.withValues(alpha: 0.25)
+                              : null,
+                          foregroundColor: current == tab.path
+                              ? ref.watch(settingsProvider).colors.accent
+                              : Colors.white70,
+                        ),
+                        child: Text(
+                          tab.label,
+                          style:
+                              TextStyle(fontWeight: current == tab.path ? FontWeight.w700 : FontWeight.w500),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-          ],
+            ),
+    );
+  }
+}
+
+/// The same tabs on a phone, as a sheet you open rather than a strip you
+/// scroll.
+///
+/// Nineteen destinations in a horizontal scroller showed four of them and
+/// gave no sign the rest existed - so on a phone the dashboard appeared to
+/// have four sections. This shows where you are and opens the whole list,
+/// which is what the **More** sheet does for the member side.
+class _AdminTabPicker extends StatelessWidget {
+  final List<AdminTab> tabs;
+  final String current;
+
+  const _AdminTabPicker({required this.tabs, required this.current});
+
+  @override
+  Widget build(BuildContext context) {
+    final here = tabs.where((t) => t.path == current).firstOrNull ?? tabs.first;
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: OutlinedButton.icon(
+        onPressed: () => showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          builder: (sheetContext) => SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final tab in tabs)
+                    ListTile(
+                      leading: Icon(tab.icon),
+                      title: Text(tab.label),
+                      selected: tab.path == current,
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.go(tab.path);
+                      },
+                    ),
+                ],
+              ),
+            ),
+          ),
         ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.white,
+          side: const BorderSide(color: Colors.white38),
+        ),
+        icon: Icon(here.icon, size: 18),
+        label: Text(here.label),
       ),
     );
   }

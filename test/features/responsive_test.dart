@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yoked_church_app/app/app.dart';
@@ -32,9 +32,11 @@ import '../fakes/fake_repositories.dart';
 /// so pumping every route at phone width catches the whole class in one
 /// pass - including on screens nobody thinks to open on a phone.
 ///
-/// What this cannot catch is a layout that fits and is still unusable:
-/// three text fields sharing ninety pixels throw nothing. That part is
-/// verified with screenshots in a browser.
+/// Not overflowing is not the same as being readable, though: three
+/// fields sharing ninety pixels throw nothing at all. So the second group
+/// below measures how narrow text actually ends up, which is what caught
+/// an email address rendered one letter per line on `/admin/members` and
+/// a group's name laid out in twenty-one pixels.
 void main() {
   const phone = Size(390, 844);
   const tablet = Size(768, 1024);
@@ -293,6 +295,38 @@ void main() {
     '/admin/reports',
   ];
 
+  /// The narrowest a run of real text may be laid out on a phone, and the
+  /// length at which "real text" starts.
+  ///
+  /// A phone is 390px wide. Anything meaningful squeezed into a quarter of
+  /// that is not a layout, it is a column of syllables - which is what
+  /// `/admin/members` did to every email address. Short labels are exempt
+  /// because a chip reading "New" is allowed to be small.
+  const minTextWidth = 100.0;
+  const shortLabel = 14;
+
+  /// Text laid out narrower than [minTextWidth], as "width: the text".
+  ///
+  /// This is the assertion the overflow check could never make: none of
+  /// these throw, none of them are visible to `pumpAndSettle`, and every
+  /// one of them is unreadable.
+  List<String> squashedText(WidgetTester tester) {
+    final found = <String>{};
+
+    for (final element in tester.allElements) {
+      final box = element.renderObject;
+      if (box is! RenderParagraph || !box.hasSize) continue;
+      if (box.size.width >= minTextWidth || box.size.width <= 0) continue;
+
+      final text = box.text.toPlainText().trim();
+      if (text.length < shortLabel) continue;
+
+      found.add('${box.size.width.toStringAsFixed(0)}px: "$text"');
+    }
+
+    return found.toList()..sort();
+  }
+
   Future<void> walk(
     WidgetTester tester,
     Size size,
@@ -356,6 +390,73 @@ void main() {
           '    ${broken.join('\n    ')}',
     );
   }
+
+  /// Same trip as [walk], asking a different question: not "did anything
+  /// throw" but "is any of this readable".
+  Future<void> walkForReadability(
+    WidgetTester tester,
+    List<String> routes, {
+    AppUser? signedInAs,
+  }) async {
+    tester.view.physicalSize = phone;
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final container = ProviderContainer(overrides: seeded(signedInAs: signedInAs));
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(container: container, child: const YokedChurchApp()),
+    );
+    await tester.pumpAndSettle();
+
+    final router = container.read(routerProvider);
+    final squashed = <String>[];
+
+    for (final route in routes) {
+      router.go(route);
+      try {
+        await tester.pumpAndSettle(
+          const Duration(milliseconds: 100),
+          EnginePhase.sendSemanticsUpdate,
+          const Duration(seconds: 5),
+        );
+      } catch (_) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      while (tester.takeException() != null) {}
+
+      final offenders = squashedText(tester);
+      if (offenders.isNotEmpty) {
+        squashed.add([route, for (final o in offenders) '      $o'].join('\n'));
+      }
+    }
+
+    expect(
+      squashed,
+      isEmpty,
+      reason: 'text squeezed under ${minTextWidth.toInt()}px on a 390px screen:\n'
+          '    ${squashed.join('\n    ')}',
+    );
+  }
+
+  group('readable on a phone', () {
+    testWidgets('nothing on the public site is squeezed to a sliver', (tester) async {
+      await walkForReadability(tester, publicRoutes);
+    });
+
+    testWidgets('nothing in the member portal is squeezed to a sliver', (tester) async {
+      await walkForReadability(tester, memberRoutes, signedInAs: testMember(uid: 'u1'));
+    });
+
+    testWidgets('nothing in the staff dashboard is squeezed to a sliver', (tester) async {
+      await walkForReadability(
+        tester,
+        adminRoutes,
+        signedInAs: testMember(uid: 'a1', role: UserRole.admin),
+      );
+    });
+  });
 
   group('phone (390x844)', () {
     testWidgets('public pages lay out', (tester) => walk(tester, phone, publicRoutes));

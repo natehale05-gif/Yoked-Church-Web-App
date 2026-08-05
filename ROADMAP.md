@@ -89,17 +89,63 @@ Phones got navigation that reaches: a bottom bar built from the
 church's feature flags, replacing the hamburger that opened a flat sheet
 of every destination in the app.
 
+**M11 — a way in, screens that read, and a live banner that means it.**
+Demo sign-in did nothing on the deployed site: Riverpod fires the
+router's refresh listener before recomputing anything derived from the
+auth state, so the guard read the *previous* user on the one
+notification that mattered and bounced the sign-in it had just
+completed. The guard now reads the auth state at its source and is the
+only thing that decides where signing in takes you.
+
+With the signed-in half reachable, the route sweep ran for the first
+time and found not crashes but text squeezed into slivers - an email
+address at 68px, a group's name at 21px. `responsive_test.dart` gained
+an assertion that can see that class of problem, and the screens it
+named were fixed; the staff dashboard's nineteen tabs stopped being a
+horizontal scroller that showed four.
+
+YouTube live detection landed, which needed the project's first
+server-side code. One scheduled function serves every church - possible
+only because tenancy came first - and stays inside a 10,000/day quota by
+reading each channel's RSS feed for free and spending a single unit on
+`videos.list`. A finished stream becomes an unpublished sermon keyed by
+video id, so the next poll five minutes later creates nothing.
+
+**M12 — the part that makes it a product.** Every church got an address:
+`/c/{slug}`, so a link to your church opens *your* church rather than
+whichever one the recipient looked at last. The sixty-six existing
+`context.go('/sermons')` call sites did not change — the redirect
+rewrites bare paths onto the current church, and the guards still reason
+about bare paths because only one function knows about the prefix.
+
+Then the thing that had been missing all along: **signing up**. Creating
+a church used to mean an operator writing a Firestore document and
+setting a role by hand in a console. Now it is four fields and thirty
+seconds, and the founder lands in their own dashboard as its admin.
+Creation stays server-side — the rules still refuse it outright, because
+a rule permissive enough to let you create a church *and* write yourself
+in as its admin is a rule that lets anyone mint admin rights.
+
+That dashboard needed something to say, so it got a setup checklist
+derived from what is actually there, and the settings screen got a
+gallery of ready-made looks for the many churches that have a logo but
+no brand guide.
+
 ## Not built
 
 Listed because a buyer should know what they are not getting, not as a
 commitment to build them.
 
-- **YouTube live/VOD sync.** The homepage live banner is driven by a
-  `liveStreamUrl` in settings, set by hand. Automatic detection — banner
-  appears when the channel goes live, ended stream lands in the sermon
-  library for review — needs a scheduled server-side job holding a
-  YouTube Data API key, so it cannot be a static-site feature. It is the
-  largest single item here.
+- **Billing.** Nothing is charged, nothing is gated, there are no plans
+  and no Stripe. Named because "like Shopify" usually implies charging,
+  and this deliberately does not.
+- **Custom domains.** A church's address is `<host>/#/c/their-slug`, not
+  `theirchurch.com`. Per-tenant domains need wildcard DNS and a host
+  that terminates TLS for them, which GitHub Pages cannot do — it would
+  mean moving hosting.
+- **Renaming a church's address.** Slugs are permanent. Changing one
+  breaks every link already shared, so it would mean keeping redirects
+  forever.
 - **Push and email notifications.** The in-app inbox is real and
   staff-write-only. Nothing leaves the app: no FCM, no email. Form
   notification routing deliberately targets staff *accounts* rather than
