@@ -640,14 +640,19 @@ class _BrandPreview extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            Row(
+            // Wrap rather than Row: this is a preview of a button beside
+            // a label, and at a large font size the pair is wider than a
+            // phone. Letting them stack is what a preview should do.
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(color: colors.accent, borderRadius: BorderRadius.circular(6)),
                   child: const Text('Give', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                 ),
-                const SizedBox(width: 12),
                 Text('Preview', style: TextStyle(color: colors.primary, fontWeight: FontWeight.w600)),
               ],
             ),

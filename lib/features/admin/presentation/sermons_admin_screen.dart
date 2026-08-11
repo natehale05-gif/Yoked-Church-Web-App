@@ -247,6 +247,7 @@ class _SermonFormState extends State<_SermonForm> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String?>(
+              isExpanded: true,
               initialValue: _seriesId,
               decoration: const InputDecoration(labelText: 'Series'),
               items: [

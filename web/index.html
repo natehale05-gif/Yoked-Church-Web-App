@@ -75,15 +75,108 @@
 
   <title>Yoked</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    The loading screen.
+    ===================
+
+    A phone fetches somewhere around 3.5MB before this app can draw
+    anything: the Dart bundle, the CanvasKit renderer, the fonts. Until
+    this existed, all of that happened behind a blank white page - and on
+    a slow connection a blank white page is indistinguishable from a site
+    that is broken. Somebody who has just been handed their church's
+    address gives it a few seconds and decides it does not work.
+
+    Deliberately plain CSS with no web font and no image, because it has
+    to paint from the first HTML response rather than joining the queue
+    it exists to cover. It says the product's name rather than the
+    church's: which church this is lives in Dart, which has not loaded.
+
+    `web/flutter_bootstrap.js` takes it down once Flutter's scene is
+    actually on screen.
+  -->
+  <style>
+    body { margin: 0; background: #1B3A4B; }
+
+    #loading {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      background: #1B3A4B;
+      color: #F7F5F0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      opacity: 1;
+      transition: opacity 220ms ease-out;
+    }
+    #loading.done { opacity: 0; pointer-events: none; }
+
+    #loading .wordmark {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    #loading .mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #C9A24B;
+      color: #1B3A4B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      font-weight: 700;
+    }
+
+    /* A determinate-looking bar would be a lie - nothing here knows how
+       far along the download is. This just says the page is alive. */
+    #loading .bar {
+      width: 168px;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(247, 245, 240, 0.18);
+      overflow: hidden;
+    }
+    #loading .bar::after {
+      content: '';
+      display: block;
+      width: 40%;
+      height: 100%;
+      border-radius: 2px;
+      background: #C9A24B;
+      animation: slide 1.15s ease-in-out infinite;
+    }
+    @keyframes slide {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(250%); }
+    }
+
+    #loading .hint { font-size: 13px; color: rgba(247, 245, 240, 0.6); }
+
+    @media (prefers-reduced-motion: reduce) {
+      #loading .bar::after { animation: none; width: 100%; opacity: 0.5; }
+      #loading { transition: none; }
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <div id="loading">
+    <div class="wordmark"><span class="mark">Y</span>Yoked</div>
+    <div class="bar"></div>
+    <div class="hint">Loading your church&rsquo;s site&hellip;</div>
+  </div>
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
+  <!--
+    Customized in web/flutter_bootstrap.js, which is what removes the
+    loading screen above once there is something behind it.
   -->
   <script src="flutter_bootstrap.js" async></script>
 </body>

@@ -100,24 +100,26 @@ flutter:
   # for visitors on a slow or restrictive network. Lora is used for
   # headings, Work Sans for body copy - both licensed under the SIL Open
   # Font License (see assets/fonts/*-OFL.txt).
+  # Every face declared here is downloaded before the first frame, whether
+  # or not anything ever draws it. That is a fixed cost on the slowest
+  # connection any member has, so this list is exactly what the app uses
+  # and nothing else - see test/core/fonts_test.dart, which fails if a
+  # style is asked for that is not declared.
+  #
+  # Lora is headings only (theme.dart) and is never slanted. Work Sans
+  # carries body text, and italic on it is used in three places - a room
+  # booking note, an attendance note, a form hint. Bold italic, on either
+  # family, has never been used at all.
   fonts:
     - family: Lora
       fonts:
         - asset: assets/fonts/Lora-Regular.ttf
         - asset: assets/fonts/Lora-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Lora-Italic.ttf
-          style: italic
-        - asset: assets/fonts/Lora-BoldItalic.ttf
-          weight: 700
-          style: italic
     - family: WorkSans
       fonts:
         - asset: assets/fonts/WorkSans-Regular.ttf
         - asset: assets/fonts/WorkSans-Bold.ttf
           weight: 700
         - asset: assets/fonts/WorkSans-Italic.ttf
-          style: italic
-        - asset: assets/fonts/WorkSans-BoldItalic.ttf
-          weight: 700
           style: italic

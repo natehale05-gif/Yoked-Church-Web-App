@@ -87,6 +87,7 @@ class _MemberRow extends ConsumerWidget {
     final email = Text(member.email);
 
     final rolePicker = DropdownButtonFormField<UserRole>(
+      isExpanded: true,
       initialValue: member.role,
       decoration: InputDecoration(
         isDense: true,

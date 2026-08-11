@@ -134,8 +134,19 @@ class _RequestFormState extends ConsumerState<_RequestForm> {
               const SizedBox(height: 12),
               DropdownButtonFormField<Room>(
                 initialValue: _room,
+                // Without this the dropdown sizes itself to its widest
+                // item and ignores the space it actually has, so a room
+                // called anything longer than "Nursery" runs off the side
+                // of a narrow phone.
+                isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Room'),
-                items: [for (final room in rooms) DropdownMenuItem(value: room, child: Text(room.name))],
+                items: [
+                  for (final room in rooms)
+                    DropdownMenuItem(
+                      value: room,
+                      child: Text(room.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                ],
                 onChanged: (value) => setState(() => _room = value),
                 validator: (value) => value == null ? 'Choose a room' : null,
               ),

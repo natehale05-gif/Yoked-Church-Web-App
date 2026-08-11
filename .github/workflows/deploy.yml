@@ -30,7 +30,17 @@ jobs:
 
       - run: flutter test
 
-      - run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+      # `--no-web-resources-cdn` because the default is to fetch CanvasKit
+      # - about 2MB, on the critical path of the very first paint - from
+      # www.gstatic.com rather than from the copy already sitting in
+      # build/web/canvaskit and being deployed alongside everything else.
+      #
+      # That default costs a phone an extra DNS lookup and TLS handshake
+      # before it can draw anything, and makes the whole site depend on a
+      # third party: a school or workplace filter that blocks gstatic, or
+      # a country that does, turns "your church's website" into a page
+      # that never renders. The bytes are already here. Serve them.
+      - run: flutter build web --release --no-web-resources-cdn --base-href "/${{ github.event.repository.name }}/"
 
       - uses: actions/upload-pages-artifact@v3
         with:

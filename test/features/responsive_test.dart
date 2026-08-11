@@ -332,10 +332,23 @@ void main() {
     Size size,
     List<String> routes, {
     AppUser? signedInAs,
+
+    /// The phone's own font-size setting, as a multiplier.
+    ///
+    /// Set on the platform dispatcher rather than by wrapping the app in
+    /// a `MediaQuery`, because `MaterialApp` builds its own from the view
+    /// and would throw an override above it away. This is the same lever
+    /// the OS pulls.
+    double textScale = 1.0,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
+
+    if (textScale != 1.0) {
+      tester.platformDispatcher.textScaleFactorTestValue = textScale;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    }
 
     final container = ProviderContainer(overrides: seeded(signedInAs: signedInAs));
     addTearDown(container.dispose);
@@ -386,7 +399,8 @@ void main() {
     expect(
       broken,
       isEmpty,
-      reason: 'these routes overflowed at ${size.width.toInt()}x${size.height.toInt()}:\n'
+      reason: 'these routes overflowed at ${size.width.toInt()}x${size.height.toInt()}'
+          '${textScale == 1.0 ? '' : ' with text at ${textScale}x'}:\n'
           '    ${broken.join('\n    ')}',
     );
   }
@@ -480,5 +494,77 @@ void main() {
     testWidgets('the staff dashboard lays out', (tester) async {
       await walk(tester, tablet, adminRoutes, signedInAs: testMember(uid: 'a1', role: UserRole.admin));
     });
+  });
+
+  /// 390 is an iPhone 14, which is a reasonable phone to design against
+  /// and a poor one to *only* test against. Everything below is narrower,
+  /// shorter or bigger-typed than that, and all of it is somebody's
+  /// actual phone.
+  group('the phones nobody was testing', () {
+    // The commonest Android width there is - a Galaxy A-series, a Pixel
+    // a-series, most of what a congregation is holding.
+    const android = Size(360, 800);
+
+    // An iPhone SE. Small, cheap, long-lived, and disproportionately the
+    // phone of somebody who is not replacing it this year.
+    const small = Size(320, 568);
+
+    // A phone turned sideways. Not a rare accident: it is what happens
+    // when somebody props it up to read, and the viewport is barely
+    // taller than the app bar and the bottom nav together.
+    const landscape = Size(844, 390);
+
+    for (final (name, size) in [('android (360x800)', android), ('small (320x568)', small)]) {
+      testWidgets('$name - public pages lay out', (tester) => walk(tester, size, publicRoutes));
+
+      testWidgets('$name - the member portal lays out', (tester) async {
+        await walk(tester, size, memberRoutes, signedInAs: testMember(uid: 'u1'));
+      });
+
+      testWidgets('$name - the staff dashboard lays out', (tester) async {
+        await walk(tester, size, adminRoutes, signedInAs: testMember(uid: 'a1', role: UserRole.admin));
+      });
+    }
+
+    testWidgets('landscape - public pages lay out', (tester) async {
+      await walk(tester, landscape, publicRoutes);
+    });
+
+    testWidgets('landscape - the member portal lays out', (tester) async {
+      await walk(tester, landscape, memberRoutes, signedInAs: testMember(uid: 'u1'));
+    });
+
+    testWidgets('landscape - the staff dashboard lays out', (tester) async {
+      await walk(tester, landscape, adminRoutes, signedInAs: testMember(uid: 'a1', role: UserRole.admin));
+    });
+  });
+
+  /// Nothing in this app touches `textScaler`, so whatever the phone asks
+  /// for is what the layouts get. A congregation skews older than most
+  /// audiences, so "I turned the text up" is not an edge case here - it
+  /// is a substantial fraction of the people the site is for.
+  ///
+  /// 1.3 is a couple of notches up. 2.0 is the top of iOS's ordinary
+  /// range, before the accessibility sizes beyond it.
+  group('with the text turned up', () {
+    for (final scale in [1.3, 2.0]) {
+      testWidgets('${scale}x - public pages lay out', (tester) async {
+        await walk(tester, phone, publicRoutes, textScale: scale);
+      });
+
+      testWidgets('${scale}x - the member portal lays out', (tester) async {
+        await walk(tester, phone, memberRoutes, signedInAs: testMember(uid: 'u1'), textScale: scale);
+      });
+
+      testWidgets('${scale}x - the staff dashboard lays out', (tester) async {
+        await walk(
+          tester,
+          phone,
+          adminRoutes,
+          signedInAs: testMember(uid: 'a1', role: UserRole.admin),
+          textScale: scale,
+        );
+      });
+    }
   });
 }
