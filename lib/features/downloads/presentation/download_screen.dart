@@ -53,9 +53,9 @@ class DownloadScreen extends ConsumerWidget {
                 const _Notice(
                   icon: Icons.hourglass_empty,
                   text: 'There is no installable build published yet, so '
-                      'there is nothing to download at the moment. The '
-                      'website below works everywhere in the meantime, '
-                      'including on a phone.',
+                      'there is nothing to download at the moment. Nothing '
+                      'is wrong with the app - it simply has not been '
+                      'packaged up for this church yet.',
                 ),
                 const SizedBox(height: 12),
                 _Notice(
