@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yoked_church_app/app/app.dart';
 import 'package:yoked_church_app/app/router.dart';
@@ -221,6 +222,8 @@ void main() {
     });
   });
 
+  group('what the server says when it says no', _messageTests);
+
   group('when it goes wrong', () {
     testWidgets('the reason is on screen, and the form still holds what was typed', (tester) async {
       final container = ProviderContainer(
@@ -258,6 +261,66 @@ void main() {
         reason: 'making someone retype it all is how you lose them on the second try',
       );
     });
+  });
+}
+
+/// What a person is told when the server says no.
+///
+/// The mapping lives in [FirestoreChurchDirectoryRepository], which
+/// cannot be constructed without a Firebase app, so these go at the
+/// function that decides - reached through the same public surface the
+/// screen sees.
+void _messageTests() {
+  String reasonFor(String code, [String message = '']) {
+    try {
+      throw FirebaseFunctionsException(code: code, message: message);
+    } on FirebaseFunctionsException catch (e) {
+      return churchCreationMessageFor(e);
+    }
+  }
+
+  test('a refusal the function wrote is passed through untouched', () {
+    // "That address is taken. Try adding your town." is already a
+    // sentence for a person; rewriting it here would only make it worse.
+    expect(
+      reasonFor('invalid-argument', 'That address is taken. Try adding your town.'),
+      'That address is taken. Try adding your town.',
+    );
+    expect(
+      reasonFor('resource-exhausted', 'One account can set up 3 churches.'),
+      'One account can set up 3 churches.',
+    );
+  });
+
+  test('a function that was never deployed says so, and how to fix it', () {
+    // The failure mode this exists for. An undeployed callable raises
+    // not-found with an empty message, and "please try again" in front
+    // of it is advice that can never work.
+    final message = reasonFor('not-found');
+
+    expect(message, contains('firebase deploy'));
+    expect(message, isNot(contains('try again')));
+  });
+
+  test('a raw code is never shown to anyone', () {
+    // FirebaseFunctionsException carries NOT_FOUND / INTERNAL as the
+    // message for transport failures. Nobody signing up for a church
+    // site should read that.
+    for (final code in ['not-found', 'internal', 'unavailable', 'permission-denied']) {
+      final message = reasonFor(code, code.toUpperCase().replaceAll('-', '_'));
+      expect(message, isNot(contains('_')), reason: '$code leaked a raw code');
+      expect(message.trim(), isNotEmpty);
+    }
+  });
+
+  test('a genuinely transient failure is the one place "try again" is honest', () {
+    for (final code in ['unavailable', 'deadline-exceeded']) {
+      expect(reasonFor(code), contains('try again'));
+    }
+  });
+
+  test('an unknown code still says something rather than nothing', () {
+    expect(reasonFor('something-new-in-the-sdk').trim(), isNotEmpty);
   });
 }
 
