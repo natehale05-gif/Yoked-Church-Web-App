@@ -117,6 +117,27 @@ jobs:
           echo "Signing with the configured upload key."
 
       - name: Build
+        env:
+          # The Firebase C++ SDK - which `firebase_core` downloads to build
+          # the Windows desktop embedder - still opens with
+          # `cmake_minimum_required(VERSION 3.1)`. CMake 4, now on the
+          # Windows runner image, removed compatibility with anything below
+          # 3.5 and refuses to configure at all:
+          #
+          #   Compatibility with CMake < 3.5 has been removed from CMake.
+          #
+          # So the Windows build fails inside a dependency nothing here
+          # controls, with the app itself perfectly fine - the first run of
+          # this workflow died exactly there. This is the escape hatch
+          # CMake's own error message names, and it applies only to
+          # projects that ask for a minimum below it.
+          #
+          # Remove this when the Firebase C++ SDK raises its floor. Set for
+          # every platform rather than guarded on Windows: the Linux
+          # embedder is CMake too and will meet the same wall as runner
+          # images move on, and a build that fails for this reason gives no
+          # hint that one line elsewhere would fix it.
+          CMAKE_POLICY_VERSION_MINIMUM: '3.5'
         run: flutter build ${{ matrix.target == 'android' && 'apk' || matrix.target }} --release
 
       # Each platform's output is packaged under the exact name the
