@@ -195,7 +195,7 @@ class SermonCard extends ConsumerWidget {
                       Text(
                         sermon.seriesName.toUpperCase(),
                         style: TextStyle(
-                          color: brand.accent,
+                          color: brand.accentInk,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1,

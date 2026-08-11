@@ -7,6 +7,7 @@ import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/section_container.dart';
+import '../../../core/widgets/service_times.dart';
 import '../application/church_info_providers.dart';
 import '../domain/church_info.dart';
 
@@ -35,48 +36,7 @@ class VisitScreen extends ConsumerWidget {
           ),
         SectionContainer(
           backgroundColor: Colors.white,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Service Times', style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: 24),
-              if (settings.serviceTimes.isEmpty)
-                const EmptyState(message: 'Service times are being updated.')
-              else
-                Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
-                  children: [
-                    for (final service in settings.serviceTimes)
-                      SizedBox(
-                        width: 260,
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(service.day, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                                const SizedBox(height: 4),
-                                Text(
-                                  service.time,
-                                  style: TextStyle(
-                                    color: settings.colors.accent,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 22,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(service.label, style: const TextStyle(color: Colors.black54)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-            ],
-          ),
+          child: ServiceTimes(settings: settings, heading: 'Service Times'),
         ),
         SectionContainer(
           child: Column(

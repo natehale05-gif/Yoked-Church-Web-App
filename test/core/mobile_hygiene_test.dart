@@ -58,6 +58,55 @@ void main() {
     );
   });
 
+  test('no text is painted in the raw accent colour', () {
+    // The accent is a *fill*. As ink on a pale background every bundled
+    // palette measures 2.2 to 3.7 against the 4.5:1 text needs, which is
+    // what `BrandColors.accentInk` exists to correct.
+    //
+    // This rule is here because the last attempt at the same bug shipped
+    // half-finished. That one was applied with a single-line grep and
+    // guarded by a test that walked the palettes proving `accentInk`
+    // *would* read - never asking whether anything used it. It passed
+    // with three sites still broken, two of them on the home page and
+    // Plan a Visit.
+    //
+    // It cannot be a widget test: no screen renders every accent label,
+    // and no screenshot distinguishes 2.2:1 from 4.6:1 by eye.
+    final offenders = <String>[];
+
+    for (final file in dartFiles) {
+      final source = file.readAsStringSync();
+
+      for (final match in RegExp(r'TextStyle\(').allMatches(source)) {
+        // Walk to the matching close paren, so a nested style or a
+        // BoxDecoration further down is not swept in.
+        var depth = 0;
+        var i = match.end - 1;
+        for (; i < source.length; i++) {
+          if (source[i] == '(') depth++;
+          if (source[i] == ')') {
+            depth--;
+            if (depth == 0) break;
+          }
+        }
+        final body = source.substring(match.start, i + 1);
+
+        // `color: <anything>.accent` - but not `.accentInk`, and not
+        // `readableOn(...accent)`, which is the fill case done right.
+        if (RegExp(r'color:\s*[\w.]*\baccent\b(?!Ink)').hasMatch(body)) {
+          offenders.add('${file.path}:${source.substring(0, match.start).split('\n').length}');
+        }
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason: 'these paint text in a colour that does not read; use `accentInk`:\n'
+          '  ${offenders.join('\n  ')}',
+    );
+  });
+
   test('the custom bootstrap still does the two jobs it exists for', () {
     // A hand-written `web/flutter_bootstrap.js` opts out of whatever the
     // generated one does, silently, so what it must keep is worth

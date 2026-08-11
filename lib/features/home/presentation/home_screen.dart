@@ -9,6 +9,7 @@ import '../../../core/config/church_settings.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/section_container.dart';
+import '../../../core/widgets/service_times.dart';
 import '../../devotionals/application/devotional_providers.dart';
 import '../../events/application/event_providers.dart';
 import '../../live/application/live_providers.dart';
@@ -159,45 +160,7 @@ class _ServiceTimes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SectionContainer(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Join Us', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 24),
-          Wrap(
-            spacing: 20,
-            runSpacing: 20,
-            children: [
-              for (final service in settings.serviceTimes)
-                SizedBox(
-                  width: 260,
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(service.day, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                          const SizedBox(height: 4),
-                          Text(
-                            service.time,
-                            style: TextStyle(
-                              color: settings.colors.accent,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 22,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(service.label, style: const TextStyle(color: Colors.black54)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
+      child: ServiceTimes(settings: settings, heading: 'Join Us'),
     );
   }
 }
