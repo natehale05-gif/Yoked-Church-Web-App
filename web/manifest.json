@@ -1,11 +1,11 @@
 {
-    "name": "Yoked Church",
-    "short_name": "Yoked Church",
+    "name": "Yoked",
+    "short_name": "Yoked",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#1B3A4B",
     "theme_color": "#1B3A4B",
-    "description": "Yoked Church - service times, sermons, events, and online giving.",
+    "description": "Yoked - a website, a member app, and the tools to run a Sunday.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

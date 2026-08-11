@@ -51,6 +51,36 @@ user or organisation page (`<user>.github.io`, served from the domain
 root) means setting `PATH_SEGMENTS_IN_BASE` to `0`; a test holds it in
 step with the workflow so the two cannot drift silently.
 
+The address is on the dashboard, with a copy button — it used to appear
+once while the church was being named and then nowhere, which is an odd
+way to treat the one link the whole thing exists to hand out. It is
+built from the page's own origin, so a fork on its own domain shows its
+own address rather than this one.
+
+### What a link looks like before anyone clicks it
+
+`index.html` carries `og:` and `twitter:` tags and a
+[social card](web/social-card.png), so a church's address pasted into
+Facebook, WhatsApp, iMessage or Slack renders as something rather than a
+bare URL. Regenerate the card with
+`node web/tools/build_social_card.mjs` after changing the copy or the
+palette — it is written as HTML in that script rather than being a
+binary nobody dares edit.
+
+**The preview is the product, not the church, and cannot be otherwise
+here.** The app routes on the URL fragment and browsers never send a
+fragment to the server, so a crawler fetching a church's address
+receives one static `index.html` and has no way to learn which church
+was meant. Per-church previews need server-side rendering, which GitHub
+Pages does not do.
+
+What *is* per-church is everything a real visitor's browser sees once
+the app boots: the tab title, the description, the browser chrome colour
+and the label iOS puts under the icon after Add to Home Screen. That
+last one matters more than it sounds — Apple has no sideloading, so Add
+to Home Screen is the only way this app reaches an iPhone at all. See
+[`lib/core/branding/document_branding.dart`](lib/core/branding/document_branding.dart).
+
 ## Setting up a church
 
 Nobody has to do anything in a console. **Start your church site** asks
@@ -305,7 +335,8 @@ lib/
 assets/
   data/         sample content, incl. church_settings.json
   fonts/        Lora + Work Sans, bundled so text never depends on a CDN
-web/            index.html and 404.html, the Pages hash-less redirect
+web/            index.html, 404.html (the Pages hash-less redirect),
+                the social card and the script that generates it
 functions/     the scheduled YouTube poller - the only server-side code
 firestore.rules, storage.rules, firestore.indexes.json, firebase.json
 test/           Flutter tests
