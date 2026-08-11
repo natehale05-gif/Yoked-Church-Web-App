@@ -7,6 +7,8 @@ import 'package:yoked_church_app/core/config/tenant.dart';
 import 'package:yoked_church_app/features/churches/application/church_providers.dart';
 import 'package:yoked_church_app/features/churches/data/church_directory_repository.dart';
 import 'package:yoked_church_app/core/config/settings_providers.dart';
+import 'package:yoked_church_app/features/downloads/application/release_providers.dart';
+import 'package:yoked_church_app/features/downloads/domain/release_check.dart';
 import 'package:yoked_church_app/features/live/application/live_providers.dart';
 import 'package:yoked_church_app/features/live/data/live_repository.dart';
 import 'package:yoked_church_app/features/live/domain/live_status.dart';
@@ -701,6 +703,14 @@ List<Override> fakeOverrides({
   /// the state a member is in before they have chosen one, which is what
   /// sends them to the picker.
   String? churchId = demoChurchId,
+
+  /// What a look at the releases repository found.
+  ///
+  /// Overridden unconditionally so no test ever reaches api.github.com.
+  /// The default is what the real page falls back to while the check is
+  /// in flight or after it fails, which is also what every test written
+  /// before this existed assumes: the buttons are there.
+  ReleaseCheck release = ReleaseCheck.unknown,
 }) {
   final connectRepo = connect ?? FakeConnectRepository()
     ..seedInMemory(const []);
@@ -751,6 +761,7 @@ List<Override> fakeOverrides({
     attendanceRepositoryProvider.overrideWithValue(FakeAttendanceRepository()..seedInMemory(attendance)),
     formRepositoryProvider.overrideWithValue(FakeFormRepository()..seedInMemory(forms)),
     submissionRepositoryProvider.overrideWithValue(FakeSubmissionRepository()..seedInMemory(submissions)),
+    releaseCheckProvider.overrideWith((ref) => release),
   ];
 }
 

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yoked Church</title>
+  <meta name="robots" content="noindex">
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: #4b5563;
+      background: #ffffff;
+    }
+    main { max-width: 32rem; padding: 2rem; text-align: center; }
+    a { color: #1d4ed8; }
+  </style>
+  <script>
+    // Every church has an address, and the whole pitch is that a church
+    // can hand it out - print it on a card, put it in a bulletin. But the
+    // app routes on the URL fragment, so the address it actually answers
+    // to is
+    //
+    //     .../Yoked-Church-Web-App/#/c/grace-chapel
+    //
+    // and the one somebody types from memory is the same thing without
+    // the `#`. GitHub Pages has no server-side rewrites, so that request
+    // reaches no file and Pages serves this page. Turning it back into the
+    // hash form here is the only place that can be fixed, and it is the
+    // difference between a printed address working and not.
+    //
+    // The deep link is preserved rather than dropped at the front door:
+    // somebody sent that exact link for a reason.
+    (function () {
+      // How much of the path belongs to the site rather than the route.
+      //
+      // One, because this deploys to a GitHub *project* page, where the
+      // site lives under /<repo>/ - and `deploy.yml` builds with
+      // `--base-href "/<repo>/"` to match. A user or organisation page
+      // serves from the domain root and would want 0.
+      // `test/features/pages_routing_test.dart` holds the two in step.
+      var PATH_SEGMENTS_IN_BASE = 1;
+
+      var l = window.location;
+      var segments = l.pathname.split('/').filter(function (s) { return s.length > 0; });
+
+      var base = '/' + segments.slice(0, PATH_SEGMENTS_IN_BASE).join('/');
+      if (base.length > 1) base += '/';
+
+      var route = segments.slice(PATH_SEGMENTS_IN_BASE).join('/');
+
+      // A miss on the base itself means index.html is genuinely absent -
+      // a broken deploy, not a mistyped address. Redirecting would loop.
+      if (route.length === 0 && !l.search) return;
+
+      // The query string moves inside the fragment, which is where the
+      // router looks for it. `replace` rather than `assign` so the back
+      // button goes where the visitor came from rather than back to a
+      // page that only ever redirects.
+      l.replace(l.protocol + '//' + l.host + base + '#/' + route + l.search);
+    })();
+  </script>
+</head>
+<body>
+  <main>
+    <p>Taking you to the app&hellip;</p>
+    <noscript>
+      <p>This site needs JavaScript. Once it is enabled, this address will
+      work; in the meantime the site itself is still reachable.</p>
+    </noscript>
+  </main>
+</body>
+</html>

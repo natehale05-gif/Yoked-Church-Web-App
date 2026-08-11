@@ -7,7 +7,9 @@ import '../../../app/theme.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/section_container.dart';
+import '../application/release_providers.dart';
 import '../domain/app_download.dart';
+import '../domain/release_check.dart';
 
 /// Where a member goes to install the app on their own machine or phone.
 ///
@@ -21,6 +23,10 @@ class DownloadScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final repo = settings.releasesRepo.trim();
+    // Still loading and failed outright both read as "we do not know",
+    // and that shows the buttons - see ReleaseCheck.offers. So the
+    // common case never waits on this and never flickers.
+    final release = ref.watch(releaseCheckProvider).valueOrNull ?? ReleaseCheck.unknown;
     final detected = buildForCurrentPlatform();
     final others = appBuilds.where((b) => b != detected).toList();
 
@@ -37,43 +43,77 @@ class DownloadScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (detected != null) ...[
-                Text('Recommended for you', style: Theme.of(context).textTheme.titleMedium),
+              if (release.isEmpty) ...[
+                // Nothing has been published from the configured
+                // repository. Four buttons that all 404 look identical to
+                // a broken app, so the page says which it is - and says
+                // the one thing that would fix it, because the person
+                // most likely to see this screen is whoever set the site
+                // up rather than a member.
+                const _Notice(
+                  icon: Icons.hourglass_empty,
+                  text: 'There is no installable build published yet, so '
+                      'there is nothing to download at the moment. Nothing '
+                      'is wrong with the app - it simply has not been '
+                      'packaged up for this church yet.',
+                ),
                 const SizedBox(height: 12),
-                _DownloadCard(download: detected, repo: repo, highlighted: true),
-                const SizedBox(height: 32),
-                Text(
-                  'Other platforms',
-                  style: Theme.of(context).textTheme.titleMedium,
+                _Notice(
+                  icon: Icons.settings_outlined,
+                  text: 'Running this site? The apps are built and attached '
+                      'automatically the first time a version is tagged in '
+                      '$repo. If that is not the right repository, change '
+                      'it under Settings in the dashboard.',
                 ),
                 const SizedBox(height: 12),
               ] else ...[
-                // Reached on iPhone and iPad, and on anything whose
-                // platform we could not identify.
-                if (defaultTargetPlatform == TargetPlatform.iOS) ...[
-                  const _Notice(icon: Icons.phone_iphone, text: iosExplanation),
+                if (detected != null) ...[
+                  Text('Recommended for you', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 12),
+                  _DownloadCard(
+                    download: detected,
+                    repo: repo,
+                    offered: release.offers(detected.asset),
+                    highlighted: true,
+                  ),
                   const SizedBox(height: 32),
+                  Text(
+                    'Other platforms',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 12),
+                ] else ...[
+                  // Reached on iPhone and iPad, and on anything whose
+                  // platform we could not identify.
+                  if (defaultTargetPlatform == TargetPlatform.iOS) ...[
+                    const _Notice(icon: Icons.phone_iphone, text: iosExplanation),
+                    const SizedBox(height: 32),
+                  ],
+                  Text('Choose your platform', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 12),
                 ],
-                Text('Choose your platform', style: Theme.of(context).textTheme.titleMedium),
+                for (final other in others) ...[
+                  _DownloadCard(
+                    download: other,
+                    repo: repo,
+                    offered: release.offers(other.asset),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                const SizedBox(height: 20),
+                const _Notice(
+                  icon: Icons.lock_outline,
+                  // The honest version. These builds are not code-signed,
+                  // and a member who meets that warning cold assumes the
+                  // worst about the church, not about the build pipeline.
+                  text: 'These apps are not code-signed, so your computer or '
+                      'phone will warn you the first time you open one. That '
+                      'warning means the app has no paid certificate attached, '
+                      'not that anything is wrong with it. Each download above '
+                      'says exactly what you will see and what to click.',
+                ),
                 const SizedBox(height: 12),
               ],
-              for (final other in others) ...[
-                _DownloadCard(download: other, repo: repo),
-                const SizedBox(height: 12),
-              ],
-              const SizedBox(height: 20),
-              const _Notice(
-                icon: Icons.lock_outline,
-                // The honest version. These builds are not code-signed,
-                // and a member who meets that warning cold assumes the
-                // worst about the church, not about the build pipeline.
-                text: 'These apps are not code-signed, so your computer or '
-                    'phone will warn you the first time you open one. That '
-                    'warning means the app has no paid certificate attached, '
-                    'not that anything is wrong with it. Each download above '
-                    'says exactly what you will see and what to click.',
-              ),
-              const SizedBox(height: 12),
               const _Notice(
                 icon: Icons.public,
                 text: 'Nothing to install? The website works everywhere, '
@@ -91,19 +131,39 @@ class DownloadScreen extends ConsumerWidget {
 class _DownloadCard extends StatelessWidget {
   final AppDownload download;
   final String repo;
+
+  /// Whether the latest release actually has this build attached.
+  ///
+  /// False only when we know it does not - one platform failed in CI
+  /// while the others published. A disabled button that says why beats a
+  /// live one that 404s.
+  final bool offered;
+
   final bool highlighted;
 
-  const _DownloadCard({required this.download, required this.repo, this.highlighted = false});
+  const _DownloadCard({
+    required this.download,
+    required this.repo,
+    this.offered = true,
+    this.highlighted = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isMobile = Breakpoints.isMobile(context);
-    final button = FilledButton.icon(
-      onPressed: () => launchUrl(Uri.parse(download.urlFor(repo)), webOnlyWindowName: '_blank'),
-      icon: const Icon(Icons.download),
-      label: Text('Download for ${download.label}'),
-    );
+    final button = offered
+        ? FilledButton.icon(
+            onPressed: () =>
+                launchUrl(Uri.parse(download.urlFor(repo)), webOnlyWindowName: '_blank'),
+            icon: const Icon(Icons.download),
+            label: Text('Download for ${download.label}'),
+          )
+        : FilledButton.icon(
+            onPressed: null,
+            icon: const Icon(Icons.download_for_offline_outlined),
+            label: Text('${download.label} not in this release'),
+          );
 
     return Card(
       elevation: highlighted ? 2 : 0,

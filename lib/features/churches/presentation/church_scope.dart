@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/config/tenant.dart';
 import '../application/church_providers.dart';
@@ -56,8 +57,27 @@ class _ChurchScopeState extends ConsumerState<ChurchScope> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(selectedChurchIdProvider.notifier).state = id;
-      ChurchPreference.write(id);
+      // Deliberately not remembered here. A mistyped or dead address
+      // would otherwise become the church this browser opens on every
+      // time. [_missing] writes it once the directory confirms it is
+      // real.
     });
+  }
+
+  /// Whether the directory has come back and positively does not have
+  /// this church.
+  ///
+  /// A directory still loading is not an answer, and neither is one that
+  /// failed to load - `valueOrNull` is null for both, and both mean "keep
+  /// going". Answering "no such church" from a dropped request would take
+  /// a church's entire site down over one bad connection.
+  bool _missing(String id) {
+    final known = ref.watch(churchesProvider).valueOrNull;
+    if (known == null) return false;
+
+    final exists = known.any((church) => church.id == id);
+    if (exists) ChurchPreference.write(id);
+    return !exists;
   }
 
   @override
@@ -71,6 +91,90 @@ class _ChurchScopeState extends ConsumerState<ChurchScope> {
     if (id != null && selected != id) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+    if (id != null && _missing(id)) return ChurchNotFound(churchId: id);
     return widget.child;
+  }
+}
+
+/// What a link to a church that is not there should say.
+///
+/// The alternative is what this replaced: the address bar reading
+/// `/c/grace-chapel` while the page shows a different church's name,
+/// service times and colours, because nothing under the church id
+/// resolved and the settings fell back to the bundled defaults. Someone
+/// following a stale link would read another church's Sunday times and
+/// believe they were their own.
+///
+/// Deliberately plain. There is no church here, so there is no palette to
+/// theme it with, and dressing it in the last church's colours would be
+/// the same lie in a quieter voice.
+class ChurchNotFound extends ConsumerWidget {
+  final String churchId;
+
+  const ChurchNotFound({super.key, required this.churchId});
+
+  /// Leaves the church behind before leaving the page.
+  ///
+  /// Order matters and is not cosmetic. The router sends `/` to whichever
+  /// church is selected, so navigating with this one still selected would
+  /// redirect straight back to the address that has no church - a loop
+  /// with a Back button that cannot escape it.
+  ///
+  /// The *stored* church is left alone: it holds whichever real church
+  /// this browser last opened, and a bad link should not cost someone
+  /// that.
+  void _leave(BuildContext context, WidgetRef ref, String to) {
+    ref.read(selectedChurchIdProvider.notifier).state = null;
+    context.go(to);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(32),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 460),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.travel_explore, size: 40, color: theme.colorScheme.primary),
+                const SizedBox(height: 20),
+                Text(
+                  'No church at this address',
+                  style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Nothing is set up at "$churchId". The link may have a typo '
+                  'in it, or the church may have moved to a different address.',
+                  style: theme.textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 24),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    FilledButton.icon(
+                      onPressed: () => _leave(context, ref, '/choose-church'),
+                      icon: const Icon(Icons.search),
+                      label: const Text('Find your church'),
+                    ),
+                    OutlinedButton(
+                      onPressed: () => _leave(context, ref, '/'),
+                      child: const Text('What is this?'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

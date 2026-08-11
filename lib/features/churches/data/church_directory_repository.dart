@@ -165,13 +165,53 @@ class FirestoreChurchDirectoryRepository implements ChurchDirectoryRepository {
       }
       return id;
     } on FirebaseFunctionsException catch (e) {
-      // The function raises its refusals with messages written for a
-      // person; anything else gets a plain one rather than a code.
-      throw ChurchCreationFailure(
-        e.message?.trim().isNotEmpty == true
-            ? e.message!
-            : "We couldn't set up your church just then. Please try again.",
-      );
+      throw ChurchCreationFailure(churchCreationMessageFor(e));
     }
   }
+
 }
+
+///
+/// Switched on the code rather than sniffing the message, because the
+/// two sources of failure read completely differently. `createChurch`
+/// raises its own refusals with sentences written for a person - a
+/// name too short, an address taken, a cap reached - while the SDK
+/// raises transport failures whose `message` is empty or a bare
+/// `NOT_FOUND`.
+///
+/// Getting this wrong is expensive in the one place it happens: the
+/// first thing a new customer ever does. "Please try again" in front
+/// of a problem that retrying cannot fix costs someone their evening.
+String churchCreationMessageFor(FirebaseFunctionsException e) {
+  final written = e.message?.trim() ?? '';
+
+  switch (e.code) {
+    // Raised by the function itself, which already said something
+    // useful. Only fall back if it somehow did not.
+    case 'invalid-argument':
+    case 'resource-exhausted':
+    case 'unauthenticated':
+      return written.isNotEmpty ? written : _generic;
+
+    // The callable does not exist. Not a transient failure and not the
+    // person's fault - the deploy has not happened - so it names the
+    // command rather than suggesting a retry that can never work.
+    case 'not-found':
+      return 'Church signup is not switched on for this site yet. '
+          'It needs the createChurch function deployed: '
+          '`firebase deploy --only functions`.';
+
+    case 'unavailable':
+    case 'deadline-exceeded':
+      return "We couldn't reach the server. Check your connection and try again.";
+
+    case 'permission-denied':
+      return 'The server refused that. If this keeps happening, the '
+          "site's Firebase configuration needs a look.";
+
+    default:
+      return written.isNotEmpty ? written : _generic;
+  }
+}
+
+const String _generic = "We couldn't set up your church just then. Please try again.";

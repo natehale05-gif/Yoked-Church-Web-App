@@ -6,6 +6,7 @@ import 'package:yoked_church_app/core/config/tenant.dart';
 import 'package:yoked_church_app/app/router.dart';
 import 'package:yoked_church_app/core/config/church_settings.dart';
 import 'package:yoked_church_app/core/widgets/app_shell.dart';
+import 'package:yoked_church_app/features/account/presentation/account_header.dart';
 import 'package:yoked_church_app/features/admin/presentation/admin_header.dart';
 import 'package:yoked_church_app/features/auth/domain/app_user.dart';
 
@@ -81,6 +82,76 @@ void main() {
 
       final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
       expect(bar.selectedIndex, bottomNav(testSettings()).length - 1);
+    });
+  });
+
+  group('the member portal on a phone', () {
+    /// Thirteen sections in a horizontal scroller showed four - Overview,
+    /// Profile, Groups, My Events - and gave no sign the rest existed.
+    /// Exactly the bug the staff dashboard had, on the side far more
+    /// people use, left standing a milestone longer.
+    Future<ProviderContainer> pumpAccount(WidgetTester tester, Size size) async {
+      final container = await pumpAt(tester, size, signedInAs: testMember());
+      container.read(routerProvider).go('/account');
+      await tester.pumpAndSettle();
+      return container;
+    }
+
+    Finder inHeader(String label) =>
+        find.descendant(of: find.byType(AccountHeader), matching: find.text(label));
+
+    testWidgets('every section is reachable from one control', (tester) async {
+      await pumpAccount(tester, phone);
+
+      expect(inHeader('Notifications'), findsNothing, reason: 'the far tab is not in the header');
+
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Overview'));
+      await tester.pumpAndSettle();
+
+      final inSheet = find.widgetWithText(ListTile, 'Notifications');
+      expect(inSheet, findsOneWidget, reason: 'the sheet lists every section');
+
+      await tester.ensureVisible(inSheet);
+      await tester.pumpAndSettle();
+      await tester.tap(inSheet);
+      await tester.pumpAndSettle();
+
+      expect(
+        subPathOf(container(tester).read(routerProvider).routerDelegate.currentConfiguration.uri.path),
+        '/account/notifications',
+      );
+    });
+
+    testWidgets('the control says which section you are in', (tester) async {
+      final c = await pumpAccount(tester, phone);
+      c.read(routerProvider).go('/account/giving');
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(OutlinedButton, 'Giving'), findsOneWidget);
+    });
+
+    testWidgets('a desktop keeps the tab row', (tester) async {
+      await pumpAccount(tester, desktop);
+
+      expect(inHeader('Notifications'), findsOneWidget, reason: 'there is room for them all');
+    });
+
+    testWidgets('a switched-off feature has no section at all', (tester) async {
+      // The sheet is built from the same flag-filtered list the row was,
+      // so moving to it must not have quietly reintroduced a way in.
+      await pumpAt(
+        tester,
+        phone,
+        signedInAs: testMember(),
+        settings: testSettings(features: const FeatureFlags(giving: false)),
+      );
+      container(tester).read(routerProvider).go('/account');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Overview'));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(ListTile, 'Giving'), findsNothing);
     });
   });
 
@@ -175,3 +246,7 @@ void main() {
     });
   });
 }
+
+/// The container behind the currently pumped app.
+ProviderContainer container(WidgetTester tester) =>
+    ProviderScope.containerOf(tester.element(find.byType(YokedChurchApp)));

@@ -9,6 +9,7 @@ import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/section_container.dart';
+import '../../../core/widgets/section_picker.dart';
 import '../../auth/application/auth_providers.dart';
 
 /// Tabs for the staff dashboard. Content tools are open to staff; the
@@ -96,92 +97,17 @@ class AdminHeader extends ConsumerWidget {
       eyebrow: 'Staff Dashboard',
       title: title,
       subtitle: subtitle,
-      below: Breakpoints.isMobile(context)
-          ? _AdminTabPicker(tabs: tabs, current: current)
-          : SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (final tab in tabs)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: TextButton(
-                        onPressed: () => context.go(tab.path),
-                        style: TextButton.styleFrom(
-                          backgroundColor: current == tab.path
-                              ? ref.watch(settingsProvider).colors.accent.withValues(alpha: 0.25)
-                              : null,
-                          foregroundColor: current == tab.path
-                              ? ref.watch(settingsProvider).colors.accent
-                              : Colors.white70,
-                        ),
-                        child: Text(
-                          tab.label,
-                          style:
-                              TextStyle(fontWeight: current == tab.path ? FontWeight.w700 : FontWeight.w500),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-    );
-  }
-}
-
-/// The same tabs on a phone, as a sheet you open rather than a strip you
-/// scroll.
-///
-/// Nineteen destinations in a horizontal scroller showed four of them and
-/// gave no sign the rest existed - so on a phone the dashboard appeared to
-/// have four sections. This shows where you are and opens the whole list,
-/// which is what the **More** sheet does for the member side.
-class _AdminTabPicker extends StatelessWidget {
-  final List<AdminTab> tabs;
-  final String current;
-
-  const _AdminTabPicker({required this.tabs, required this.current});
-
-  @override
-  Widget build(BuildContext context) {
-    final here = tabs.where((t) => t.path == current).firstOrNull ?? tabs.first;
-
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: OutlinedButton.icon(
-        onPressed: () => showModalBottomSheet<void>(
-          context: context,
-          isScrollControlled: true,
-          builder: (sheetContext) => SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (final tab in tabs)
-                    ListTile(
-                      leading: Icon(tab.icon),
-                      title: Text(tab.label),
-                      selected: tab.path == current,
-                      onTap: () {
-                        Navigator.pop(sheetContext);
-                        context.go(tab.path);
-                      },
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
-          side: const BorderSide(color: Colors.white38),
-        ),
-        icon: Icon(here.icon, size: 18),
-        label: Text(here.label),
+      below: SectionPicker(
+        sections: [
+          for (final tab in tabs) (label: tab.label, path: tab.path, icon: tab.icon),
+        ],
+        current: current,
+        selectedColor: ref.watch(settingsProvider).colors.accent,
       ),
     );
   }
 }
+
 
 /// Shared chrome for the admin list-and-edit screens: banner, an optional
 /// "New" action, and a list that handles its own loading/error/empty

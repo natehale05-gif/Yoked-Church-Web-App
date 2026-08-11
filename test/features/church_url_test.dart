@@ -231,4 +231,59 @@ void main() {
       expect(pathOf(container), '/c/$demoChurchId/admin');
     });
   });
+
+  /// A link that has been printed on a card or forwarded twice can name a
+  /// church that is not there - a typo, or one that moved. The failure
+  /// this guards against is quiet: nothing resolves under the id, the
+  /// settings fall back to the bundled defaults, and the page renders
+  /// another church's name, service times and colours while the address
+  /// bar still shows the one that was asked for.
+  group('an address with no church behind it', () {
+    testWidgets('says so instead of showing a different church', (tester) async {
+      final container = await pumpAt(tester, '/c/no-such-church', churchId: null);
+
+      expect(find.text('No church at this address'), findsOneWidget);
+      expect(find.textContaining('no-such-church'), findsOneWidget);
+      expect(
+        find.text('Church of $demoChurchId'),
+        findsNothing,
+        reason: 'somebody would read this church\'s Sunday times as their own',
+      );
+      expect(
+        pathOf(container),
+        '/c/no-such-church',
+        reason: 'the address stays put so the reader can see the typo they made',
+      );
+    });
+
+    testWidgets('offers a way out that does not come straight back', (tester) async {
+      // The router sends `/` to whichever church is selected, so leaving
+      // without dropping this one first is a loop the Back button cannot
+      // escape.
+      final container = await pumpAt(tester, '/c/no-such-church', churchId: null);
+
+      await tester.tap(find.text('What is this?'));
+      await tester.pumpAndSettle();
+
+      expect(pathOf(container), '/');
+      expect(container.read(selectedChurchIdProvider), isNull);
+    });
+
+    testWidgets('the other way out reaches the picker', (tester) async {
+      final container = await pumpAt(tester, '/c/no-such-church', churchId: null);
+
+      await tester.tap(find.text('Find your church'));
+      await tester.pumpAndSettle();
+
+      expect(pathOf(container), '/choose-church');
+    });
+
+    testWidgets('a church that does exist is untouched by any of this', (tester) async {
+      final container = await pumpAt(tester, '/c/riverside-fellowship', churchId: null);
+
+      expect(find.text('No church at this address'), findsNothing);
+      expect(pathOf(container), '/c/riverside-fellowship');
+      expect(container.read(currentChurchIdProvider), 'riverside-fellowship');
+    });
+  });
 }
