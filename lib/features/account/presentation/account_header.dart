@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/config/tenant.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/widgets/section_container.dart';
+import '../../../core/widgets/section_picker.dart';
 
 /// Secondary nav shared by every `/account/*` screen, filtered by the
 /// church's feature flags so a disabled feature never shows a tab.
@@ -22,58 +23,49 @@ class AccountHeader extends ConsumerWidget {
     final current =
         subPathOf(GoRouter.of(context).routerDelegate.currentConfiguration.uri.path);
 
-    final tabs = <({String label, String path})>[
-      (label: 'Overview', path: '/account'),
-      (label: 'Profile', path: '/account/profile'),
-      if (flags.groups) (label: 'Groups', path: '/account/groups'),
-      if (flags.events) (label: 'My Events', path: '/account/events'),
-      if (flags.volunteering) (label: 'Volunteering', path: '/account/volunteering'),
-      if (flags.readingPlans) (label: 'Reading', path: '/account/reading'),
-      if (flags.sermons) (label: 'My Notes', path: '/account/notes'),
-      if (flags.prayerWall) (label: 'Prayer', path: '/account/prayer'),
-      if (flags.roomBooking) (label: 'Bookings', path: '/account/bookings'),
-      if (flags.kidsCheckIn) (label: 'Kids', path: '/account/kids'),
-      (label: 'Directory', path: '/account/directory'),
-      if (flags.giving) (label: 'Giving', path: '/account/giving'),
-      (label: 'Notifications', path: '/account/notifications'),
+    // Icons because the phone sheet is a list, and thirteen rows of bare
+    // text is a worse thing to scan than thirteen rows with a picture.
+    final tabs = <Section>[
+      (label: 'Overview', path: '/account', icon: Icons.dashboard_outlined),
+      (label: 'Profile', path: '/account/profile', icon: Icons.person_outline),
+      if (flags.groups) (label: 'Groups', path: '/account/groups', icon: Icons.groups_outlined),
+      if (flags.events)
+        (label: 'My Events', path: '/account/events', icon: Icons.event_outlined),
+      if (flags.volunteering)
+        (
+          label: 'Volunteering',
+          path: '/account/volunteering',
+          icon: Icons.volunteer_activism_outlined
+        ),
+      if (flags.readingPlans)
+        (label: 'Reading', path: '/account/reading', icon: Icons.menu_book_outlined),
+      if (flags.sermons) (label: 'My Notes', path: '/account/notes', icon: Icons.edit_note),
+      if (flags.prayerWall)
+        (label: 'Prayer', path: '/account/prayer', icon: Icons.favorite_outline),
+      if (flags.roomBooking)
+        (label: 'Bookings', path: '/account/bookings', icon: Icons.meeting_room_outlined),
+      if (flags.kidsCheckIn)
+        (label: 'Kids', path: '/account/kids', icon: Icons.child_care_outlined),
+      (label: 'Directory', path: '/account/directory', icon: Icons.contacts_outlined),
+      if (flags.giving) (label: 'Giving', path: '/account/giving', icon: Icons.payments_outlined),
+      (
+        label: 'Notifications',
+        path: '/account/notifications',
+        icon: Icons.notifications_outlined
+      ),
     ];
 
     return PageBanner(
       eyebrow: 'My Account',
       title: title,
       subtitle: subtitle,
-      below: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (final tab in tabs)
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: _Tab(label: tab.label, path: tab.path, selected: current == tab.path),
-              ),
-          ],
-        ),
+      // Thirteen sections, four of which fit on a phone. Same control
+      // the staff dashboard uses, for the same reason.
+      below: SectionPicker(
+        sections: tabs,
+        current: current,
+        selectedColor: ref.watch(settingsProvider).colors.accent,
       ),
-    );
-  }
-}
-
-class _Tab extends ConsumerWidget {
-  final String label;
-  final String path;
-  final bool selected;
-
-  const _Tab({required this.label, required this.path, required this.selected});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return TextButton(
-      onPressed: () => context.go(path),
-      style: TextButton.styleFrom(
-        backgroundColor: selected ? Colors.white.withValues(alpha: 0.16) : null,
-        foregroundColor: selected ? Colors.white : Colors.white70,
-      ),
-      child: Text(label, style: TextStyle(fontWeight: selected ? FontWeight.w700 : FontWeight.w500)),
     );
   }
 }
