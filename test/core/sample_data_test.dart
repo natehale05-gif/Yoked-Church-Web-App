@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yoked_church_app/core/firestore/sample_data.dart';
 import 'package:yoked_church_app/features/attendance/data/attendance_repository.dart';
@@ -183,4 +186,79 @@ void main() {
       }
     });
   });
+
+  /// The demo's relationships are held together by *position*, and
+  /// nothing else.
+  ///
+  /// `LocalCrudRepository` ignores the `id` field in these files and
+  /// hands out `local-0`, `local-1`, ... in the order it reads them, so
+  /// `group_memberships.json` saying `"uid": "local-3"` means "the
+  /// fourth entry in members.json" and nothing more. Fourteen of the
+  /// sample files point at each other that way.
+  ///
+  /// Insert one member at the top of `members.json` and every
+  /// membership, RSVP, booking and check-in silently attaches to the
+  /// wrong person. The app renders it happily; the demo just quietly
+  /// stops making sense, and the demo is what sells this template.
+  ///
+  /// What makes this checkable is that the sample data denormalises the
+  /// name next to the id - `memberName` beside `uid`, `roomName` beside
+  /// `roomId`. So this does not merely ask whether the index exists,
+  /// which a re-pointed reference would still pass; it asks whether the
+  /// entry at that index is the one the file says it is.
+  group('the sample data agrees with itself', () {
+    Future<List<Map<String, dynamic>>> read(String name) async {
+      final raw = await rootBundle.loadString('assets/data/$name.json');
+      return (jsonDecode(raw) as List<dynamic>).cast<Map<String, dynamic>>();
+    }
+
+    /// One `local-N` reference, and the denormalised name that proves it
+    /// points where it claims.
+    const references = [
+      ('group_memberships', 'uid', 'members', 'displayName', 'memberName'),
+      ('group_memberships', 'groupId', 'groups', 'name', null),
+      ('room_bookings', 'requestedByUid', 'members', 'displayName', 'requestedByName'),
+      ('room_bookings', 'roomId', 'rooms', 'name', 'roomName'),
+      ('check_ins', 'guardianUid', 'members', 'displayName', 'guardianName'),
+      ('check_ins', 'roomId', 'rooms', 'name', 'roomName'),
+      ('volunteer_assignments', 'uid', 'members', 'displayName', 'memberName'),
+      ('event_rsvps', 'uid', 'members', 'displayName', 'memberName'),
+      ('event_rsvps', 'eventId', 'events', 'title', null),
+      ('sermon_notes', 'sermonId', 'sermons', 'title', 'sermonTitle'),
+    ];
+
+    for (final (file, idField, target, targetName, denormalised) in references) {
+      test('$file.$idField points into $target', () async {
+        final rows = await read(file);
+        final targets = await read(target);
+        final problems = <String>[];
+
+        for (var i = 0; i < rows.length; i++) {
+          final value = rows[i][idField];
+          if (value is! String || !value.startsWith('local-')) continue;
+
+          final index = int.parse(value.split('-').last);
+          if (index >= targets.length) {
+            problems.add('[$i].$idField=$value but $target has ${targets.length} entries');
+            continue;
+          }
+          if (denormalised == null) continue;
+
+          final actual = targets[index][targetName];
+          final claimed = rows[i][denormalised];
+          if (actual != claimed) {
+            problems.add('[$i].$idField=$value is "$actual", but $denormalised says "$claimed"');
+          }
+        }
+
+        expect(
+          problems,
+          isEmpty,
+          reason: 'these point at the wrong entry - did the order of '
+              '$target.json change?\n    ${problems.join('\n    ')}',
+        );
+      });
+    }
+  });
 }
+
