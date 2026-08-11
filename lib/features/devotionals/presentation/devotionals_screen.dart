@@ -85,7 +85,7 @@ class DevotionalCard extends ConsumerWidget {
             children: [
               Text(
                 DateFormat.yMMMMd().format(devotional.publishDate).toUpperCase(),
-                style: TextStyle(color: brand.accent, fontWeight: FontWeight.w700, letterSpacing: 1, fontSize: 12),
+                style: TextStyle(color: brand.accentInk, fontWeight: FontWeight.w700, letterSpacing: 1, fontSize: 12),
               ),
               const SizedBox(height: 8),
               Text(devotional.title, style: Theme.of(context).textTheme.titleLarge),

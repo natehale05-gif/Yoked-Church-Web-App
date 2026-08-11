@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/config/church_settings.dart';
+import '../core/config/contrast.dart';
 import '../core/config/settings_providers.dart';
 
 /// Theme is *derived from* [ChurchSettings], so changing a brand color in
@@ -42,7 +43,12 @@ ThemeData buildTheme(ChurchSettings settings) {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: brand.accent,
-        foregroundColor: Colors.white,
+        // Not white. Every one of the six bundled palettes has a
+        // mid-tone accent, and white on those measures 2.4 to 3.9
+        // against the 4.5 that normal text needs - on Give, on Plan a
+        // Visit, on Sign In, on every primary action in the app, read
+        // on a phone and often outdoors. See core/config/contrast.dart.
+        foregroundColor: readableOn(brand.accent),
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         textStyle: const TextStyle(fontFamily: 'WorkSans', fontWeight: FontWeight.w600, letterSpacing: 0.5),

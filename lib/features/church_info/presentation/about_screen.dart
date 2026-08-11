@@ -100,7 +100,7 @@ class _StaffCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(member.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                        Text(member.role, style: TextStyle(color: brand.accent, fontWeight: FontWeight.w600)),
+                        Text(member.role, style: TextStyle(color: brand.accentInk, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),

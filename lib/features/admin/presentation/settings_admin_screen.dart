@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/church_settings.dart';
+import '../../../core/config/contrast.dart';
 import '../../../core/config/settings_providers.dart';
 import '../../../core/config/themes.dart';
 import '../../../core/widgets/app_shell.dart';
@@ -651,11 +652,18 @@ class _BrandPreview extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(color: colors.accent, borderRadius: BorderRadius.circular(6)),
-                  child: const Text('Give', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                  // The same choice the real button makes. A preview
+                  // that hardcoded white would be showing an admin a
+                  // button their site does not have.
+                  child: Text(
+                    'Give',
+                    style: TextStyle(color: readableOn(colors.accent), fontWeight: FontWeight.w600),
+                  ),
                 ),
                 Text('Preview', style: TextStyle(color: colors.primary, fontWeight: FontWeight.w600)),
               ],
             ),
+            _ContrastNote(colors: colors),
           ],
         ),
       ),
@@ -686,5 +694,68 @@ class _ServiceRow {
     day.dispose();
     time.dispose();
     label.dispose();
+  }
+}
+
+/// Says so when the colours an admin typed will not read.
+///
+/// Advice, not a gate. These are their church's colours and they may
+/// have been chosen by somebody with a brand guide and an opinion - a
+/// rule that cannot be overridden is one people route around by giving
+/// up on the feature. What it can do is make sure nobody finds out from
+/// a member squinting at a Give button in a car park.
+///
+/// Names the measured number and what it affects, because "poor
+/// contrast" is not actionable and "2.4:1 against the 4.5:1 text needs"
+/// is.
+class _ContrastNote extends StatelessWidget {
+  final BrandColors colors;
+
+  const _ContrastNote({required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    final problems = <String>[
+      // The button foreground is chosen for readability now, so this
+      // only fires when *neither* black nor white works on the accent -
+      // which takes a genuinely mid-grey choice.
+      if (contrastRatio(readableOn(colors.accent), colors.accent) < readableContrast)
+        'Buttons in this accent cannot be read in black or white '
+            '(${contrastRatio(readableOn(colors.accent), colors.accent).toStringAsFixed(1)}:1). '
+            'A darker or lighter accent would fix it.',
+      if (contrastRatio(colors.primary, colors.background) < readableContrast)
+        'Headings and links are hard to read on this background '
+            '(${contrastRatio(colors.primary, colors.background).toStringAsFixed(1)}:1, '
+            'against the ${readableContrast.toStringAsFixed(1)}:1 text needs). '
+            'A deeper main colour, or a paler background, would fix it.',
+    ];
+
+    if (problems.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final problem in problems)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: Colors.orange.shade800),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      problem,
+                      style: TextStyle(fontSize: 12, height: 1.35, color: Colors.orange.shade900),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

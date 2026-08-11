@@ -57,4 +57,26 @@ void main() {
           '  ${offenders.join('\n  ')}',
     );
   });
+
+  test('the custom bootstrap still does the two jobs it exists for', () {
+    // A hand-written `web/flutter_bootstrap.js` opts out of whatever the
+    // generated one does, silently, so what it must keep is worth
+    // pinning. Both tokens are substituted at build time and the file is
+    // dead without them.
+    //
+    // Not pinned: the service worker. Passing `serviceWorkerSettings`
+    // looks like it would restore caching and does nothing on this
+    // Flutter - the loader only refreshes an existing registration and
+    // creates none, generated bootstrap or not. Tested both ways; see
+    // the note at the top of the file.
+    final bootstrap = File('web/flutter_bootstrap.js').readAsStringSync();
+
+    expect(bootstrap, contains(r'{{flutter_js}}'));
+    expect(bootstrap, contains(r'{{flutter_build_config}}'));
+    expect(
+      bootstrap,
+      contains("getElementById('loading')"),
+      reason: 'nothing else takes the loading screen down, and it covers the whole app',
+    );
+  });
 }
