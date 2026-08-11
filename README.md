@@ -162,6 +162,23 @@ groups and memberships, staff, locations, FAQs, devotionals, reading
 plans, resources, prayer posts, rooms and bookings, attendance, and two
 worked example forms. Replace these to reshape the demo.
 
+**These files reference each other by position, not by id.**
+`LocalCrudRepository` ignores the `id` field and hands out `local-0`,
+`local-1`, … in the order it reads a file, so `"uid": "local-3"` in
+`group_memberships.json` means *the fourth entry in `members.json`* and
+nothing else. Fourteen of the files point at each other that way.
+
+That means inserting one member at the top of `members.json` silently
+re-points every membership, RSVP, booking and check-in to the wrong
+person — the app renders it perfectly happily. Adding to the *end* of a
+file is always safe; reordering or inserting is not.
+
+`test/core/sample_data_test.dart` catches it: the data denormalises the
+name beside each id (`memberName` next to `uid`, `roomName` next to
+`roomId`), so the test resolves every reference and checks the entry it
+lands on is the one the file claims. It names the wrong person rather
+than just failing.
+
 ## Connecting Firebase
 
 The app decides once, at startup, based on whether
