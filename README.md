@@ -38,6 +38,19 @@ break every link already shared.
 The product's own pages are the three that are not a church: `/` (what
 this is), `/start` (make one), `/choose-church` (find one).
 
+The `#` is optional when the link is typed rather than clicked. Routing
+happens on the URL fragment, so `/c/grace-chapel` without it reaches no
+file on GitHub Pages — which has no server-side rewrites, and would
+answer with its own 404. [`web/404.html`](web/404.html) turns that
+request back into the hash form, deep link and query string intact, so
+an address copied off a printed card works either way.
+
+That file strips one path segment as the site's base, matching the
+`--base-href "/<repo>/"` a project page is built with. Deploying to a
+user or organisation page (`<user>.github.io`, served from the domain
+root) means setting `PATH_SEGMENTS_IN_BASE` to `0`; a test holds it in
+step with the workflow so the two cannot drift silently.
+
 ## Setting up a church
 
 Nobody has to do anything in a console. **Start your church site** asks
@@ -292,6 +305,7 @@ lib/
 assets/
   data/         sample content, incl. church_settings.json
   fonts/        Lora + Work Sans, bundled so text never depends on a CDN
+web/            index.html and 404.html, the Pages hash-less redirect
 functions/     the scheduled YouTube poller - the only server-side code
 firestore.rules, storage.rules, firestore.indexes.json, firebase.json
 test/           Flutter tests
@@ -391,6 +405,13 @@ your own fork, or the buttons will hand your members somebody else's
 builds. Leave it blank and the page, its route and its links all
 disappear.
 
+Point it at a fork you have not tagged yet and the page says so, rather
+than showing four buttons that every one of them 404s — it asks GitHub
+whether the repository has a release before offering anything. If that
+question cannot be answered — offline, rate-limited, a proxy in the way
+— the buttons are shown anyway. Hiding a download that works is worse
+than the dead button the check exists to prevent.
+
 ### Sign the Android build before your second release
 
 Android refuses to install an APK over one signed with a different key —
@@ -418,8 +439,11 @@ Actions**):
 | `ANDROID_KEY_ALIAS` | `upload` |
 
 The release workflow picks them up automatically. With none set it still
-builds, and logs a warning saying the APK cannot be installed as an
-update. To build a signed release locally instead, put the same values
+builds, logs a warning saying the APK cannot be installed as an update,
+and adds a paragraph to the release notes saying the same thing to
+whoever downloads it. That paragraph is written by the workflow rather
+than kept in a file, so it disappears by itself once these secrets
+exist. To build a signed release locally instead, put the same values
 in `android/key.properties` — `storeFile` (an **absolute** path to the
 `.jks`, since a relative one resolves against `android/app`),
 `storePassword`, `keyAlias`, `keyPassword`. That file and `*.jks` are
