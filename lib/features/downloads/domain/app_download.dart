@@ -89,6 +89,17 @@ const List<AppDownload> appBuilds = [
     warning: 'Your phone will ask permission to install apps from this '
         'source, because it did not come from the Play Store. Allow it for '
         'your browser, then install.',
+    // Worded to stay true whether or not the project has a signing
+    // certificate configured, because the page cannot tell. Android
+    // refuses an update signed by a different key than the installed
+    // app, and a release built before a certificate was set up is
+    // signed with a throwaway one - so this is a real possibility for
+    // early releases and simply never happens after. The sharper,
+    // time-bound version ("this build is debug-signed") is written into
+    // the release notes by the workflow, which does know.
+    caveat: 'If a future version refuses to install over this one, '
+        'uninstall this one first. Android only accepts an update signed '
+        'with the same certificate as the copy already on the phone.',
   ),
   AppDownload(
     platform: TargetPlatform.linux,

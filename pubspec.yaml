@@ -58,6 +58,12 @@ dependencies:
   web: ^1.1.1
   shared_preferences: ^2.5.5
 
+  # One request, to GitHub's releases API - see
+  # lib/features/downloads/data/release_check.dart. Already present
+  # transitively via the Firebase packages; named here because the app
+  # imports it directly now.
+  http: ^1.6.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

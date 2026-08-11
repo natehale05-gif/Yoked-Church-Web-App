@@ -154,12 +154,33 @@ final routerProvider = Provider<GoRouter>((ref) {
       // makes the data layer agree with it.
       if (loading) return null;
 
-      if (!_flagAllows(ref.read(featureFlagsProvider), path)) return churchPath(urlChurchId);
+      // Which pages a church runs is in that church's settings, which
+      // arrive over a stream - and read at the source, for the same
+      // reason the auth state above is.
+      //
+      // `settingsProvider` is derived from this one, so inside the
+      // notification that the settings just landed it still reports
+      // `ChurchSettings.fallback`. That fallback names no releases
+      // repository, so the guard closed `/download` using the defaults of
+      // a church nobody was looking at, a beat after the real settings
+      // said to open it. A link straight to the download page landed on
+      // the church home instead - and the link is only ever sent to
+      // somebody who does not have the site open yet, so it failed in
+      // exactly the case it exists for.
+      //
+      // Nothing is decided at all until the first emission. That is safe
+      // because [_AuthRefresh] listens to the same stream and re-runs
+      // this the moment there is a real answer, so nothing gated stays
+      // open on the strength of the wait.
+      final churchSettings = ref.read(churchSettingsProvider).valueOrNull;
+      if (churchSettings == null) return null;
+
+      if (!_flagAllows(churchSettings.features, path)) return churchPath(urlChurchId);
 
       // The download buttons point at a specific repo's GitHub releases.
       // With no repo configured there is nothing to link to, so the page
       // closes rather than rendering four buttons that 404.
-      if (path == '/download' && ref.read(settingsProvider).releasesRepo.trim().isEmpty) {
+      if (path == '/download' && churchSettings.releasesRepo.trim().isEmpty) {
         return churchPath(urlChurchId);
       }
 
@@ -312,15 +333,24 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Re-runs the router's redirect whenever the signed-in user changes.
+/// Re-runs the router's redirect whenever something the guard reasons
+/// about changes.
 ///
 /// This is the only notification the guard gets, so the guard has to be
 /// able to answer correctly from inside it - which is why it reads
 /// [authStateProvider] rather than anything derived from it. See the
 /// redirect above.
+///
+/// The church's settings are here for the same reason as the auth state,
+/// one step later. They arrive over a stream, and the guard gates
+/// [_flagAllows] and `/download` on them; without this notification the
+/// answer given on the very first pass - taken against the bundled
+/// defaults, before the church's own settings existed - would be the
+/// permanent one.
 class _AuthRefresh extends ChangeNotifier {
   _AuthRefresh(Ref ref) {
     ref.listen(authStateProvider, (_, _) => notifyListeners());
+    ref.listen(churchSettingsProvider, (_, _) => notifyListeners());
   }
 }
 
