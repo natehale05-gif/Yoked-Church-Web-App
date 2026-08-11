@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'contrast.dart';
+
 /// Everything that differs between one church's deployment and another.
 ///
 /// This is deliberately *runtime data*, not compile-time constants: it is
@@ -142,6 +144,22 @@ class BrandColors {
   final Color background;
 
   const BrandColors({required this.primary, required this.accent, required this.background});
+
+  /// The accent, dark enough to be read as text.
+  ///
+  /// The accent is a *fill* colour - it works under a button label. The
+  /// small bold labels that use it as ink ("SERMON", "THIS SUNDAY", a
+  /// staff member's role) are a different job, and on a pale background
+  /// every bundled palette scored 2.2 to 3.7 against the 4.5 that text
+  /// needs.
+  ///
+  /// Measured against [background] rather than the white of a card,
+  /// because the pale background is the stricter of the two - anything
+  /// that reads on it reads on white as well.
+  ///
+  /// Unchanged when the accent is already dark enough, so a church that
+  /// chose a deep colour keeps precisely what it chose.
+  Color get accentInk => readableInk(accent, on: background);
 
   factory BrandColors.fromMap(Map<String, dynamic> map) {
     return BrandColors(

@@ -424,6 +424,30 @@ whole experience of the site:
   `test/core/fonts_test.dart` keeps the declared set and the used set in
   step in both directions.
 
+There is **no service worker**, and not by omission. Flutter's loader no
+longer registers one — passing `serviceWorkerSettings` only refreshes a
+registration that already exists — so a build with the stock bootstrap
+ends with none either. Tested both ways. Repeat visits ride on ordinary
+HTTP caching, which Pages does properly with `max-age` and ETags.
+
+### Colours a church can actually read
+
+The palettes are the church's, and the app picks what goes *on* them.
+Button labels take black or white by measured contrast rather than
+assuming white, and the accent is darkened as far as it has to be — no
+further — where it is used as small text. Both live in
+[`core/config/contrast.dart`](lib/core/config/contrast.dart).
+
+This is not decoration. Every one of the six bundled themes shipped a
+primary button at 2.4–3.9:1 against the 4.5:1 that text needs, the
+default one worst of all — on Give, on Plan a Visit, read on a phone in
+a car park. `test/core/contrast_test.dart` now walks every palette and
+every pair the app paints, which is arithmetic that could have been done
+at any point and never was.
+
+An admin who types their own hex gets told when it will not read. Told,
+not stopped: they are their church's colours.
+
 ## Download the app
 
 The same app also installs on a desktop or an Android phone. Every

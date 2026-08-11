@@ -77,7 +77,7 @@ class _GroupTile extends ConsumerWidget {
         if (group.category.isNotEmpty)
           Text(
             group.category.toUpperCase(),
-            style: TextStyle(color: brand.accent, fontSize: 12, fontWeight: FontWeight.w700),
+            style: TextStyle(color: brand.accentInk, fontSize: 12, fontWeight: FontWeight.w700),
           ),
         const SizedBox(height: 4),
         Text(group.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),

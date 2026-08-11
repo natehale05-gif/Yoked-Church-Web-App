@@ -90,7 +90,7 @@ class _SermonBody extends ConsumerWidget {
         if (sermon.seriesName.isNotEmpty)
           Text(
             sermon.seriesName.toUpperCase(),
-            style: TextStyle(color: brand.accent, fontWeight: FontWeight.w700, letterSpacing: 1),
+            style: TextStyle(color: brand.accentInk, fontWeight: FontWeight.w700, letterSpacing: 1),
           ),
         const SizedBox(height: 8),
         Text(sermon.title, style: Theme.of(context).textTheme.headlineMedium),

@@ -303,7 +303,7 @@ class _TodaysDevotional extends ConsumerWidget {
         children: [
           Text(
             "TODAY'S DEVOTIONAL",
-            style: TextStyle(color: brand.accent, fontWeight: FontWeight.w700, letterSpacing: 1.5, fontSize: 12),
+            style: TextStyle(color: brand.accentInk, fontWeight: FontWeight.w700, letterSpacing: 1.5, fontSize: 12),
           ),
           const SizedBox(height: 12),
           Text(

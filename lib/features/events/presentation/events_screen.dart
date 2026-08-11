@@ -149,7 +149,7 @@ class _DateChip extends StatelessWidget {
         children: [
           Text(
             DateFormat.MMM().format(date).toUpperCase(),
-            style: TextStyle(color: brand.accent, fontWeight: FontWeight.w700, fontSize: 12),
+            style: TextStyle(color: brand.accentInk, fontWeight: FontWeight.w700, fontSize: 12),
           ),
           Text(
             DateFormat.d().format(date),

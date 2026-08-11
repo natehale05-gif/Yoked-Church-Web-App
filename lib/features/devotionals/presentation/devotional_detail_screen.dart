@@ -56,7 +56,7 @@ class _DevotionalBody extends ConsumerWidget {
         const SizedBox(height: 16),
         Text(
           DateFormat.yMMMMd().format(devotional.publishDate).toUpperCase(),
-          style: TextStyle(color: brand.accent, fontWeight: FontWeight.w700, letterSpacing: 1, fontSize: 12),
+          style: TextStyle(color: brand.accentInk, fontWeight: FontWeight.w700, letterSpacing: 1, fontSize: 12),
         ),
         const SizedBox(height: 10),
         Text(devotional.title, style: Theme.of(context).textTheme.headlineMedium),

@@ -12,6 +12,26 @@
 {{flutter_js}}
 {{flutter_build_config}}
 
+// There is deliberately no service worker here.
+//
+// Not an oversight of writing a custom bootstrap, which was the first
+// theory: the bootstrap Flutter generates does not register one either.
+// Both were tested - a fresh browser profile against a real build ends
+// with zero registrations and no request for `flutter_service_worker.js`
+// on either. Passing `serviceWorkerSettings` does not change that; the
+// loader now only refreshes a registration that already exists, and
+// creates none, which is the deprecation Flutter's own generated code
+// warns about having already arrived.
+//
+// So repeat visits ride on ordinary HTTP caching, which GitHub Pages
+// does properly: `max-age` for the quiet case and ETags for the rest, so
+// a second visit is conditional requests rather than megabytes.
+//
+// Registering the file by hand would work today and is not worth it. It
+// means owning a deprecated artifact's lifecycle, and the failure it
+// invites - a stale worker serving last week's build - is one where a
+// member reads the wrong service time and turns up an hour late.
+
 _flutter.loader.load({
   onEntrypointLoaded: async function (engineInitializer) {
     const appRunner = await engineInitializer.initializeEngine();
