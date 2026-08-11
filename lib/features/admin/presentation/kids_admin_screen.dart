@@ -287,6 +287,7 @@ class _CheckInPanelState extends ConsumerState<_CheckInPanel> {
                   decoration: const InputDecoration(labelText: "Child's name"),
                 ),
                 DropdownButtonFormField<Room>(
+                  isExpanded: true,
                   initialValue: _room,
                   decoration: const InputDecoration(labelText: 'Room'),
                   items: [for (final r in rooms) DropdownMenuItem(value: r, child: Text(r.name))],
@@ -488,7 +489,19 @@ class _RosterRow extends ConsumerWidget {
       dense: true,
       title: Row(
         children: [
-          Text(session.childName, style: const TextStyle(fontWeight: FontWeight.w600)),
+          // A child's name is arbitrary text sharing a narrow tile with
+          // the pickup code and the override button. Unbounded, a
+          // double-barrelled name pushed the age and the allergy warning
+          // off the row - and the allergy warning is the one thing on
+          // this screen nobody can afford to miss.
+          Flexible(
+            child: Text(
+              session.childName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
           if (age != null) ...[
             const SizedBox(width: 8),
             Text('age $age', style: const TextStyle(color: Colors.black54, fontSize: 12)),

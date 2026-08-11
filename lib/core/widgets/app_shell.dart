@@ -175,6 +175,27 @@ class PageBody extends StatelessWidget {
   }
 }
 
+/// Roughly how much of the top bar the controls to the right of the
+/// church's name take up.
+///
+/// Estimated rather than measured, because measuring would mean laying
+/// the bar out twice. Erring high costs a few characters of a long
+/// church name; erring low costs the notification bell falling off the
+/// edge of a phone, so the numbers here are generous.
+double _trailingWidth({
+  required bool collapsed,
+  required bool showsMenu,
+  required ChurchSettings settings,
+}) {
+  var width = 48.0; // the notification bell, on every width
+  if (!collapsed) {
+    width += 52; // the account control, plus its gap
+    if (settings.features.giving) width += 102; // the Give button, plus its gap
+  }
+  if (showsMenu) width += 48; // the tablet hamburger
+  return width;
+}
+
 class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
   const AppNavBar({super.key});
 
@@ -214,9 +235,40 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
       titleSpacing: 0,
       title: Padding(
         padding: EdgeInsets.symmetric(horizontal: collapsed ? 16 : 40),
-        child: Row(
+        child: LayoutBuilder(
+          builder: (context, bar) => Row(
           children: [
-            _Wordmark(settings: settings),
+            // A church's name is arbitrary text, and this bar is 320px
+            // wide on the smallest phone still in use - narrower still
+            // once somebody turns their font size up. Unbounded, the name
+            // pushed the notification bell off the edge of the screen.
+            //
+            // A ceiling rather than `Flexible`, which was the first
+            // attempt: making the wordmark a flex child changes how the
+            // bar hands space to the link row beside it, and the two
+            // ended up overlapping - every nav link still drawn and none
+            // of them clickable, because the wordmark's tap target was
+            // sitting on top. This caps the name and leaves the rest of
+            // the layout arithmetic exactly as it was.
+            //
+            // The cap is what is left after the controls on the right,
+            // rather than a fraction. A flat fraction was the first
+            // version of this too, and at 320px it truncated "Yoked
+            // Church" to "Yoked Ch..." on a bar that was two-thirds
+            // empty. The link row is not counted: it scrolls, so it can
+            // give up all its width without losing anything.
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: (bar.maxWidth -
+                        _trailingWidth(
+                          collapsed: collapsed,
+                          showsMenu: collapsed && !Breakpoints.isMobile(context),
+                          settings: settings,
+                        ))
+                    .clamp(96.0, bar.maxWidth),
+              ),
+              child: _Wordmark(settings: settings),
+            ),
             // The link row scrolls rather than overflows. A church can
             // switch on every feature at once, and the wordmark is its
             // own name - neither has a length this bar can assume.
@@ -256,6 +308,7 @@ class AppNavBar extends ConsumerWidget implements PreferredSizeWidget {
                 onPressed: () => openMoreMenu(context, destinations, settings),
               ),
           ],
+          ),
         ),
       ),
     );
@@ -447,9 +500,16 @@ class _Wordmark extends StatelessWidget {
             Icon(Icons.church, color: settings.colors.primary, size: 28),
             const SizedBox(width: 10),
           ],
-          Text(
-            settings.churchName,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: settings.colors.primary),
+          // Truncating a church's own name is not ideal; running it off
+          // the side of the screen and taking the notification bell with
+          // it is worse. The full name is on every page below this.
+          Flexible(
+            child: Text(
+              settings.churchName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: settings.colors.primary),
+            ),
           ),
         ],
       ),

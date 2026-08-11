@@ -585,6 +585,7 @@ class _FieldFormState extends State<_FieldForm> {
           TextField(controller: _label, decoration: const InputDecoration(labelText: 'Question')),
           const SizedBox(height: 12),
           DropdownButtonFormField<FormFieldType>(
+            isExpanded: true,
             initialValue: _type,
             decoration: const InputDecoration(labelText: 'Answer type'),
             items: [
@@ -612,6 +613,7 @@ class _FieldFormState extends State<_FieldForm> {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<int>(
+            isExpanded: true,
             initialValue: _page,
             decoration: const InputDecoration(labelText: 'Page'),
             items: [

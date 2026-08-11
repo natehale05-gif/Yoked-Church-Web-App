@@ -400,6 +400,30 @@ Pages.
 One-time setup: **Settings → Pages → Source: GitHub Actions**. The site
 lands at `https://<user>.github.io/<repo>/`.
 
+### What a phone waits for
+
+A Flutter web app is a big first download — the Dart bundle, the
+CanvasKit renderer and the fonts come to roughly 3.5MB compressed, and
+none of it can be skipped. Three things keep that from being the visitor's
+whole experience of the site:
+
+- **A loading screen.** `web/index.html` paints a branded splash from the
+  first response, about 150ms in, and
+  [`web/flutter_bootstrap.js`](web/flutter_bootstrap.js) removes it once
+  Flutter's first frame is up. Before this the wait was a blank white
+  page, which on a slow connection is indistinguishable from a site that
+  is broken.
+- **`--no-web-resources-cdn` in the deploy.** Flutter defaults to
+  fetching CanvasKit from `www.gstatic.com` even though the same 2MB is
+  already deployed alongside everything else. That is an extra DNS lookup
+  and TLS handshake before the first paint, and it makes the whole site
+  depend on a third party — a network that blocks gstatic turns a
+  church's website into a page that never renders.
+- **Only the fonts the app draws.** Every face declared in `pubspec.yaml`
+  is downloaded before the first frame, used or not.
+  `test/core/fonts_test.dart` keeps the declared set and the used set in
+  step in both directions.
+
 ## Download the app
 
 The same app also installs on a desktop or an Android phone. Every

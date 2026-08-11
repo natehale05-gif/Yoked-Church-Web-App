@@ -366,6 +366,7 @@ class _RoomFormState extends ConsumerState<_RoomForm> {
             if (locations.isNotEmpty) ...[
               const SizedBox(height: 12),
               DropdownButtonFormField<String?>(
+                isExpanded: true,
                 initialValue: _locationId,
                 decoration: const InputDecoration(labelText: 'Campus'),
                 items: [

@@ -123,6 +123,7 @@ class _ComposeDialogState extends ConsumerState<_ComposeDialog> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<AnnouncementAudience>(
+                  isExpanded: true,
                   initialValue: _audience,
                   decoration: const InputDecoration(labelText: 'Send to'),
                   items: [
@@ -141,6 +142,7 @@ class _ComposeDialogState extends ConsumerState<_ComposeDialog> {
                 if (_audience == AnnouncementAudience.group) ...[
                   const SizedBox(height: 12),
                   DropdownButtonFormField<ChurchGroup>(
+                    isExpanded: true,
                     initialValue: _group,
                     decoration: const InputDecoration(labelText: 'Group'),
                     items: [

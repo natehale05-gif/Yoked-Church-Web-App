@@ -133,33 +133,48 @@ class _MetricCard extends ConsumerWidget {
                     )
                   else
                     const Spacer(),
+                  // The trend sits beside a detail line that already takes
+                  // whatever is left, so at a large font size there is
+                  // nothing left to take. Both halves shrink instead of
+                  // one of them running off the card.
                   if (change != null)
-                    Row(
-                      children: [
-                        Icon(
-                          trend!.isUp
-                              ? Icons.trending_up
-                              : (trend.isDown ? Icons.trending_down : Icons.trending_flat),
-                          size: 16,
-                          color: trend.isDown ? Colors.orange.shade800 : Colors.green.shade700,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          change,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                    Flexible(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            trend!.isUp
+                                ? Icons.trending_up
+                                : (trend.isDown ? Icons.trending_down : Icons.trending_flat),
+                            size: 16,
                             color: trend.isDown ? Colors.orange.shade800 : Colors.green.shade700,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              change,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: trend.isDown ? Colors.orange.shade800 : Colors.green.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     )
                   else if (trend != null)
                     // No prior window to compare against. "+100%" from a
                     // zero baseline would be a lie dressed as a metric.
-                    const Text(
-                      'no baseline yet',
-                      style: TextStyle(fontSize: 11, color: Colors.black38),
+                    const Flexible(
+                      child: Text(
+                        'no baseline yet',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 11, color: Colors.black38),
+                      ),
                     ),
                 ],
               ),
