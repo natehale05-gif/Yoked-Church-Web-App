@@ -195,6 +195,8 @@ ChurchSettings testSettings({
   // setup, from the minute it was created to fully filled in - which is
   // what the setup checklist is a function of.
   String aboutBody = 'About body copy.',
+  String tagline = 'A tagline',
+  String logoUrl = '',
   BrandColors? colors,
   ContactInfo? contact,
   List<ServiceTime>? serviceTimes,
@@ -202,7 +204,8 @@ ChurchSettings testSettings({
     ChurchSettings(
       churchName: churchName,
       releasesRepo: releasesRepo,
-      tagline: 'A tagline',
+      logoUrl: logoUrl,
+      tagline: tagline,
       aboutHeadline: 'Welcome Home',
       aboutBody: aboutBody,
       colors: colors ?? BrandColors.fallback,

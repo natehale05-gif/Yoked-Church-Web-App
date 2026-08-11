@@ -44,6 +44,35 @@ String churchPath(String churchId, [String subPath = '/']) {
   return '$churchPathPrefix/$churchId$rest';
 }
 
+/// A church's whole address, as somebody would write it on a card.
+///
+/// [churchPath] is the part the router reasons about; this is the part
+/// you can hand out. Built from [Uri.base], which on the web is the page
+/// URL, so it picks up the real origin and the deploy's base path -
+/// `/Yoked-Church-Web-App/` here, `/` for a fork on its own domain -
+/// rather than being hardcoded to one deployment.
+///
+/// The `#` is included because that is the address the router answers
+/// to. `web/404.html` makes it optional for anyone typing it in, but the
+/// version offered for copying should be the one that works everywhere,
+/// including when it is pasted somewhere that does not follow redirects.
+///
+/// Returns empty where there is no web address to give: a desktop or
+/// mobile build's [Uri.base] is a `file:` directory with no origin, and
+/// inventing one would put a URL that goes nowhere on a copy button.
+String churchUrl(String churchId, {Uri? from}) {
+  final base = from ?? Uri.base;
+  if (base.scheme != 'http' && base.scheme != 'https') return '';
+
+  // The directory the app is served from. A page served as
+  // `.../index.html` has that on the end, and it is not part of the
+  // address anyone should be given.
+  var dir = base.path;
+  if (!dir.endsWith('/')) dir = dir.substring(0, dir.lastIndexOf('/') + 1);
+
+  return '${base.origin}$dir#${churchPath(churchId)}';
+}
+
 /// The church a location names, or null if it names none.
 ///
 /// Pure, and used from two places that cannot share anything else:

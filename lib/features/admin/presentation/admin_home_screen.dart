@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/settings_providers.dart';
+import '../../../core/config/tenant.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/section_container.dart';
 import '../../auth/application/auth_providers.dart';
@@ -116,6 +118,119 @@ class _SetupRow extends StatelessWidget {
   }
 }
 
+/// The church's own address, with a way to copy it.
+///
+/// It was shown once, while the church was being named at signup, and
+/// then nowhere at all - not here, not in settings. Handing that link
+/// out is the entire point of having a site, and an admin should not have
+/// to reconstruct it from the browser bar or remember what they typed
+/// weeks ago.
+///
+/// Deliberately not a row in [_SetupChecklist]: that disappears the
+/// moment a church finishes setting up, and this is the one thing they
+/// will still want on the day they print the newsletter.
+class _YourAddress extends ConsumerStatefulWidget {
+  const _YourAddress();
+
+  @override
+  ConsumerState<_YourAddress> createState() => _YourAddressState();
+}
+
+class _YourAddressState extends ConsumerState<_YourAddress> {
+  bool _copied = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final churchId = ref.watch(currentChurchIdProvider);
+    final theme = Theme.of(context);
+
+    // Empty off the web, where there is no origin to build an address
+    // from. The path is still worth showing - it is the church's
+    // identity, and the part that goes after whatever the site's domain
+    // turns out to be.
+    final url = churchUrl(churchId);
+    final shown = url.isEmpty ? churchPath(churchId) : url;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 36),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.link, size: 18, color: theme.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  // Expanded because a Row gives its children unbounded
+                  // width, so the title would run off the side of a phone
+                  // rather than wrapping - which is what the identical
+                  // header above this one already learned.
+                  Expanded(
+                    child: Text('Your church\'s address', style: theme.textTheme.titleMedium),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Send this to anyone - put it in the newsletter, on a card, '
+                'in the bulletin. It opens your site, not anyone else\'s.',
+                style: const TextStyle(color: Colors.black54, fontSize: 13, height: 1.35),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                // No `fontFamily: 'monospace'`, however much an address
+                // wants one. This app bundles Lora and Work Sans and
+                // nothing else, and naming a family it does not ship
+                // renders no glyphs at all on the web build - the box
+                // came out empty, exactly as the landing page's buttons
+                // once did. A font is not worth an invisible address.
+                child: SelectableText(
+                  shown,
+                  style: const TextStyle(fontSize: 13, letterSpacing: 0.2),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                children: [
+                  FilledButton.icon(
+                    onPressed: () async {
+                      await Clipboard.setData(ClipboardData(text: shown));
+                      if (!mounted) return;
+                      // Confirmed on the button itself rather than in a
+                      // snackbar: a copy is one of those actions where
+                      // nothing visible happens, and the doubt sends
+                      // people clicking it again.
+                      setState(() => _copied = true);
+                    },
+                    icon: Icon(_copied ? Icons.check : Icons.copy, size: 18),
+                    label: Text(_copied ? 'Copied' : 'Copy link'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => context.go(churchPath(churchId)),
+                    icon: const Icon(Icons.open_in_new, size: 18),
+                    label: const Text('View your site'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class AdminHomeScreen extends ConsumerWidget {
   const AdminHomeScreen({super.key});
 
@@ -137,6 +252,7 @@ class AdminHomeScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const _SetupChecklist(),
+              const _YourAddress(),
               Text('Needs attention', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 16),
               const _NeedsAttention(),
