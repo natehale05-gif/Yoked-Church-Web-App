@@ -1,0 +1,17 @@
+/* Everything visual comes from Polaris. This file exists for the few
+   things a component library cannot own - the page filling the viewport,
+   and the app frame having a height to lay out against.
+
+   It is deliberately almost empty, and should stay that way: the point
+   of adopting Polaris is that the admin looks like the Shopify admin,
+   and every rule added here is a small step away from that. */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}

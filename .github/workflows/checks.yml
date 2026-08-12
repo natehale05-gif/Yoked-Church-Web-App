@@ -8,8 +8,30 @@ on:
   workflow_dispatch:
 
 jobs:
+  web:
+    name: React app — typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # `npm ci`, not `npm install`: the lockfile is the record of what
+      # was actually verified, and Polaris pins React 18 as a peer, so a
+      # resolution that drifts is a resolution nobody has looked at.
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      - run: npm run build
+
   flutter:
-    name: Analyze, test, build web
+    name: Flutter app (being replaced) — analyze, test, build web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

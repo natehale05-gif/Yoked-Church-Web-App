@@ -36,6 +36,11 @@ doc/api/
 
 node_modules/
 
+# Vite's output. Deliberately not `build/`, which is Flutter's and is
+# already ignored above - keeping them apart means either toolchain can
+# be run without clobbering the other's artifacts.
+dist/
+
 .flutter-plugins
 .flutter-plugins-dependencies
 

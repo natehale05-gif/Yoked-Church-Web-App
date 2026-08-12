@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yoked</title>
+    <meta name="description" content="Run your church on one system: people, giving, services and your website." />
+    <!-- Absolute, via the build's base path. A relative `favicon.png`
+         resolves against the *current* URL, so on a real route like
+         /c/yoked-demo/admin the browser asked for
+         /c/yoked-demo/favicon.png and got a 404 on every page. Hash
+         routing hid this: the path never changed. -->
+    <link rel="icon" type="image/png" href="%BASE_URL%favicon.png" />
+    <link rel="apple-touch-icon" href="%BASE_URL%icons/Icon-192.png" />
+    <style>
+      /* Shown until React mounts. Polaris' own page background, so the
+         handover is invisible rather than a white flash followed by a
+         grey page.
+
+         The Flutter app learned this the hard way - it shipped for
+         nineteen milestones with nothing on screen until CanvasKit had
+         painted, which on a cold cache was several seconds of white. */
+      html, body { margin: 0; height: 100%; background: #f1f1f1; }
+      #boot {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 500 13px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #616161;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="boot">Loading…</div>
+    <script>
+      // The other half of public/404.html. GitHub Pages has no rewrites,
+      // so a deep link lands on 404.html, which stashes the path here
+      // and bounces to this page. Restoring it *before* the app module
+      // loads means the router reads the intended address on its first
+      // pass and no wrong screen is ever rendered.
+      (function () {
+        try {
+          var stashed = sessionStorage.getItem('yoked:redirect');
+          if (stashed) {
+            sessionStorage.removeItem('yoked:redirect');
+            history.replaceState(null, '', '%BASE_URL%'.replace(/\/$/, '') + stashed);
+            return;
+          }
+        } catch (e) {
+          // Storage disabled; fall through to the query form below.
+        }
+        var match = /[?&]redirect=([^&]*)/.exec(location.search);
+        if (match) {
+          history.replaceState(
+            null,
+            '',
+            '%BASE_URL%'.replace(/\/$/, '') + decodeURIComponent(match[1]),
+          );
+        }
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
